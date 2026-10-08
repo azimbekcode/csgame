@@ -1,54 +1,250 @@
 extends CharacterBody3D
 
-@export var move_speed: float = 5.5
-@export var jump_velocity: float = 4.5
-@export var mouse_sensitivity: float = 0.002
+const WEAPONS = preload("res://scripts/weapons.gd")
 
-var gravity: float = 9.8
+@export var move_speed := 5.5
+@export var jump_velocity := 5.8
+@export var mouse_sensitivity := 0.002
+var team := 0
+var actor_name := "Siz"
+var health := 100
+var armor := 0
+var money := 800
+var kills := 0
+var deaths := 0
+var kit := false
+var primary := ""
+var weapon := "pistol"
+var ammunition: Dictionary = {}
+var grenades := {"he": 0, "flash": 0, "smoke": 0}
+var cooldown := 0.0
+var reload_left := 0.0
+var flash_left := 0.0
+var recoil := 0.0
 var view_camera: Camera3D
+var weapon_model: Node3D
+var scoped := false
+var crouched := false
+var bob_time := 0.0
+var footstep_time := 0.0
+var round_spawn := Vector3.ZERO
+var game: Node3D
 
 
 func _ready() -> void:
+	game = get_parent()
 	view_camera = $Camera3D
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	add_to_group("combatants")
+	add_to_group("human_player")
+	fill_ammunition("pistol")
+	show_weapon()
+
+
+func fill_ammunition(id: String) -> void:
+	ammunition[id] = {"mag": int(WEAPONS.DATA[id]["mag"]), "reserve": int(WEAPONS.DATA[id]["reserve"])}
+
+
+func show_weapon() -> void:
+	if is_instance_valid(weapon_model):
+		view_camera.remove_child(weapon_model)
+		weapon_model.queue_free()
+	weapon_model = WEAPONS.make_model(weapon)
+	weapon_model.position = Vector3(0.22, -0.23, -0.35)
+	weapon_model.scale = Vector3.ONE * 1.3
+	view_camera.add_child(weapon_model)
+	weapon_model.visible = health > 0
+	scoped = false
+
+
+func equip(id: String) -> void:
+	if id == weapon:
+		return
+	weapon = id
+	reload_left = 0.0
+	cooldown = 0.2
+	show_weapon()
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if game.input_locked() or health <= 0:
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		view_camera.rotate_x(-event.relative.y * mouse_sensitivity)
-		view_camera.rotation.x = clampf(view_camera.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
+		var sensitivity := mouse_sensitivity * (0.45 if scoped else 1.0)
+		rotate_y(-event.relative.x * sensitivity)
+		view_camera.rotation.x = clampf(view_camera.rotation.x - event.relative.y * sensitivity, -1.5, 1.5)
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.physical_keycode:
+			KEY_1:
+				if not primary.is_empty(): equip(primary)
+			KEY_2: equip("pistol")
+			KEY_3: equip("knife")
+			KEY_4: cycle_grenade()
+			KEY_R: start_reload()
+			KEY_F1, KEY_F2, KEY_F3, KEY_F4:
+				if game.exploring: game.explore_teleport(event.physical_keycode)
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_RIGHT and weapon == "awp":
+			scoped = not scoped
+		elif event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+			equip("pistol" if weapon == primary else (primary if not primary.is_empty() else "knife"))
 
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+func cycle_grenade() -> void:
+	var ids := ["he", "flash", "smoke"]
+	var start := ids.find(weapon)
+	for offset in range(1, 4):
+		var id: String = ids[(start + offset) % 3]
+		if grenades[id] > 0:
+			equip(id)
+			return
 
 
 func _physics_process(delta: float) -> void:
-	var input_vector := Vector2.ZERO
-	if Input.is_key_pressed(KEY_A):
-		input_vector.x -= 1.0
-	if Input.is_key_pressed(KEY_D):
-		input_vector.x += 1.0
-	if Input.is_key_pressed(KEY_W):
-		input_vector.y -= 1.0
-	if Input.is_key_pressed(KEY_S):
-		input_vector.y += 1.0
-	input_vector = input_vector.normalized()
-
-	var direction := (transform.basis * Vector3(input_vector.x, 0.0, input_vector.y)).normalized()
-	if direction.length() > 0.0:
-		velocity.x = direction.x * move_speed
-		velocity.z = direction.z * move_speed
-	else:
-		velocity.x = move_toward(velocity.x, 0.0, move_speed)
-		velocity.z = move_toward(velocity.z, 0.0, move_speed)
-
-	if not is_on_floor():
-		velocity.y -= gravity * delta
-	elif Input.is_key_pressed(KEY_SPACE):
+	cooldown = maxf(0, cooldown - delta)
+	flash_left = maxf(0, flash_left - delta)
+	if reload_left > 0:
+		reload_left -= delta
+		if reload_left <= 0:
+			finish_reload()
+	if position.y < -8:
+		if game.exploring: reset_to(Vector3(0,0.1,5),0)
+		else: take_damage(200, null)
+	if health <= 0:
+		return
+	recoil = move_toward(recoil, 0.0, delta * 3.0)
+	var locked: bool = game.input_locked()
+	var input_vector := Vector2.ZERO if locked else Input.get_vector("left", "right", "forward", "back")
+	_set_crouch(not locked and Input.is_action_pressed("crouch"))
+	var direction := (transform.basis * Vector3(input_vector.x, 0, input_vector.y)).normalized()
+	var speed := move_speed
+	if not locked and Input.is_action_pressed("walk"): speed = 2.8
+	if crouched: speed = 2.2
+	if scoped: speed *= 0.65
+	if game.phase == "freeze" and not game.exploring: speed = 0
+	velocity.x = move_toward(velocity.x, direction.x * speed, delta * 35.0)
+	velocity.z = move_toward(velocity.z, direction.z * speed, delta * 35.0)
+	if not is_on_floor(): velocity.y -= 18.0 * delta
+	elif not locked and Input.is_action_just_pressed("jump") and not crouched:
 		velocity.y = jump_velocity
-
 	move_and_slide()
+	view_camera.position.y = lerpf(view_camera.position.y, 1.03 if crouched else 1.65, delta * 12.0)
+	view_camera.fov = lerpf(view_camera.fov, 28.0 if scoped else 80.0, delta * 15.0)
+	if is_instance_valid(weapon_model):
+		bob_time += delta * velocity.length() * 1.8
+		weapon_model.position = Vector3(0.22, -0.23 + sin(bob_time) * 0.008, -0.35 + recoil * 0.055)
+		weapon_model.rotation.x = recoil * 0.06
+		weapon_model.rotation.z = sin(bob_time * 0.5) * 0.012
+		weapon_model.visible = not scoped and game.phase != "menu" and not game.exploring
+	footstep_time -= delta
+	if footstep_time <= 0 and is_on_floor() and Vector2(velocity.x,velocity.z).length() > 3.0:
+		footstep_time = 0.42
+		game.play_sound("step", global_position, -25.0)
+	if locked or not game.can_fire():
+		return
+	var automatic: bool = WEAPONS.DATA[weapon]["auto"]
+	if Input.is_action_pressed("fire") if automatic else Input.is_action_just_pressed("fire"):
+		try_fire()
+
+
+func _set_crouch(value: bool) -> void:
+	if not value and crouched:
+		var query := PhysicsShapeQueryParameters3D.new()
+		var shape := CapsuleShape3D.new()
+		shape.radius = 0.3
+		shape.height = 1.8
+		query.shape = shape
+		query.transform = global_transform.translated(Vector3(0,0.9,0))
+		query.exclude = [get_rid()]
+		# Ignore the floor when checking overhead clearance.
+		query.margin = -0.01
+		if not get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+			return
+	crouched = value
+	$CollisionShape3D.shape.height = 1.25 if value else 1.8
+	$CollisionShape3D.position.y = 0.625 if value else 0.9
+
+
+func try_fire() -> bool:
+	if cooldown > 0 or reload_left > 0 or health <= 0:
+		return false
+	if weapon in ["he","flash","smoke"]:
+		if grenades[weapon] <= 0: return false
+		grenades[weapon] -= 1
+		game.throw_grenade(self, weapon, view_camera.global_position, -view_camera.global_basis.z)
+		cooldown = 0.8
+		equip(primary if not primary.is_empty() else "pistol")
+		return true
+	if weapon != "knife":
+		if ammunition[weapon]["mag"] <= 0:
+			start_reload()
+			return false
+		ammunition[weapon]["mag"] -= 1
+	cooldown = float(WEAPONS.DATA[weapon]["delay"])
+	game.fire(self, view_camera.global_position, -view_camera.global_basis.z, weapon)
+	if weapon != "knife":
+		recoil = minf(recoil + 0.65, 3.0)
+		view_camera.rotation.x = minf(1.5, view_camera.rotation.x + (0.006 if weapon == "pistol" else 0.014))
+	return true
+
+
+func start_reload() -> void:
+	if reload_left > 0 or weapon in ["knife","he","flash","smoke"]:
+		return
+	if ammunition[weapon]["mag"] >= int(WEAPONS.DATA[weapon]["mag"]) or ammunition[weapon]["reserve"] <= 0:
+		return
+	reload_left = float(WEAPONS.DATA[weapon]["reload"])
+	game.play_sound("reload", global_position, -15.0)
+
+
+func finish_reload() -> void:
+	var needed := int(WEAPONS.DATA[weapon]["mag"]) - int(ammunition[weapon]["mag"])
+	var transfer := mini(needed, int(ammunition[weapon]["reserve"]))
+	ammunition[weapon]["mag"] += transfer
+	ammunition[weapon]["reserve"] -= transfer
+	reload_left = 0.0
+
+
+func take_damage(amount: int, attacker: Node3D) -> void:
+	if health <= 0 or game.exploring: return
+	if is_instance_valid(attacker) and attacker != self and attacker.team == team: return
+	var absorbed := mini(armor, int(amount * 0.4))
+	armor -= absorbed
+	health = maxi(0, health - (amount - absorbed))
+	game.hud.hurt_alpha = 0.45
+	if health == 0:
+		deaths += 1
+		scoped = false
+		weapon_model.visible = false
+		collision_layer = 0
+		collision_mask = 0
+		game.on_death(self, attacker)
+
+
+func reset_to(spawn_position: Vector3, yaw: float) -> void:
+	position = spawn_position
+	rotation.y = yaw
+	velocity = Vector3.ZERO
+	view_camera.rotation = Vector3.ZERO
+
+
+func respawn(spawn_position: Vector3, yaw: float) -> void:
+	var was_dead := health <= 0
+	health = 100
+	if was_dead:
+		primary = ""
+		armor = 0
+		kit = false
+		grenades = {"he":0,"flash":0,"smoke":0}
+		ammunition.clear()
+	fill_ammunition("pistol")
+	if not primary.is_empty(): fill_ammunition(primary)
+	weapon = primary if not primary.is_empty() else "pistol"
+	reload_left = 0.0
+	cooldown = 0.0
+	flash_left = 0.0
+	collision_layer = 2
+	collision_mask = 3
+	_set_crouch(false)
+	round_spawn = spawn_position
+	reset_to(spawn_position,yaw)
+	show_weapon()

@@ -1,0 +1,29 @@
+ATRIUM STRIKE v0.1 — Windows x64, offline botlar
+
+1. ZIP arxivni to‘liq oching (Extract All).
+2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.
+3. CT yoki T jamoasini tanlab boshlang; Godot o‘rnatish shart emas.
+4. Faqat xaritani ko‘rish uchun menyudagi erkin ko‘rish tugmasini bosing.
+
+Windows 10/11 64-bit va OpenGL 3.3 qo‘llaydigan video drayver kerak.
+Bu portable versiya: installer yoki administrator huquqi kerak emas.
+
+WASD — yurish | Space — sakrash | Ctrl — egilish | Shift — sekin yurish
+Sichqoncha chap tugmasi — otish | o‘ng tugma — sniper zoom
+1 — asosiy qurol | 2 — pistol | 3 — pichoq | 4 — granata turini almashtirish
+R — qayta o‘qlash | B — xarid | E — bomba / zararsizlantirish
+Tab — hisob | Esc — pauza | F11 — to‘liq ekran
+Erkin ko‘rishda: F1 atrium, F2 orqa kirish, F3 auditoriya, F4 yuqori balkon.
+
+Siz + 7 bot: 4×4 jamoalar, 5 raund g‘alabasigacha.
+Birinchi raund $800 va pistol bilan boshlanadi.
+Xarid dastlabki 20 soniyada, boshlanish hududida ishlaydi.
+T: A (atrium) yoki B (orqa hovli) nuqtada qimirlamasdan E ni 3 soniya tuting.
+CT: bomba yonida E ni 10 soniya tuting (kit bilan 5 soniya).
+O‘lgan o‘yinchi keyingi raundda qaytadi.
+
+Xarita 15 ta videodan taxminiy nisbatlarda qurildi.
+Bu original CS 1.6 emas: original modellar, tovushlar va mustaqil kod ishlatilgan.
+Internet multiplayer, Android APK va yashirin xonalar bu versiyada yo‘q.
+
+Kod va yangilanishlar: https://github.com/azimbekcode/csgame
