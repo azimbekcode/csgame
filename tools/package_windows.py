@@ -15,6 +15,9 @@ with ZipFile(output, 'w', ZIP_DEFLATED, compresslevel=9) as archive:
     archive.write(root / 'THIRD_PARTY_NOTICES.md', 'AtriumStrike/THIRD_PARTY_NOTICES.md')
     archive.write(root / 'GODOT-COPYRIGHT.txt', 'AtriumStrike/GODOT-COPYRIGHT.txt')
 checksum = hashlib.sha256(output.read_bytes()).hexdigest()
-(root / 'downloads/SHA256SUMS.txt').write_text(f'{checksum}  {output.name}\n')
+(root / 'downloads/SHA256SUMS.txt').write_text(''.join(
+    f'{hashlib.sha256(package.read_bytes()).hexdigest()}  {package.name}\n'
+    for package in sorted((root / 'downloads').glob('AtriumStrike-*.zip'))
+))
 print(f'Windows archive: {output.name} ({output.stat().st_size:,} bytes)')
 print(f'SHA256: {checksum}')

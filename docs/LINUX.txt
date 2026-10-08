@@ -1,0 +1,22 @@
+ATRIUM STRIKE — LINUX X64
+
+ZIP arxivini to'liq oching. AtriumStrike papkasida terminal ochib:
+
+chmod +x AtriumStrike.x86_64
+./AtriumStrike.x86_64
+
+Godot yoki Wine o'rnatish kerak emas. O'yin internet talab qilmaydi.
+64-bit x86 Linux, grafik ish stoli va OpenGL 3.3 video drayver kerak.
+Yangilangan Kali Linux x64, Debian yoki Ubuntu uchun mo'ljallangan.
+ARM kompyuterlar uchun bu build mos emas.
+
+Menyuda CT, T yoki xaritani erkin ko'rish rejimini tanlang.
+WASD: yurish; sichqoncha: qarash; chap tugma: otish.
+Space: sakrash; Ctrl: egilish; Shift: sekin yurish.
+R: qayta o'qlash; B: xarid; E: bomba o'rnatish/zararsizlantirish.
+1/2/3/4: qurol, pistol, pichoq, granata.
+Tab: hisob; Esc: pauza; F11: to'liq ekran.
+Erkin ko'rishda F1-F4 xaritadagi joylarga o'tkazadi.
+
+Bu video asosidagi taxminiy xarita va botlar bilan dastlabki versiya.
+Batafsil: https://github.com/azimbekcode/csgame
