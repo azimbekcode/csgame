@@ -1,0 +1,15 @@
+# Godot 4 editor/cache files
+.godot/
+.import/
+
+# Exported builds
+/build/
+/dist/
+*.exe
+*.pck
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
