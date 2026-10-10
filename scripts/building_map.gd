@@ -375,9 +375,11 @@ func _make_entrances() -> void:
 			_stair_railing(Vector3(edge,1.4,5.45),Vector3(edge,4,0))
 		for node in get_children().slice(first): node.reparent(assembly,false)
 		_box(Vector3(side*2.45,1.45,21.0),Vector3(0.30,4.6,0.36),limestone)
+	# Close the courtyard-facing edge; both lateral stair arrivals stay open.
+	_stair_railing(Vector3(-2.65,4,22.75),Vector3(2.65,4,22.75))
 	for x in [-2.65,2.65]:
-		_beam(Vector3(x,4,20),Vector3(x,5.05,20),0.04,metal)
-		_beam(Vector3(x,5.05,20),Vector3(x,5.05,22.75),0.04,metal)
+		_beam(Vector3(x,4,22.75),Vector3(x,5.05,22.75),0.04,metal)
+	_box(Vector3(0,4.55,22.75),Vector3(5.3,1.1,0.08),metal).visible = false
 	# Pale recessed rectangular portal and cornice above the rear landing.
 	for x in [-2.45,2.45]:
 		_box(Vector3(x,6.0,20.36),Vector3(0.40,4.0,0.46),limestone,0,false)
