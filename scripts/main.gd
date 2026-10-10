@@ -6,8 +6,8 @@ const BOT = preload("res://scripts/bot.gd")
 const HUD = preload("res://scripts/hud.gd")
 const WEAPONS = preload("res://scripts/weapons.gd")
 const GRENADE = preload("res://scripts/grenade.gd")
-const SITES := [Vector3(0,0,0), Vector3(0,-0.9,36)]
-const SPAWNS := [Vector3(-4,0.05,5.5), Vector3(0,-0.85,41)]
+const SITES := [Vector3(0,-1.8,0), Vector3(0,-0.9,36)]
+const SPAWNS := [Vector3(-4,-1.75,5.5), Vector3(0,-0.85,41)]
 
 var player: CharacterBody3D
 var building: Node3D
@@ -51,7 +51,7 @@ func _ready() -> void:
 	hud.set_script(HUD)
 	add_child(hud)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	player.reset_to(Vector3(0,0.08,6),0)
+	player.reset_to(Vector3(0,-1.72,6),0)
 	player.view_camera.look_at(Vector3(0,5.3,-3))
 
 
@@ -533,7 +533,7 @@ func explore_map() -> void:
 	exploring = true
 	phase = "active"
 	player.health = 100
-	player.respawn(Vector3(0,0.05,5),0)
+	player.respawn(Vector3(0,-1.75,5),0)
 	hud.close_panels()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	hud.message("Xaritani ko‘rish: F1 atrium / F2 orqa kirish / F3 auditoriya / F4 yuqori balkon",8.0)
@@ -541,7 +541,7 @@ func explore_map() -> void:
 
 func explore_teleport(key: int) -> void:
 	match key:
-		KEY_F1: player.reset_to(Vector3(0,0.05,5),0)
+		KEY_F1: player.reset_to(Vector3(0,-1.75,5),0)
 		KEY_F2: player.reset_to(Vector3(0,-0.85,27),PI)
 		KEY_F3: player.reset_to(Vector3(-12.7,12.05,0),PI/2)
 		KEY_F4: player.reset_to(Vector3(8.5,12.05,0),PI/2)
@@ -568,7 +568,7 @@ func return_to_menu() -> void:
 	player.health = 100
 	player.collision_layer = 2
 	player.collision_mask = 3
-	player.reset_to(Vector3(0,0.08,6),0)
+	player.reset_to(Vector3(0,-1.72,6),0)
 	player.view_camera.look_at(Vector3(0,5.3,-3))
 	hud.close_panels()
 	hud.menu_panel.visible = true

@@ -62,7 +62,7 @@ Birinchi raund $800 va pistol bilan boshlanadi. **B** bilan dastlabki 20 soniyad
 Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm olib tashlandi: auditoriya, xonalar va ichki zinapoya endi dumaloq bino ichida.
 
 - Rasmdagi och rangli dumaloq fasad, kulrang pastki qism, baland ravoqli oynalar, ustunlar va karnizlar. Ko‘k gumbaz old hovlida yer sathidan qaraganda ham ko‘rinishi uchun ko‘tarildi.
-- Old markaziy tashqi zina 1-qavatga olib chiqadi; uning tagidagi 0-qavat eshigiga hovlidan ikki yon zinasi orqali pastga tushib kiriladi.
+- Old markaziy tashqi zina 1-qavatga olib chiqadi; uning tagidagi 0-qavat eshigiga hovlidan panjarasiz ikki yon zinasi orqali pastga tushiladi. Eshikdan atriumgacha pol tekis: ichkarida qayta ko‘tariladigan zina va yo‘lni to‘sadigan plita yo‘q.
 - Atriumda old kirishning ikki yonidagi belgilangan joylarda kichik yog‘och yo‘laklar ochildi; ulardan kiriladigan alohida buriluvchi zinapoyalar 0–3-qavatlarni bog‘laydi. Eski o‘ng yon zina olib tashlandi, xona devorlaridagi ortiqcha ochilishlar yopildi.
 - Orqadagi ikkala zina rasmdagidek oraliq maydonchada burilib, bitta 1-qavat kirishiga birlashadi; uning tagidagi eshikdan 0-qavatga kiriladi.
 - Orqadan kirganda chapdagi lift barcha to‘rt qavatni bog‘laydi. Kabinada **E — keyingi qavat**, **Q — oldingi qavat**; kabina shu qavatda bo‘lsa yaqinlashganda ikki tabaqali eshik ochiladi; boshqa qavatda bo‘lsa **E — chaqirish tugmasi**.
@@ -82,6 +82,8 @@ Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm oli
 ![Old kirish yonidagi ichki zina](docs/screenshots/inner_stairs.png)
 ![Belgilangan joylardagi ikkala zina yo‘lagi](docs/screenshots/front_stair_pair.png)
 ![Pastga tushib kiriladigan 0-qavat eshigi](docs/screenshots/front_entry_zero.png)
+
+![0-qavat eshigidan atriumgacha tekis yo‘lak](docs/screenshots/front_entry_flat.png)
 ![Derazadan tashqi ko‘rinish](docs/screenshots/window_view.png)
 ![Lift oynasidagi o‘yinchi aksi](docs/screenshots/lift_mirror.png)
 ![Pog‘onali auditoriya](docs/screenshots/classroom.png)

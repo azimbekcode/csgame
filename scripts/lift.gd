@@ -1,5 +1,13 @@
 extends Node3D
 ## Four-stop lift with paired sliding landing doors and physical call panels.
+const FLOOR_LEVELS := [-1.8,4.0,8.0,12.0]
+
+func nearest_floor(height: float) -> int:
+	var result := 0
+	for level in range(1,4):
+		if absf(height-FLOOR_LEVELS[level]) < absf(height-FLOOR_LEVELS[result]): result = level
+	return result
+
 var current_floor := 0
 var target_floor := 0
 var moving := false
@@ -25,6 +33,7 @@ func _ready() -> void:
 	button_lit = _material(Color("ffbe49"),0.0,0.4,true)
 	cabin = Node3D.new()
 	cabin.name = "MovingCabin"
+	cabin.position.y = FLOOR_LEVELS[0]
 	add_child(cabin)
 	_part(cabin,Vector3(0,-0.10,0),Vector3(2.5,0.2,2.5),steel)
 	_part(cabin,Vector3(1.25,1.4,0),Vector3(0.1,2.8,2.5),lining)
@@ -48,7 +57,7 @@ func _ready() -> void:
 	lamp.light_energy = 0.8
 	cabin.add_child(lamp)
 	for level in range(4):
-		var h := level*4.0
+		var h: float = FLOOR_LEVELS[level]
 		for side in [-1.0,1.0]:
 			_part(self,Vector3(-1.32,h+1.4,side*1.32),Vector3(0.22,2.8,0.22),steel)
 			_part(self,Vector3(-1.29,h+1.4,side*1.6),Vector3(0.12,2.8,0.34),lining)
@@ -130,18 +139,18 @@ func contains_actor(actor: Node3D) -> bool:
 
 func _near_landing(actor: Node3D) -> bool:
 	var p := to_local(actor.global_position)
-	var level := clampi(roundi(p.y/4),0,3)
-	return p.x>-3.4 and p.x<-0.9 and absf(p.z)<2.1 and absf(p.y-level*4)<0.35
+	var level := nearest_floor(p.y)
+	return p.x>-3.4 and p.x<-0.9 and absf(p.z)<2.1 and absf(p.y-FLOOR_LEVELS[level])<0.35
 
 func _doorway_occupied(actor: Node3D) -> bool:
 	var p := to_local(actor.global_position)
-	return p.x>-1.95 and p.x<-0.85 and absf(p.z)<1.35 and absf(p.y-current_floor*4)<0.35
+	return p.x>-1.95 and p.x<-0.85 and absf(p.z)<1.35 and absf(p.y-FLOOR_LEVELS[current_floor])<0.35
 
 func prompt(actor: Node3D) -> String:
 	if contains_actor(actor):
 		return "LIFT · %d-qavatga harakatlanmoqda" % target_floor if moving else "LIFT · E — keyingi qavat  /  Q — oldingi qavat"
 	if not _near_landing(actor): return ""
-	var level := clampi(roundi(to_local(actor.global_position).y/4),0,3)
+	var level := nearest_floor(to_local(actor.global_position).y)
 	if moving: return "LIFT · harakatlanmoqda, kuting"
 	if level==current_floor: return "LIFT · eshik avtomatik ochiladi"
 	return "E — chaqirish tugmasini bosing (%d-qavat)" % level
@@ -164,7 +173,7 @@ func interact(actor: CharacterBody3D,previous: bool=false) -> void:
 	if contains_actor(actor):
 		request_floor((current_floor+(3 if previous else 1))%4,actor)
 	elif _near_landing(actor):
-		var level := clampi(roundi(to_local(actor.global_position).y/4),0,3)
+		var level := nearest_floor(to_local(actor.global_position).y)
 		if level==current_floor: hold_open = 3.0
 		else: request_floor(level)
 
@@ -174,16 +183,16 @@ func _physics_process(delta: float) -> void:
 	if not moving:
 		hold_open = maxf(0,hold_open-delta)
 		if is_instance_valid(human) and human.health>0:
-			if contains_actor(human) or (_near_landing(human) and absf(to_local(human.global_position).y-current_floor*4)<0.35): hold_open = 3.0
+			if contains_actor(human) or (_near_landing(human) and absf(to_local(human.global_position).y-FLOOR_LEVELS[current_floor])<0.35): hold_open = 3.0
 		var wanted := 1.0 if hold_open>0 or occupied else 0.0
 		door_open[current_floor] = move_toward(door_open[current_floor],wanted,delta*1.6)
 	else:
 		if not occupied: door_open[current_floor] = move_toward(door_open[current_floor],0.0,delta*1.6)
 		if door_open[current_floor]<=0.001 and not occupied:
 			var old_y := cabin.position.y
-			cabin.position.y = move_toward(old_y,target_floor*4.0,speed*delta)
+			cabin.position.y = move_toward(old_y,FLOOR_LEVELS[target_floor],speed*delta)
 			if is_instance_valid(rider): rider.global_position.y += cabin.position.y-old_y
-			if is_equal_approx(cabin.position.y,target_floor*4.0):
+			if is_equal_approx(cabin.position.y,FLOOR_LEVELS[target_floor]):
 				current_floor = target_floor
 				moving = false
 				hold_open = 3.0

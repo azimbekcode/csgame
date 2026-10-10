@@ -1,4 +1,4 @@
-ATRIUM STRIKE v0.2.7 — Windows x64, offline botlar
+ATRIUM STRIKE v0.2.8 — Windows x64, offline botlar
 
 1. ZIP arxivni to‘liq oching (Extract All).
 2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.
@@ -34,5 +34,6 @@ Lift: kabinada E — keyingi qavat, Q — oldingi qavat. Tashqarida E — chaqir
 Lift orqa eshikdan chiqishda o‘ngda, kirishda chapda.
 
 Atriumdagi old kirishning ikki yonida kichik zina yo‘laklari bor; ular 0–3-qavatlarni bog‘laydi.
-Old zinaning tagidagi 0-qavat eshigiga hovlidan pastga tushib kiriladi.
+Old zinaning tagidagi 0-qavat eshigiga panjarasiz yon zinadan pastga tushiladi.
+Eshikdan bino ichiga tekis pol orqali kiriladi; ichkarida ortiqcha zina yo‘q.
 Old fasadning chap tarafidagi daraxtlar olib tashlandi.
