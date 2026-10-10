@@ -1,2 +1,2 @@
-11015dae27164835b7655d3312d2c584789c1b3417222a9bb5ad1026f1fcb32e  AtriumStrike-Linux-x64.zip
-adbf05c529befac84014524d8abfba24c2c621ca7ea1c78569fd4dafffaa75fb  AtriumStrike-Windows-x64.zip
+84366d242acf5288c0416cd51a933ed3ea5fa5226f45f3b68ef72570c4b73a6a  AtriumStrike-Linux-x64.zip
+6d085e28106a6e051fc66ee3b5ceb6d1c84357a2b2224779934e2bdb0e2cdc9a  AtriumStrike-Windows-x64.zip

@@ -236,18 +236,34 @@ func _make_rooms() -> void:
 			var a := deg_to_rad(door_angles[index])
 			room_entries.append(_polar(12.6,a,h+0.05))
 			_label("%d%02d  /  %s" % [level,index+1,"AUDITORIYA" if index==2 else "XONA"],_polar(10.84,a,h+3.0),-a+PI/2,0.004)
-			# Brown timber leaf held open, with inset panels and a brass handle.
+			# Frame sits in the actual wall opening; the leaf pivots at its jamb.
 			var door := Node3D.new()
-			door.position = _polar(12.0,a+0.085,h)
-			door.rotation.y = -a
+			door.position = _polar(ROOM_RADIUS,a,h)
+			door.rotation.y = PI/2-a
 			door.name = "BrownRoomDoor_%d_%d" % [level,index]
 			add_child(door)
 			var first := get_child_count()
-			_box(Vector3(0,1.32,0),Vector3(1.25,2.64,0.07),door_wood)
-			for y in [0.68,1.91]:
-				_box(Vector3(0,y,-0.045),Vector3(0.99,1.02,0.025),bronze,0,false)
-			_box(Vector3(-0.44,1.18,-0.10),Vector3(0.20,0.035,0.06),metal,0,false)
+			for side in [-1.0,1.0]:
+				_box(Vector3(side*1.24,1.4,0),Vector3(0.55,2.8,0.20),wood)
+				_box(Vector3(side*0.94,1.4,-0.04),Vector3(0.13,2.8,0.24),door_wood)
+			_box(Vector3(0,2.75,-0.04),Vector3(2.0,0.15,0.24),door_wood)
 			for node in get_children().slice(first): node.reparent(door,false)
+			var hinge := Node3D.new()
+			hinge.name = "HingedLeaf"
+			hinge.position = Vector3(-0.86,0,0)
+			hinge.rotation.y = -PI/2
+			door.add_child(hinge)
+			first = get_child_count()
+			_box(Vector3(0.82,1.34,0),Vector3(1.64,2.68,0.065),door_wood)
+			for y in [0.68,1.95]:
+				for z in [-0.041,0.041]:
+					_box(Vector3(0.82,y,z),Vector3(1.35,1.03,0.022),door_wood,0,false)
+			for z in [-0.075,0.075]:
+				_box(Vector3(1.47,1.12,z),Vector3(0.045,0.20,0.025),metal,0,false)
+				_box(Vector3(1.37,1.15,z),Vector3(0.23,0.035,0.05),metal,0,false)
+			for y in [0.24,1.34,2.44]:
+				_cylinder(Vector3(0.015,y,0),0.025,0.13,metal)
+			for node in get_children().slice(first): node.reparent(hinge,false)
 			_make_lecture_room(_polar(13.2,a,h),PI/2-a)
 			var lamp := OmniLight3D.new()
 			lamp.position = _polar(15,a,h+3.2)
@@ -478,7 +494,6 @@ func _make_lift() -> void:
 	for level in range(FLOOR_COUNT):
 		var h := level*4.0
 		_box(Vector3(-2.65,h-0.14,16.2),Vector3(1.0,0.28,2.5),marble)
-		_label("LIFT  /  %d" % level,Vector3(-2.1,h+2.9,16.2),PI/2,0.005)
 	# Doorway in the rear corridor's left wall is carved by replacing its lift-facing piece.
 	for node in get_children():
 		if node is StaticBody3D and absf(node.position.x+2.2)<0.01 and absf(node.position.z-15.6)<0.01:

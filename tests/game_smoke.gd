@@ -132,6 +132,12 @@ func run() -> void:
 	check(p.stair_amount<0.01,"Stair motion settles when the player stops")
 	p.set_physics_process(false)
 	var lift: Node3D = game.building.lift
+	p.reset_to(lift.to_global(Vector3(-2.4,0.05,0)),0)
+	await frames(50)
+	check(lift.door_open[0]>0.98,"Approaching a present cabin automatically opens paired doors")
+	check(lift.gates[0].collision_layer==0,"An open lift entrance is physically walkable")
+	check(lift.gates[1].collision_layer==1 and lift.door_open[1]==0,"An absent cabin leaves the other landing closed")
+	check(lift.find_child("CallButton_0",true,false)!=null,"Landing has a visible physical call button")
 	p.reset_to(lift.global_position+Vector3(0,0.06,0),0)
 	await settle(p)
 	check(lift.contains_actor(p),"Player can enter physical lift cabin")
@@ -148,6 +154,20 @@ func run() -> void:
 	check(lift.request_floor(2),"Empty lift can be dispatched")
 	while lift.moving: await physics_frame
 	check(not p.lift_riding and p.position.y<0.2,"Calling lift leaves the waiting player on the landing")
+	check(lift.prompt(p).contains("chaqirish tugmasi"),"Absent cabin offers the landing call-button prompt")
+	lift.interact(p)
+	check(lift.moving and lift.target_floor==0 and lift.waiting_floor==0,"Call button requests the caller's own floor")
+	check(lift.gates[0].collision_layer==1,"Landing stays blocked while a called cabin travels")
+	while lift.moving: await physics_frame
+	await frames(50)
+	check(lift.current_floor==0 and lift.door_open[0]>0.98,"Called cabin arrives and opens automatically")
+	p.reset_to(lift.to_global(Vector3(-1.3,0.05,0)),0)
+	lift.hold_open = 0
+	await frames(50)
+	check(lift.door_open[0]>0.98,"Occupied doorway keeps lift doors open")
+	p.reset_to(Vector3(0,0.05,5),0)
+	await frames(230)
+	check(lift.door_open[0]<0.01 and lift.gates[0].collision_layer==1,"Unattended lift closes its doors after the hold time")
 	game.start_match(0,1)
 	for bot in game.bots: bot.set_physics_process(false)
 	check(game.bots.size()==7 and p.team==0,"CT match starts with 3 teammates and 4 enemies")

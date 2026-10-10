@@ -20,11 +20,20 @@ func run() -> void:
 		"atrium": [Vector3(3,1.9,5.2),Vector3(-2,4.8,-4)],
 		"gallery": [Vector3(8.2,13.7,0),Vector3(-3,10,0)],
 		"lift": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
+		"lift_closed": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
+		"room_doors": [Vector3(-7.5,5.65,0),Vector3(-11,5.4,0)],
 		"classroom": [Vector3(-12.6,13.7,0),Vector3(-18.4,13.3,0)],
 		"garden": [Vector3(23,1.6,-23),Vector3(33,4,-15)]}
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:
 		if not selected.is_empty() and not name in selected: continue
+		if name=="lift":
+			game.player.global_position = game.building.lift.to_global(Vector3(-2.4,0.05,0))
+			for frame in range(50): await physics_frame
+		else:
+			game.player.global_position = Vector3(0,0.05,5)
+			if name=="lift_closed":
+				for frame in range(230): await physics_frame
 		camera.global_position = shots[name][0]
 		camera.look_at(shots[name][1])
 		for frame in range(5): await process_frame
