@@ -32,6 +32,7 @@ var footstep_time := 0.0
 var round_spawn := Vector3.ZERO
 var lift_riding := false
 var game: Node3D
+var reflection_body: Node3D
 
 
 func _ready() -> void:
@@ -41,6 +42,7 @@ func _ready() -> void:
 	add_to_group("human_player")
 	fill_ammunition("pistol")
 	show_weapon()
+	view_camera.cull_mask = 1|4|8
 
 
 func fill_ammunition(id: String) -> void:
@@ -55,6 +57,16 @@ func show_weapon() -> void:
 	weapon_model.position = Vector3(0.22, -0.23, -0.35)
 	weapon_model.scale = Vector3.ONE * 1.3
 	view_camera.add_child(weapon_model)
+	for mesh in weapon_model.find_children("*","MeshInstance3D",true,false): mesh.layers = 8
+	if is_instance_valid(reflection_body): reflection_body.queue_free()
+	reflection_body = Node3D.new()
+	reflection_body.name = "MirrorPlayerBody"
+	reflection_body.set_script(preload("res://scripts/soldier_model.gd"))
+	reflection_body.team = team
+	reflection_body.weapon = weapon if weapon in ["pistol","ak","m4","mp5"] else "pistol"
+	add_child(reflection_body)
+	for mesh in reflection_body.find_children("*","MeshInstance3D",true,false):
+		mesh.layers = 2
 	weapon_model.visible = health > 0
 	scoped = false
 
@@ -138,6 +150,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	var horizontal_speed := Vector2(velocity.x,velocity.z).length()
 	var height_speed := (global_position.y-previous_height)/maxf(delta,0.001)
+	reflection_body.animate(delta,horizontal_speed,reload_left>0,height_speed if is_on_floor() else 0.0)
+	reflection_body.visible = health>0
 	var climbing := is_on_floor() and horizontal_speed>0.4 and absf(height_speed)>0.15
 	stair_amount = move_toward(stair_amount,1.0 if climbing else 0.0,delta*8.0)
 	bob_time += delta*horizontal_speed*2.0

@@ -91,6 +91,19 @@ func run() -> void:
 	await walk_to(p,Vector3(5,12,0),90)
 	check(p.position.x>6.65 and p.position.y>11.8,"Balcony rail prevents walking into the atrium void")
 	check(game.building.FLOOR_COUNT==4,"Building has levels 0, 1, 2 and 3")
+	var stair_walls := true
+	var stair_guards := true
+	for level in range(4):
+		var wall_query := PhysicsRayQueryParameters3D.create(Vector3(15,level*4+1,5.8),Vector3(15,level*4+1,6.6))
+		stair_walls = stair_walls and not p.get_world_3d().direct_space_state.intersect_ray(wall_query).is_empty()
+		if level>0:
+			p.reset_to(Vector3(18,level*4+0.05,7),0)
+			await settle(p)
+			check(absf(p.position.y-level*4)<0.15,"Room floor beside stairwell stays solid on level %d" % level)
+			var guard_query := PhysicsRayQueryParameters3D.create(Vector3(10.7,level*4+0.55,0),Vector3(11.3,level*4+0.55,0))
+			stair_guards = stair_guards and not p.get_world_3d().direct_space_state.intersect_ray(guard_query).is_empty()
+	check(stair_walls,"Stairwell partitions separate neighbouring rooms on all four floors")
+	check(stair_guards,"Stairwell edge guards physically block accidental falls")
 	for entry in game.building.room_entries:
 		var start := Vector3(entry.x,0,entry.z).normalized()*9.4
 		start.y = entry.y
@@ -141,6 +154,13 @@ func run() -> void:
 	p.reset_to(lift.global_position+Vector3(0,0.06,0),0)
 	await settle(p)
 	check(lift.contains_actor(p),"Player can enter physical lift cabin")
+	for frame in range(3): await process_frame
+	var mirror: Node3D = lift.cabin.get_node("CabinMirror")
+	var mirror_normal: Vector3 = mirror.global_basis*Vector3.LEFT
+	var eye_distance: float = mirror_normal.dot(p.view_camera.global_position-mirror.global_position)
+	var reflected_distance: float = mirror_normal.dot(mirror.camera.global_position-mirror.global_position)
+	check(absf(eye_distance+reflected_distance)<0.02 and mirror.viewport.world_3d==p.get_world_3d(),"Lift mirror reflects the live eye position in the shared scene")
+	check(is_instance_valid(p.reflection_body) and p.reflection_body.hips.size()==2 and (p.view_camera.cull_mask&2)==0 and (mirror.camera.cull_mask&2)!=0,"Player body appears in the mirror without obstructing first-person view")
 	for floor_index in [1,2,3,0]:
 		check(lift.request_floor(floor_index,p),"Lift accepts destination %d" % floor_index)
 		var limit := Time.get_ticks_msec()+15000

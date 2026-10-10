@@ -56,10 +56,7 @@ func _make_floors() -> void:
 			var a := TAU * segment / SEGMENTS
 			var b := TAU * (segment+1) / SEGMENTS
 			_wedge(0.0 if level == 0 else INNER_RADIUS, ROOM_RADIUS, a,b,h,0.28,marble,true)
-			var stair_opening := cos((a+b)/2.0) > cos(deg_to_rad(25.0))
-			var lift_opening := false
-			if level == 0 or (not stair_opening and not lift_opening):
-				_wedge(ROOM_RADIUS,OUTER_RADIUS,a,b,h,0.28,marble,true)
+			_wedge(ROOM_RADIUS,OUTER_RADIUS,a,b,h,0.28,marble,true)
 			if level > 0:
 				_make_balcony_rail(a,b,h)
 				_wedge(INNER_RADIUS,ROOM_RADIUS,a,b,h-0.29,0.025,cream,false)
@@ -175,7 +172,9 @@ func _window(origin: Vector3,yaw: float,width: float,height: float,arched: bool=
 	assembly.position = origin
 	assembly.rotation.y = yaw
 	add_child(assembly)
-	var pane_mat := _material(Color("243a43"),0.17)
+	var pane_mat := _material(Color(0.73,0.85,0.91,0.16),0.10)
+	pane_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pane_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	pane_mat.metallic = 0.35
 	var pane := _box(Vector3.ZERO,Vector3(width,height,0.035),pane_mat,0,true)
 	pane.reparent(assembly,false)
@@ -307,7 +306,7 @@ func _make_lecture_room(origin: Vector3,yaw: float) -> void:
 		_box(Vector3(0,h-0.025,z-0.65),Vector3(1.3,0.04,0.07),dark,0,false)
 	_ramp(0,1.3,0,-0.65,5.2,0.72)
 	# Front presentation area and a white ceiling with recessed round lights.
-	_box(Vector3(3.35,1.8,1.9),Vector3(0.06,1.15,2.9),dark,0,false)
+	_box(Vector3(3.35,1.3,-0.70),Vector3(0.06,1.0,1.8),dark,0,false)
 	_box(Vector3(0,3.73,2.2),Vector3(6.5,0.08,6.3),cream,0,false)
 	for x in [-2.1,2.1]:
 		for z in [0.0,2.3,4.5]:
@@ -343,12 +342,18 @@ func _make_stairs() -> void:
 	for level in range(FLOOR_COUNT):
 		var h := level*4.0
 		_box(Vector3(14.35,h-0.14,5.0),Vector3(7.4,0.28,2.0),marble)
+		for z in [-6.2,6.2]:
+			_box(Vector3(15.4,h+1.86,z),Vector3(8.8,3.72,0.18),wood)
+		if level>0:
+			for x in [11.0,17.5]:
+				_stair_railing(Vector3(x,h,-6),Vector3(x,h,4))
+				_box(Vector3(x,h+0.55,-1),Vector3(0.08,1.1,10.0),metal).visible = false
 		if level==FLOOR_COUNT-1: continue
 		_box(Vector3(14.5,h+1.86,-5.0),Vector3(6.2,0.28,2.0),marble)
 		_stair_flight(12.7,h,4,-4,2)
 		_stair_flight(16.0,h+2,-4,4,2)
-		for x in [11.6,13.8]: _beam(Vector3(x,h+1,4),Vector3(x,h+3,-4),0.035,metal)
-		for x in [14.9,17.1]: _beam(Vector3(x,h+3,-4),Vector3(x,h+5,4),0.035,metal)
+		for x in [11.6,13.8]: _stair_railing(Vector3(x,h,4),Vector3(x,h+2,-4))
+		for x in [14.9,17.1]: _stair_railing(Vector3(x,h+2,-4),Vector3(x,h+4,4))
 		_label("%d → %d  QAVAT" % [level,level+1],Vector3(14.3,h+2.6,5.3),0,0.005)
 
 func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2) -> void:
@@ -804,7 +809,12 @@ func _wedge(inner: float, outer: float, a: float, b: float, top: float, thicknes
 		for point in [_polar(inner,a,0),_polar(outer,a,0),_polar(outer,b,0),_polar(inner,b,0)]:
 			polygon.append(Vector2(point.x,point.z))
 		var hole := PackedVector2Array([Vector2(LIFT_CENTER.x-1.35,14.9),Vector2(LIFT_CENTER.x+1.35,14.9),Vector2(LIFT_CENTER.x+1.35,17.5),Vector2(LIFT_CENTER.x-1.35,17.5)])
-		var pieces := Geometry2D.clip_polygons(polygon,hole)
+		var stair_hole := PackedVector2Array([Vector2(11.0,-6.0),Vector2(17.5,-6.0),Vector2(17.5,4.0),Vector2(11.0,4.0)])
+		var pieces: Array[PackedVector2Array] = [polygon]
+		for opening in [hole,stair_hole]:
+			var clipped: Array[PackedVector2Array] = []
+			for piece in pieces: clipped.append_array(Geometry2D.clip_polygons(piece,opening))
+			pieces = clipped
 		for piece in pieces:
 			var indices := Geometry2D.triangulate_polygon(piece)
 			for index in range(0,indices.size(),3):

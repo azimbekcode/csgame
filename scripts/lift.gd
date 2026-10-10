@@ -33,7 +33,12 @@ func _ready() -> void:
 		_part(cabin,Vector3(0,0.92,z*0.94),Vector3(2.1,0.045,0.045),steel,false)
 	_part(cabin,Vector3(0,2.8,0),Vector3(2.5,0.12,2.5),steel)
 	_part(cabin,Vector3(0,2.72,0),Vector3(1.8,0.03,1.3),light,false)
-	_part(cabin,Vector3(1.18,1.65,0),Vector3(0.025,1.4,1.3),steel,false)
+	_part(cabin,Vector3(1.18,1.65,0),Vector3(0.025,1.55,1.4),steel,false)
+	var mirror := Node3D.new()
+	mirror.name = "CabinMirror"
+	mirror.position = Vector3(1.15,1.65,0)
+	mirror.set_script(preload("res://scripts/lift_mirror.gd"))
+	cabin.add_child(mirror)
 	_part(cabin,Vector3(-0.8,1.35,1.18),Vector3(0.25,0.65,0.04),black,false)
 	for level in range(4):
 		_part(cabin,Vector3(-0.8,1.58-level*0.14,1.15),Vector3(0.12,0.08,0.025),button_idle,false)

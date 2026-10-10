@@ -22,13 +22,20 @@ func run() -> void:
 		"lift": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
 		"lift_closed": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
 		"room_doors": [Vector3(-7.5,5.65,0),Vector3(-11,5.4,0)],
+		"inner_stairs": [Vector3(10.1,5.65,5.2),Vector3(15,6,-2)],
+		"window_view": [Vector3(-18.5,13.9,0),Vector3(-28,13.9,0)],
+		"lift_mirror": [Vector3(-4.3,1.65,16.2),Vector3(-5.55,1.65,16.2)],
 		"classroom": [Vector3(-12.6,13.7,0),Vector3(-18.4,13.3,0)],
+		"classroom_front": [Vector3(-12.0,13.65,0.6),Vector3(-12.5,13.3,3.35)],
 		"garden": [Vector3(23,1.6,-23),Vector3(33,4,-15)]}
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:
 		if not selected.is_empty() and not name in selected: continue
 		if name=="lift":
 			game.player.global_position = game.building.lift.to_global(Vector3(-2.4,0.05,0))
+			for frame in range(50): await physics_frame
+		elif name=="lift_mirror":
+			game.player.reset_to(game.building.lift.global_position+Vector3(0,0.05,0),PI/2)
 			for frame in range(50): await physics_frame
 		else:
 			game.player.global_position = Vector3(0,0.05,5)
