@@ -32,6 +32,7 @@ var navigation_ready := false
 var force_bake := false
 var navigation_region: NavigationRegion3D
 var room_entries: Array[Vector3] = []
+var stair_surfaces: Array[Node3D] = []
 var lift: Node3D
 var material_cache: Dictionary = {}
 
@@ -374,11 +375,19 @@ func _make_stairs() -> void:
 			_box(Vector3(0,h+wall_height/2,19.1),Vector3(4.28,wall_height,0.18),wood)
 			_box(Vector3(0,h-0.14,12.9),Vector3(3.9,0.28,1.2),marble)
 			_label("ZINA / 0–3",Vector3(0,h+3.15,10.85),PI,0.0035)
+			for edge in [-1.85,1.85]:
+				_stair_railing(Vector3(edge,h,12.3),Vector3(edge,h,13.8))
 			if level>0:
 				_stair_railing(Vector3(-0.25,h,13.5),Vector3(0.25,h,13.5))
 				_box(Vector3(0,h+0.55,13.5),Vector3(0.5,1.1,0.08),metal).visible = false
-			if level==FLOOR_COUNT-1: continue
+			if level==FLOOR_COUNT-1:
+				_stair_railing(Vector3(-1.85,h,13.5),Vector3(-0.25,h,13.5))
+				_box(Vector3(-1.05,h+0.55,13.5),Vector3(1.6,1.1,0.08),metal).visible = false
+				continue
 			var half_rise := (floor_height(level+1)-h)/2
+			for edge in [-1.85,1.85]:
+				_stair_railing(Vector3(edge,h+half_rise,17.4),Vector3(edge,h+half_rise,18.9))
+			_stair_railing(Vector3(0.25,floor_height(level+1),13.5),Vector3(0.25,floor_height(level+1),13.8))
 			_box(Vector3(0,h+half_rise-0.14,18.15),Vector3(3.7,0.28,1.5),marble,0,false)
 			_box(Vector3(0,h+half_rise-0.14,18.15),Vector3(0.5,0.28,1.5),marble)
 			_stair_railing(Vector3(-1.85,h+half_rise,18.9),Vector3(1.85,h+half_rise,18.9))
@@ -395,18 +404,41 @@ func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,
 	var steps := int(ceil(rise/0.16))
 	for step in range(steps):
 		var top := rise*(step+1)/steps
+		var tread_height := rise/steps+0.24
 		var z := lerpf(start_z,end_z,(step+0.5)/steps)
-		_box(Vector3(x,base+top-0.06,z),Vector3(width,0.12,absf(end_z-start_z)/steps+0.01),marble,0,false)
+		_box(Vector3(x,base+top-tread_height/2,z),Vector3(width,tread_height,absf(end_z-start_z)/steps+0.01),marble,0,false)
+		var front_z := lerpf(start_z,end_z,float(step)/steps)+signf(end_z-start_z)*0.03
+		_box(Vector3(x,base+top+0.007,front_z),Vector3(width-0.08,0.014,0.055),dark,0,false).name = "TreadNosing"
 	_stair_slab(x,width,base,start_z,end_z,rise)
 	_ramp(x,width,base,start_z,end_z,rise,landing_extension,start_extension)
+	var support := get_child(get_child_count()-1) as Node3D
+	support.set_meta("treads",{"x":x,"width":width,"base":base,"start":start_z,"end":end_z,"rise":rise,"steps":steps})
+	stair_surfaces.append(support)
+
+func stair_surface_at(point: Vector3) -> Dictionary:
+	for support in stair_surfaces:
+		var p := support.to_local(point)
+		var tread: Dictionary = support.get_meta("treads")
+		var t: float = (p.z-tread.start)/(tread.end-tread.start)
+		if absf(p.x-tread.x)>tread.width/2 or t<0 or t>1: continue
+		var slope_height: float = tread.base+t*tread.rise
+		if absf(p.y-slope_height)>0.24: continue
+		var step_index := clampi(int(ceil(t*tread.steps)),1,tread.steps)
+		return {"offset":tread.base+step_index*tread.rise/tread.steps-slope_height,"depth":absf(tread.end-tread.start)/tread.steps}
+	return {}
 
 func _stair_railing(a: Vector3,b: Vector3) -> void:
+	var railing := Node3D.new()
+	railing.name = "StairRailing_%d" % get_child_count()
+	add_child(railing)
+	var first := get_child_count()
 	_beam(a+Vector3.UP,b+Vector3.UP,0.035,metal)
 	_beam(a+Vector3.UP*0.12,b+Vector3.UP*0.12,0.025,metal)
 	var count := maxi(1,int(ceil(a.distance_to(b)/0.38)))
 	for i in range(count+1):
 		var foot := a.lerp(b,float(i)/count)
 		_beam(foot+Vector3.UP*0.08,foot+Vector3.UP,0.018,dark)
+	for node in get_children().slice(first): node.reparent(railing,false)
 
 func _stair_slab(x: float,width: float,base: float,start_z: float,end_z: float,rise: float) -> void:
 	var points := PackedVector3Array([
@@ -525,7 +557,7 @@ func _make_entrances() -> void:
 	_label("1-QAVAT",Vector3(0,7.3,20.35),0,0.005)
 	for z in range(11,20):
 		for rib in range(5):
-			_box(Vector3(-0.2+rib*0.1,0.025,z),Vector3(0.025,0.018,0.65),_material(Color("c9af62")),0,false)
+			_box(Vector3(-0.2+rib*0.1,GROUND_FLOOR+0.025,z),Vector3(0.025,0.018,0.65),_material(Color("c9af62")),0,false).name = "GroundGuidance_%d_%d" % [z,rib]
 
 func _make_dome() -> void:
 	var roof_mat := _material(Color(0.16,0.38,0.64,0.88),0.22)
@@ -784,10 +816,13 @@ func _finish_navigation() -> void:
 		await get_tree().physics_frame
 		await get_tree().process_frame
 	NavigationServer3D.map_force_update(map_rid)
-	while NavigationServer3D.map_get_regions(map_rid).is_empty() or NavigationServer3D.map_get_iteration_id(map_rid)==0:
+	while NavigationServer3D.map_get_regions(map_rid).is_empty() or NavigationServer3D.map_get_iteration_id(map_rid)==0 or NavigationServer3D.region_get_iteration_id(navigation_region.get_rid())==0:
 		await get_tree().physics_frame
 		await get_tree().process_frame
 		NavigationServer3D.map_force_update(map_rid)
+	# Drain deferred region synchronization before exposing readiness to actors.
+	for frame in range(3): await get_tree().process_frame
+	NavigationServer3D.map_force_update(map_rid)
 	navigation_ready = true
 
 

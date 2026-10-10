@@ -84,6 +84,10 @@ Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm oli
 ![Pastga tushib kiriladigan 0-qavat eshigi](docs/screenshots/front_entry_zero.png)
 
 ![0-qavat eshigidan atriumgacha tekis yo‘lak](docs/screenshots/front_entry_flat.png)
+
+Ichki zina pog‘onalari qiya taglik ustida aniq ko‘rinadi; panjaralar oraliq maydonchalargacha tutashgan. Zinada tezlik, oyoq qo‘yish balandligi, kamera va qadam tovushi pog‘ona o‘lchamiga moslanadi. Orqa kirishdagi sariq yo‘lak belgisi 0-qavat polida turadi. Lift kabinasining o‘z suriladigan eshiklari va qavatlar orasini yopadigan shaxta devorlari bor.
+
+![Ichki zinaning yuqoridan ko‘rinishi](docs/screenshots/stairs_top.png)
 ![Derazadan tashqi ko‘rinish](docs/screenshots/window_view.png)
 ![Lift oynasidagi o‘yinchi aksi](docs/screenshots/lift_mirror.png)
 ![Pog‘onali auditoriya](docs/screenshots/classroom.png)

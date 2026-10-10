@@ -13,6 +13,8 @@ var target_floor := 0
 var moving := false
 var cabin: Node3D
 var rider: CharacterBody3D
+var cabin_gate: StaticBody3D
+var cabin_panels: Array[Node3D] = []
 var gates: Array[Node3D] = []
 var door_panels: Array[Array] = []
 var door_open: Array[float] = [0.0,0.0,0.0,0.0]
@@ -31,6 +33,20 @@ func _ready() -> void:
 	var light := _material(Color("fff4da"),0.0,0.5,true)
 	button_idle = _material(Color("dde9ed"),0.3,0.4,true)
 	button_lit = _material(Color("ffbe49"),0.0,0.4,true)
+	# A continuous opaque shaft encloses the cabin between landing doors.
+	var shaft_bottom: float = FLOOR_LEVELS[0]-0.35
+	var shaft_top: float = FLOOR_LEVELS[3]+3.15
+	var shaft_height := shaft_top-shaft_bottom
+	var shaft_mid := (shaft_bottom+shaft_top)/2
+	for z in [-1.48,1.48]:
+		_part(self,Vector3(0,shaft_mid,z),Vector3(2.95,shaft_height,0.18),lining)
+	_part(self,Vector3(1.48,shaft_mid,0),Vector3(0.18,shaft_height,3.12),lining)
+	for z in [-1.67,1.67]:
+		_part(self,Vector3(-1.43,shaft_mid,z),Vector3(0.16,shaft_height,0.38),lining)
+	for level in range(4):
+		var bottom: float = FLOOR_LEVELS[level]+2.93
+		var top: float = FLOOR_LEVELS[level+1] if level<3 else shaft_top
+		_part(self,Vector3(-1.43,(bottom+top)/2,0),Vector3(0.16,top-bottom,2.98),lining)
 	cabin = Node3D.new()
 	cabin.name = "MovingCabin"
 	cabin.position.y = FLOOR_LEVELS[0]
@@ -51,6 +67,24 @@ func _ready() -> void:
 	_part(cabin,Vector3(-0.8,1.35,1.18),Vector3(0.25,0.65,0.04),black,false)
 	for level in range(4):
 		_part(cabin,Vector3(-0.8,1.58-level*0.14,1.15),Vector3(0.12,0.08,0.025),button_idle,false)
+	_part(cabin,Vector3(-1.23,2.74,0),Vector3(0.16,0.18,2.5),steel,false)
+	for z in [-1.24,1.24]:
+		_part(cabin,Vector3(-1.23,1.35,z),Vector3(0.16,2.7,0.10),steel,false)
+	# The cabin has its own sliding doors; landing doors stay at their floor.
+	cabin_gate = StaticBody3D.new()
+	cabin_gate.name = "CabinDoor"
+	cabin_gate.position = Vector3(-1.23,1.35,0)
+	var cabin_shape := CollisionShape3D.new()
+	var cabin_box := BoxShape3D.new()
+	cabin_box.size = Vector3(0.075,2.7,2.4)
+	cabin_shape.shape = cabin_box
+	cabin_gate.add_child(cabin_shape)
+	cabin.add_child(cabin_gate)
+	for side in [-1.0,1.0]:
+		var panel := _part(cabin_gate,Vector3(0,0,side*0.6),Vector3(0.055,2.68,1.19),steel,false)
+		panel.name = "CabinSlidingLeaf"
+		cabin_panels.append(panel)
+	_part(cabin,Vector3(-1.27,-0.22,0),Vector3(0.12,0.44,2.5),steel,false)
 	var lamp := OmniLight3D.new()
 	lamp.position.y = 2.4
 	lamp.omni_range = 3
@@ -125,6 +159,11 @@ func _part(parent: Node3D,pos: Vector3,size: Vector3,mat: Material,solid: bool=t
 	return body
 
 func _update_gates() -> void:
+	var cabin_open: float = door_open[current_floor]
+	cabin_gate.collision_layer = 0 if not moving and cabin_open>=0.98 else 1
+	for index in range(2):
+		var side := -1.0 if index==0 else 1.0
+		cabin_panels[index].position.z = side*(0.6+cabin_open*1.22)
 	for level in range(4):
 		gates[level].collision_layer = 0 if not moving and level==current_floor and door_open[level]>=0.98 else 1
 		for index in range(2):

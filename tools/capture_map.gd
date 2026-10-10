@@ -23,6 +23,9 @@ func run() -> void:
 		"lift_closed": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
 		"room_doors": [Vector3(-7.5,5.65,0),Vector3(-11,5.4,0)],
 		"inner_stairs": [game.building.stair_point(-1,0,12.5,5.65),game.building.stair_point(-1,-1.05,17.7,6.2)],
+		"rear_guidance": [Vector3(0,-0.15,19.5),Vector3(0,-0.8,11)],
+		"stairs_top": [game.building.stair_point(-1,1.05,13.5,13.65),game.building.stair_point(-1,0,18.2,10)],
+		"lift_between": [Vector3(-4.4,7.4,16.2),Vector3(-2.8,7.4,16.2)],
 		"front_entry_flat": [Vector3(0,-0.15,-21.5),Vector3(0,-0.15,-8)],
 		"front_entry_zero": [Vector3(-7,1.1,-24),Vector3(0,-0.35,-20.5)],
 		"front_stair_pair": [Vector3(0,5.65,4.5),Vector3(0,6,-11)],
@@ -35,7 +38,14 @@ func run() -> void:
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:
 		if not selected.is_empty() and not name in selected: continue
-		if name=="lift":
+		if name=="lift_between":
+			var lift = game.building.lift
+			lift.set_physics_process(false)
+			lift.cabin.position.y = 5.75
+			lift.door_open.fill(0.0)
+			lift._update_gates()
+			game.player.reset_to(Vector3(-4.4,5.8,16.2),PI/2)
+		elif name=="lift":
 			game.player.global_position = game.building.lift.to_global(Vector3(-2.4,0.05,0))
 			for frame in range(50): await physics_frame
 		elif name=="lift_mirror":

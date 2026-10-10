@@ -73,6 +73,15 @@ func run() -> void:
 	check(game.building.lift.position.x<0,"Lift is left when entering from the rear")
 	check(game.building.find_children("BrownRoomDoor_*","Node3D",false,false).size()==20,"All twenty rooms have brown timber doors")
 	check(game.building.find_children("TieredLectureRoom*","Node3D",false,false).size()==20,"All twenty rooms have tiered lecture seating")
+	var guidance: Array[Node] = game.building.find_children("GroundGuidance*","Node3D",false,false)
+	check(guidance.size()==45,"Rear entrance has its complete tactile guidance strip")
+	var guidance_grounded := true
+	for node in guidance: guidance_grounded = guidance_grounded and absf(node.position.y-(-1.8+0.025))<0.001
+	check(guidance_grounded,"Yellow guidance ribs rest on the lowered floor")
+	for side in [-1,1]:
+		var bay: Node3D = game.building.get_node("MarkedStairBay_%d" % side)
+		check(bay.find_children("StairRailing*","Node3D",false,false).size()==36,"Stair bay %d has joined flight and landing railings" % side)
+	check(game.building.stair_surfaces.size()>12,"Controller can identify actual tread dimensions on all stair flights")
 	p.reset_to(Vector3(0,-1.74,5),0)
 	await settle(p)
 	check(p.is_on_floor() and absf(p.position.y+1.8)<0.1,"Player spawns grounded at human eye height")
@@ -175,7 +184,7 @@ func run() -> void:
 		await physics_frame
 		up_offset = maxf(up_offset,absf(p.stair_view_offset))
 	Input.action_release("forward")
-	check(up_offset>0.02 and p.position.y>0.5,"Ascending stairs produces tread-paced camera motion")
+	check(up_offset>0.04 and p.position.y>-0.1,"Ascending stairs produces tread-paced camera motion")
 	p.rotation.y = 0
 	Input.action_press("forward")
 	var down_offset := 0.0
@@ -194,6 +203,11 @@ func run() -> void:
 	check(lift.gates[0].collision_layer==0,"An open lift entrance is physically walkable")
 	check(lift.gates[1].collision_layer==1 and lift.door_open[1]==0,"An absent cabin leaves the other landing closed")
 	check(lift.find_child("CallButton_0",true,false)!=null,"Landing has a visible physical call button")
+	check(lift.cabin_panels.size()==2 and lift.cabin_gate.collision_layer==0,"Cabin has paired sliding doors that open at a landing")
+	for height in [2.0,7.2,11.2]:
+		var from := lift.to_global(Vector3(0,height,0))
+		var to := lift.to_global(Vector3(-2,height,0))
+		check(not p.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(from,to,1)).is_empty(),"Lift shaft is enclosed between floors at %.1f" % height)
 	p.reset_to(lift.global_position+Vector3(0,-1.74,0),0)
 	await settle(p)
 	check(lift.contains_actor(p),"Player can enter physical lift cabin")
@@ -206,6 +220,7 @@ func run() -> void:
 	check(is_instance_valid(p.reflection_body) and p.reflection_body.hips.size()==2 and (p.view_camera.cull_mask&2)==0 and (mirror.camera.cull_mask&2)!=0,"Player body appears in the mirror without obstructing first-person view")
 	for floor_index in [1,2,3,0]:
 		check(lift.request_floor(floor_index,p),"Lift accepts destination %d" % floor_index)
+		check(lift.cabin_gate.collision_layer==1,"Cabin entrance is secured during travel")
 		var limit := Time.get_ticks_msec()+15000
 		while lift.moving and Time.get_ticks_msec()<limit: await physics_frame
 		check(not lift.moving and absf(p.position.y-floor_y(floor_index))<0.15,"Lift carries player to level %d" % floor_index)
