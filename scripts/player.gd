@@ -26,6 +26,8 @@ var weapon_model: Node3D
 var scoped := false
 var crouched := false
 var bob_time := 0.0
+var stair_amount := 0.0
+var stair_view_offset := 0.0
 var footstep_time := 0.0
 var round_spawn := Vector3.ZERO
 var lift_riding := false
@@ -132,12 +134,22 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor(): velocity.y -= 18.0 * delta
 	elif not locked and Input.is_action_just_pressed("jump") and not crouched:
 		velocity.y = jump_velocity
+	var previous_height := global_position.y
 	move_and_slide()
-	view_camera.position.y = lerpf(view_camera.position.y, 1.03 if crouched else 1.65, delta * 12.0)
+	var horizontal_speed := Vector2(velocity.x,velocity.z).length()
+	var height_speed := (global_position.y-previous_height)/maxf(delta,0.001)
+	var climbing := is_on_floor() and horizontal_speed>0.4 and absf(height_speed)>0.15
+	stair_amount = move_toward(stair_amount,1.0 if climbing else 0.0,delta*8.0)
+	bob_time += delta*horizontal_speed*2.0
+	# Each tread gives a short rise and footfall rather than a floating camera.
+	var tread_phase := TAU*global_position.y/0.20
+	stair_view_offset = sin(tread_phase)*0.045*stair_amount
+	var walk_bob := sin(bob_time*2.0)*0.012 if is_on_floor() and horizontal_speed>0.4 else 0.0
+	view_camera.position.y = lerpf(view_camera.position.y,(1.03 if crouched else 1.65)+walk_bob+stair_view_offset,delta*20.0)
+	view_camera.rotation.z = lerpf(view_camera.rotation.z,sin(bob_time)*0.009*stair_amount,delta*10.0)
 	view_camera.fov = lerpf(view_camera.fov, 28.0 if scoped else 80.0, delta * 15.0)
 	if is_instance_valid(weapon_model):
-		bob_time += delta * velocity.length() * 1.8
-		weapon_model.position = Vector3(0.22, -0.23 + sin(bob_time) * 0.008, -0.35 + recoil * 0.055)
+		weapon_model.position = Vector3(0.22, -0.23 + sin(bob_time) * 0.008 + stair_view_offset*0.45, -0.35 + recoil * 0.055)
 		weapon_model.rotation.x = recoil * 0.06
 		weapon_model.rotation.z = sin(bob_time * 0.5) * 0.012
 		weapon_model.visible = not scoped and game.phase != "menu" and not game.exploring
@@ -233,6 +245,9 @@ func reset_to(spawn_position: Vector3, yaw: float) -> void:
 	rotation.y = yaw
 	velocity = Vector3.ZERO
 	view_camera.rotation = Vector3.ZERO
+	stair_amount = 0.0
+	stair_view_offset = 0.0
+	bob_time = 0.0
 
 
 func respawn(spawn_position: Vector3, yaw: float) -> void:

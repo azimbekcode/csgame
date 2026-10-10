@@ -1,4 +1,4 @@
-ATRIUM STRIKE v0.2.2 — Windows x64, offline botlar
+ATRIUM STRIKE v0.2.3 — Windows x64, offline botlar
 
 1. ZIP arxivni to‘liq oching (Extract All).
 2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.

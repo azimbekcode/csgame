@@ -65,3 +65,5 @@ godot --path . --audio-driver Dummy --script res://tools/capture_map.gd
 
 Screenshots in `docs/screenshots` are actual game renders. Windows export is
 cross-built on Linux; native Windows execution requires a Windows machine.
+
+Rooms now use brown panelled timber doors, four tiers of paired wooden desk banks, dark seating, a central aisle, ceiling downlights and cassette vents. The lift and floor openings are mirrored to the left of a visitor entering from the rear. Stair movement adds tread-paced first-person motion and increased knee lift/lean for soldiers while retaining walkable collision ramps.

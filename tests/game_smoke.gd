@@ -59,6 +59,9 @@ func run() -> void:
 	var rear_path := NavigationServer3D.map_get_path(map,Vector3(0,0,5),Vector3(0,-0.9,40),true)
 	check(rear_path.size()>1 and rear_path[-1].distance_to(Vector3(0,-0.9,40))<1.0,"Navigation connects the lobby to the rear courtyard")
 	game.explore_map()
+	check(game.building.lift.position.x<0,"Lift is left when entering from the rear")
+	check(game.building.find_children("BrownRoomDoor_*","Node3D",false,false).size()==20,"All twenty rooms have brown timber doors")
+	check(game.building.find_children("TieredLectureRoom*","Node3D",false,false).size()==20,"All twenty rooms have tiered lecture seating")
 	p.reset_to(Vector3(0,0.06,5),0)
 	await settle(p)
 	check(p.is_on_floor() and absf(p.position.y)<0.1,"Player spawns grounded at human eye height")
@@ -106,6 +109,28 @@ func run() -> void:
 	await settle(p)
 	check(await walk_to(p,Vector3(0,4,-21.5)),"Wide front stairs are climbable without jumping")
 	check(await walk_to(p,Vector3(0,4,-18)),"Front portal opens into level 1")
+	# Exercise the real controller, including stair head/weapon movement.
+	p.reset_to(Vector3(0,-0.85,-32.5),PI)
+	await settle(p)
+	p.set_physics_process(true)
+	Input.action_press("forward")
+	var up_offset := 0.0
+	for frame in range(75):
+		await physics_frame
+		up_offset = maxf(up_offset,absf(p.stair_view_offset))
+	Input.action_release("forward")
+	check(up_offset>0.02 and p.position.y>0.5,"Ascending stairs produces tread-paced camera motion")
+	p.rotation.y = 0
+	Input.action_press("forward")
+	var down_offset := 0.0
+	for frame in range(60):
+		await physics_frame
+		down_offset = maxf(down_offset,absf(p.stair_view_offset))
+	Input.action_release("forward")
+	check(down_offset>0.02,"Descending stairs produces tread-paced camera motion")
+	await frames(35)
+	check(p.stair_amount<0.01,"Stair motion settles when the player stops")
+	p.set_physics_process(false)
 	var lift: Node3D = game.building.lift
 	p.reset_to(lift.global_position+Vector3(0,0.06,0),0)
 	await settle(p)
@@ -116,10 +141,10 @@ func run() -> void:
 		while lift.moving and Time.get_ticks_msec()<limit: await physics_frame
 		check(not lift.moving and absf(p.position.y-floor_index*4)<0.15,"Lift carries player to level %d" % floor_index)
 		check(not p.lift_riding,"Lift releases movement after arrival")
-		check(await walk_to(p,Vector3(1.4,floor_index*4,16.2)),"Lift exit is walkable on level %d" % floor_index)
+		check(await walk_to(p,Vector3(-1.4,floor_index*4,16.2)),"Lift exit is walkable on level %d" % floor_index)
 		check(await walk_to(p,lift.global_position+Vector3(0,floor_index*4,0)),"Lift can be reentered on level %d" % floor_index)
 	# Calling the empty lift must not carry a player standing on the landing.
-	p.reset_to(Vector3(1.7,0.05,16.2),0)
+	p.reset_to(Vector3(-1.7,0.05,16.2),0)
 	check(lift.request_floor(2),"Empty lift can be dispatched")
 	while lift.moving: await physics_frame
 	check(not p.lift_riding and p.position.y<0.2,"Calling lift leaves the waiting player on the landing")

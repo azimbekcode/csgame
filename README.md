@@ -65,7 +65,7 @@ Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm oli
 - Old markaziy zina 1-qavatga olib chiqadi.
 - Orqadagi ikkala zina rasmdagidek oraliq maydonchada burilib, bitta 1-qavat kirishiga birlashadi; uning tagidagi eshikdan 0-qavatga kiriladi.
 - Orqadan kirganda chapdagi lift barcha to‘rt qavatni bog‘laydi. Kabinada **E — keyingi qavat**, **Q — oldingi qavat**; eshik oldida **E — chaqirish**.
-- Har qavatda beshta kiriladigan xona, pog‘onali auditoriya, ochiq atrium, qora shishali panjaralar, yog‘och panellar va sariq taktil yo‘lak.
+- Jigarrang yog‘och eshiklar, markaziy yo‘lakli pog‘onali partalar va qora o‘rindiqlar; zinada qadamga mos kamera va askar oyoq harakati. Har qavatda beshta kiriladigan xona, pog‘onali auditoriya, ochiq atrium, qora shishali panjaralar, yog‘och panellar va sariq taktil yo‘lak.
 - Shox va alohida barglardan qurilgan daraxtlar; kamuflyaj, dubulg‘a, himoya jihozlari va yurish animatsiyasi bor askarlar.
 
 ![Yangi old fasad](docs/screenshots/front.png)
@@ -73,6 +73,8 @@ Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm oli
 ![Burilish maydonchali orqa zina](docs/screenshots/rear_stairs.png)
 ![Ikki tomonlama orqa zina](docs/screenshots/rear.png)
 ![Atrium va balkonlar](docs/screenshots/atrium.png)
+![Chap tomondagi lift](docs/screenshots/lift.png)
+![Pog‘onali auditoriya](docs/screenshots/classroom.png)
 ![Askar modeli](docs/screenshots/soldier.png)
 
 O‘lchamlar hamda videoda to‘liq ko‘rinmagan xonalarning joylashuvi taxminiy. Modellar protsedurali o‘yin grafikasidir; fotogrammetrik yoki fotoreal nusxa deb taqdim etilmaydi. Manbalar va tekshiruvlar: [xarita izohlari](docs/MAP.md).
@@ -89,6 +91,6 @@ bash tools/build_linux.sh
 
 `tools/check.sh` xaritada yurish, xonalar, to‘rt qavatli lift, jang mexanikalari va ikki raundli bot sinovini bajaradi. Windows va Linux export preset’lari barcha o‘yin resurslarini executable ichiga joylaydi. `tools/package_windows.py` va `tools/package_linux.py` ZIP hamda ikkala platforma uchun SHA-256 ro‘yxatini yaratadi. Xaritadagi collision geometriyasi o‘zgarsa, navigatsiya meshini qayta bake qilish kerak; [tools/bake_navigation.gd](tools/bake_navigation.gd) bilan bajarish mumkin.
 
-Yangi yig‘ilma 104 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
+Yangi yig‘ilma 110 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
 
 Godot va uchinchi tomon kutubxonalarining litsenziyalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [GODOT-COPYRIGHT.txt](GODOT-COPYRIGHT.txt). Asl reference videolar va ulardagi odamlar tasvirlari repozitoriy yoki tayyor ZIP’ga qo‘shilmagan.

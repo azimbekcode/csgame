@@ -130,8 +130,10 @@ func _physics_process(delta: float) -> void:
 	velocity.z = direction.z * (2.0 if flash_left > 0 else 3.9)
 	if not is_on_floor(): velocity.y -= 18*delta
 	else: velocity.y = 0
+	var previous_height := global_position.y
 	move_and_slide()
-	model.animate(delta,Vector2(velocity.x,velocity.z).length(),reload_left>0)
+	var vertical_speed := (global_position.y-previous_height)/maxf(delta,0.001) if is_on_floor() else 0.0
+	model.animate(delta,Vector2(velocity.x,velocity.z).length(),reload_left>0,vertical_speed)
 
 
 func _choose_target() -> void:

@@ -105,16 +105,17 @@ func _build() -> void:
 	weapon_node.position = Vector3(0.1,0.20,-0.30)
 	torso.add_child(weapon_node)
 
-func animate(delta: float,speed_value: float,reloading: bool) -> void:
+func animate(delta: float,speed_value: float,reloading: bool,vertical_speed: float=0.0) -> void:
 	moving_amount = move_toward(moving_amount,clampf(speed_value/3.9,0,1),delta*5)
 	phase += delta*(5+speed_value*1.5)
+	var stairs := clampf(absf(vertical_speed)/1.5,0,1)*moving_amount
 	for i in range(hips.size()):
 		var stride := sin(phase+i*PI)
-		hips[i].rotation.x = stride*0.52*moving_amount
-		knees[i].rotation.x = maxf(0,-stride)*0.7*moving_amount
-	torso.position.y = 1.04+absf(sin(phase))*0.024*moving_amount
+		hips[i].rotation.x = stride*(0.52*moving_amount+0.25*stairs)-maxf(0,-stride)*0.18*stairs
+		knees[i].rotation.x = maxf(0,-stride)*(0.7*moving_amount+0.7*stairs)
+	torso.position.y = 1.04+absf(sin(phase))*(0.024*moving_amount+0.055*stairs)
 	torso.rotation.z = sin(phase)*0.025*moving_amount
-	torso.rotation.x = -0.04*moving_amount
+	torso.rotation.x = -0.04*moving_amount-0.12*stairs*signf(vertical_speed)
 	weapon_node.rotation.z = -0.3 if reloading else 0.0
 
 func _shape(parent: Node3D,pos: Vector3,size: Vector3,mat: Material) -> void:

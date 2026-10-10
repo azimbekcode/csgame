@@ -11,10 +11,11 @@ const ROOF_HEIGHT := 16.0
 const DOME_RADIUS := 12.5
 const DOME_BASE := 17.4
 const DOME_RISE := 10.6
-const LIFT_CENTER := Vector3(4.4, 0, 16.2)
+const LIFT_CENTER := Vector3(-4.4, 0, 16.2)
 
 var marble: StandardMaterial3D
 var wood: StandardMaterial3D
+var door_wood: StandardMaterial3D
 var cream: StandardMaterial3D
 var dark: StandardMaterial3D
 var metal: StandardMaterial3D
@@ -230,27 +231,24 @@ func _make_rooms() -> void:
 				_box(_polar(ROOM_RADIUS-0.1,a,h+1.05),Vector3(width,0.04,0.035),bronze,-a-PI/2,false)
 		for d in [67.5,112.5,157.5,202.5,247.5,292.5]:
 			var a := deg_to_rad(d)
-			_box(_polar(15.4,a,h+height/2),Vector3(8.7,height,0.17),cream,-a)
+			_box(_polar(15.4,a,h+height/2),Vector3(8.7,height,0.17),wood,-a)
 		for index in range(door_angles.size()):
 			var a := deg_to_rad(door_angles[index])
 			room_entries.append(_polar(12.6,a,h+0.05))
 			_label("%d%02d  /  %s" % [level,index+1,"AUDITORIYA" if index==2 else "XONA"],_polar(10.84,a,h+3.0),-a+PI/2,0.004)
-			# A door leaf held open against the room wall, with metal handle.
-			_box(_polar(12.0,a+0.085,h+1.32),Vector3(1.25,2.64,0.07),wood,-a)
-			if index==2:
-				for row in range(3):
-					for side in [-1.0,1.0]:
-						_desk(Vector3(-14.1-row*1.5,h+(row+1)*0.18,side*1.5),PI/2)
-					_box(Vector3(-14.1-row*1.5,h+(row+1)*0.18-0.08,0),Vector3(1.5,0.16,4.5),marble,0,false)
-				var first := get_child_count()
-				_ramp(0,4.5,h,0,4.5,0.54)
-				var ramp := get_child(first) as Node3D
-				ramp.rotation.y = -PI/2
-				ramp.position.x = -13.35
-				_box(Vector3(-19.15,h+1.9,0),Vector3(0.08,1.45,3.2),dark)
-			else:
-				_desk(_polar(15.0,a-0.075,h),-a-PI/2)
-				_desk(_polar(17.3,a+0.085,h),-a-PI/2)
+			# Brown timber leaf held open, with inset panels and a brass handle.
+			var door := Node3D.new()
+			door.position = _polar(12.0,a+0.085,h)
+			door.rotation.y = -a
+			door.name = "BrownRoomDoor_%d_%d" % [level,index]
+			add_child(door)
+			var first := get_child_count()
+			_box(Vector3(0,1.32,0),Vector3(1.25,2.64,0.07),door_wood)
+			for y in [0.68,1.91]:
+				_box(Vector3(0,y,-0.045),Vector3(0.99,1.02,0.025),bronze,0,false)
+			_box(Vector3(-0.44,1.18,-0.10),Vector3(0.20,0.035,0.06),metal,0,false)
+			for node in get_children().slice(first): node.reparent(door,false)
+			_make_lecture_room(_polar(13.2,a,h),PI/2-a)
 			var lamp := OmniLight3D.new()
 			lamp.position = _polar(15,a,h+3.2)
 			lamp.omni_range = 7
@@ -261,6 +259,54 @@ func _make_rooms() -> void:
 		for z in [-15.6,15.6]:
 			for x in [-2.2,2.2]:
 				_box(Vector3(x,h+1.9,z),Vector3(0.16,3.8,8.2),wood)
+
+func _make_lecture_room(origin: Vector3,yaw: float) -> void:
+	var room := Node3D.new()
+	room.name = "TieredLectureRoom_%d" % get_child_count()
+	room.position = origin
+	room.rotation.y = yaw
+	add_child(room)
+	var first := get_child_count()
+	var seats := _material(Color("30373b"),0.65)
+	var floor_finish := _textured_material("wood",Color("baaa87"),0.8) if not material_cache.has("lecture_floor") else material_cache["lecture_floor"] as StandardMaterial3D
+	material_cache["lecture_floor"] = floor_finish
+	# Two desk banks leave a clear stepped aisle through the centre.
+	for row in range(4):
+		var z := 0.65+row*1.3
+		var h := (row+1)*0.18
+		for side in [-1.0,1.0]:
+			var x: float = side*1.95
+			_box(Vector3(x,h/2,z),Vector3(2.55,h,1.3),floor_finish)
+			_box(Vector3(x,h+0.77,z-0.22),Vector3(2.45,0.08,0.62),wood)
+			_box(Vector3(x,h+0.40,z-0.48),Vector3(2.45,0.65,0.06),seats,0,false)
+			for seat in range(3):
+				var xx: float = x+(seat-1)*0.76
+				_box(Vector3(xx,h+0.46,z+0.35),Vector3(0.57,0.07,0.48),seats,0,false)
+				_box(Vector3(xx,h+0.79,z+0.58),Vector3(0.57,0.56,0.06),seats,0,false)
+				for leg in [-0.22,0.22]:
+					_box(Vector3(xx+leg,h+0.22,z+0.35),Vector3(0.035,0.44,0.36),metal,0,false)
+			for edge in [-1.13,1.13]:
+				_box(Vector3(x+edge,h+0.37,z-0.22),Vector3(0.045,0.74,0.5),metal,0,false)
+		_box(Vector3(0,h-0.08,z),Vector3(1.3,0.16,1.3),floor_finish,0,false)
+		_box(Vector3(0,h-0.025,z-0.65),Vector3(1.3,0.04,0.07),dark,0,false)
+	_ramp(0,1.3,0,-0.65,5.2,0.72)
+	# Front presentation area and a white ceiling with recessed round lights.
+	_box(Vector3(3.35,1.8,1.9),Vector3(0.06,1.15,2.9),dark,0,false)
+	_box(Vector3(0,3.73,2.2),Vector3(6.5,0.08,6.3),cream,0,false)
+	for x in [-2.1,2.1]:
+		for z in [0.0,2.3,4.5]:
+			_cylinder(Vector3(x,3.66,z),0.16,0.025,glow)
+	_box(Vector3(0,3.62,2.2),Vector3(0.94,0.12,0.94),cream,0,false)
+	_box(Vector3(0,3.55,2.2),Vector3(0.64,0.025,0.64),seats,0,false)
+	for stripe in range(8):
+		_box(Vector3(0,3.53,1.95+stripe*0.07),Vector3(0.59,0.015,0.025),metal,0,false)
+	for x in [-5.05,0.0,5.05]:
+		var window_z := 6.72 if x==0 else 6.10
+		var window_width := 2.9 if x==0 else 1.9
+		_box(Vector3(x,2.86,window_z),Vector3(window_width,0.12,0.12),seats,0,false)
+		for slat in range(4):
+			_box(Vector3(x,2.72-slat*0.16,window_z),Vector3(window_width-0.05,0.055,0.035),seats,0,false)
+	for node in get_children().slice(first): node.reparent(room,false)
 
 func _desk(origin: Vector3,yaw: float) -> void:
 	var assembly := Node3D.new()
@@ -426,20 +472,21 @@ func _make_lift() -> void:
 	lift = Node3D.new()
 	lift.set_script(preload("res://scripts/lift.gd"))
 	lift.position = LIFT_CENTER
+	lift.rotation.y = PI
 	add_child(lift)
-	# Looking inward from the rear (+Z), +X is on the visitor's left.
+	# Facing inward from the rear (+Z), negative X is the visitor's left.
 	for level in range(FLOOR_COUNT):
 		var h := level*4.0
-		_box(Vector3(2.65,h-0.14,16.2),Vector3(1.0,0.28,2.5),marble)
-		_label("LIFT  /  %d" % level,Vector3(2.1,h+2.9,16.2),-PI/2,0.005)
+		_box(Vector3(-2.65,h-0.14,16.2),Vector3(1.0,0.28,2.5),marble)
+		_label("LIFT  /  %d" % level,Vector3(-2.1,h+2.9,16.2),PI/2,0.005)
 	# Doorway in the rear corridor's left wall is carved by replacing its lift-facing piece.
 	for node in get_children():
-		if node is StaticBody3D and absf(node.position.x-2.2)<0.01 and absf(node.position.z-15.6)<0.01:
+		if node is StaticBody3D and absf(node.position.x+2.2)<0.01 and absf(node.position.z-15.6)<0.01:
 			var h: float = node.position.y-1.9
 			node.queue_free()
-			_box(Vector3(2.2,h+1.9,12.55),Vector3(0.16,3.8,2.1),wood)
-			_box(Vector3(2.2,h+1.9,19.0),Vector3(0.16,3.8,1.4),wood)
-			_box(Vector3(2.2,h+3.35,16.2),Vector3(0.16,0.9,5.2),cream)
+			_box(Vector3(-2.2,h+1.9,12.55),Vector3(0.16,3.8,2.1),wood)
+			_box(Vector3(-2.2,h+1.9,19.0),Vector3(0.16,3.8,1.4),wood)
+			_box(Vector3(-2.2,h+3.35,16.2),Vector3(0.16,0.9,5.2),cream)
 
 func _make_campus() -> void:
 	var asphalt := _textured_material("stone",Color("53575a"),0.98)
@@ -529,6 +576,7 @@ func _shrub(origin: Vector3) -> void:
 func _make_materials() -> void:
 	marble = _textured_material("marble", Color("b9bbb6"), 0.32)
 	wood = _textured_material("wood", Color("bc9368"), 0.75)
+	door_wood = _textured_material("wood", Color("704323"), 0.52)
 	paving = _textured_material("paving", Color("858b90"), 0.9)
 	cream = _material(Color("c9c1ae"))
 	dark = _material(Color("252c35"))
@@ -740,7 +788,7 @@ func _wedge(inner: float, outer: float, a: float, b: float, top: float, thicknes
 		var polygon := PackedVector2Array()
 		for point in [_polar(inner,a,0),_polar(outer,a,0),_polar(outer,b,0),_polar(inner,b,0)]:
 			polygon.append(Vector2(point.x,point.z))
-		var hole := PackedVector2Array([Vector2(3.05,14.9),Vector2(5.75,14.9),Vector2(5.75,17.5),Vector2(3.05,17.5)])
+		var hole := PackedVector2Array([Vector2(LIFT_CENTER.x-1.35,14.9),Vector2(LIFT_CENTER.x+1.35,14.9),Vector2(LIFT_CENTER.x+1.35,17.5),Vector2(LIFT_CENTER.x-1.35,17.5)])
 		var pieces := Geometry2D.clip_polygons(polygon,hole)
 		for piece in pieces:
 			var indices := Geometry2D.triangulate_polygon(piece)

@@ -19,8 +19,8 @@ func run() -> void:
 		"rear_stairs": [Vector3(16,2.3,34),Vector3(6,3,21.6)],
 		"atrium": [Vector3(3,1.9,5.2),Vector3(-2,4.8,-4)],
 		"gallery": [Vector3(8.2,13.7,0),Vector3(-3,10,0)],
-		"lift": [Vector3(0.5,1.6,13.8),Vector3(4.4,1.4,16.2)],
-		"classroom": [Vector3(-12.8,13.7,0),Vector3(-18.5,13.4,0)],
+		"lift": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
+		"classroom": [Vector3(-12.6,13.7,0),Vector3(-18.4,13.3,0)],
 		"garden": [Vector3(23,1.6,-23),Vector3(33,4,-15)]}
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:
