@@ -22,13 +22,14 @@ func run() -> void:
 		"lift": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
 		"lift_closed": [Vector3(0.4,1.65,18.6),Vector3(-4.4,1.5,16.2)],
 		"room_doors": [Vector3(-7.5,5.65,0),Vector3(-11,5.4,0)],
-		"inner_stairs": [Vector3(0,5.65,-15.8),Vector3(5,6,-16.6)],
-		"front_entry_zero": [Vector3(0,1.65,-14),Vector3(0,1.65,-24)],
-		"front_stair_pair": [Vector3(0,5.65,-12),Vector3(0,6,-18)],
+		"inner_stairs": [game.building.stair_point(-1,0,12.5,5.65),game.building.stair_point(-1,-1.05,17.7,6.2)],
+		"front_entry_zero": [Vector3(-7,1.1,-24),Vector3(0,-0.35,-20.5)],
+		"front_stair_pair": [Vector3(0,5.65,4.5),Vector3(0,6,-11)],
 		"window_view": [Vector3(-18.5,13.9,0),Vector3(-28,13.9,0)],
 		"lift_mirror": [Vector3(-4.3,1.65,16.2),Vector3(-5.55,1.65,16.2)],
 		"classroom": [Vector3(-12.6,13.7,0),Vector3(-18.4,13.3,0)],
 		"classroom_front": [Vector3(-12.0,13.65,0.6),Vector3(-12.5,13.3,3.35)],
+		"front_left_clear": [Vector3(35,1.6,-45),Vector3(10,5,-5)],
 		"garden": [Vector3(23,1.6,-23),Vector3(33,4,-15)]}
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:

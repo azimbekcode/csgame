@@ -105,6 +105,9 @@ func _make_facade() -> void:
 			var win_width := 3.0 if bay%3==0 else 1.9
 			var win_height := 2.5 if level < 2 else 6.4
 			var mat: Material = plinth if level == 0 else limestone
+			if level==0 and not front:
+				var depth := 1.8 if bay in [17,19] else 0.9
+				_local_box(a,Vector3(0,-depth/2,20),Vector3(width+0.04,depth,0.45),mat,false)
 			var sill := 0.55
 			if front and level == 2:
 				win_width = 2.9
@@ -216,7 +219,7 @@ func _make_rooms() -> void:
 			var a := TAU*(i+0.5)/SEGMENTS
 			var degrees := rad_to_deg(a)
 			var doorway := absf(degrees-90)<10 or absf(degrees-270)<10
-			for d in door_angles:
+			for d in door_angles+[247.5,292.5]:
 				doorway = doorway or absf(degrees-d)<6
 			var width := 2*ROOM_RADIUS*sin(PI/SEGMENTS)+0.018
 			if doorway:
@@ -228,7 +231,7 @@ func _make_rooms() -> void:
 				for band in [0.10,1.35,2.65,3.68]:
 					_box(_polar(ROOM_RADIUS-0.10,a,h+band),Vector3(width,0.022,0.025),dark,-a-PI/2,false)
 				_box(_polar(ROOM_RADIUS-0.1,a,h+1.05),Vector3(width,0.04,0.035),bronze,-a-PI/2,false)
-		for d in [22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5]:
+		for d in [22.5,67.5,112.5,157.5,202.5,337.5]:
 			var a := deg_to_rad(d)
 			_box(_polar(15.4,a,h+height/2),Vector3(8.7,height,0.17),wood,-a)
 		for index in range(door_angles.size()):
@@ -270,15 +273,12 @@ func _make_rooms() -> void:
 			lamp.light_energy = 0.5
 			lamp.light_color = Color("fff1d9")
 			add_child(lamp)
-		# Rear/front axial corridors stay inside the circular shell.
+		# Both axial entrances keep uninterrupted wood-lined corridors.
 		for x in [-2.2,2.2]:
-			_box(Vector3(x,h+1.9,15.25),Vector3(0.16,3.8,9.2),wood)
-			# Front corridor opens into both stair bays, with continuous jambs.
-			for bounds in [Vector2(-19.85,-18.6),Vector2(-14.7,-10.65)]:
-				_box(Vector3(x,h+1.9,(bounds.x+bounds.y)/2),Vector3(0.16,3.8,bounds.y-bounds.x),wood)
-			_box(Vector3(x,h+3.4,-16.65),Vector3(0.16,0.8,3.9),wood)
-			# Stair holes expose the slab edge; finish the lintel right to the next floor.
-			_box(Vector3(x,h+3.9,-16.65),Vector3(0.16,0.2,3.9),wood,0,false)
+			for z in [-15.25,15.25]:
+				_box(Vector3(x,h+1.9,z),Vector3(0.16,3.8,9.2),wood)
+			if level==0:
+				_box(Vector3(x,-0.9,-16.95),Vector3(0.16,1.8,5.8),wood)
 
 func _make_lecture_room(origin: Vector3,yaw: float) -> void:
 	var room := Node3D.new()
@@ -342,36 +342,46 @@ func _desk(origin: Vector3,yaw: float) -> void:
 	_box(Vector3(0,0.74,0.78),Vector3(0.42,0.5,0.05),wood)
 	for node in get_children().slice(first): node.reparent(assembly,false)
 
+func stair_point(side: float, x: float, radius: float, height: float) -> Vector3:
+	var a := deg_to_rad(247.5 if side<0 else 292.5)
+	return _polar(radius,a,height)+Vector3(sin(a),0,-cos(a))*x
+
 func _make_stairs() -> void:
-	# Mirrored return stairs beside the front entrance; each serves floors 0–3.
+	# Separate atrium portals at the two marked bays, each with a short corridor.
 	for side in [-1.0,1.0]:
+		var assembly := Node3D.new()
+		assembly.name = "MarkedStairBay_%d" % int(side)
+		assembly.rotation.y = PI/2-deg_to_rad(247.5 if side<0 else 292.5)
+		add_child(assembly)
+		var first := get_child_count()
 		for level in range(FLOOR_COUNT):
 			var h := level*FLOOR_HEIGHT
-			_box(Vector3(side*2.0,h-0.14,-16.65),Vector3(0.6,0.28,3.9),marble)
-			for z in [-18.75,-14.55]:
-				_box(Vector3(side*4.15,h+1.86,z),Vector3(3.9,3.72,0.18),wood)
+			for edge in [-1.0,1.0]:
+				_box(Vector3(edge*1.27,h+1.4,11),Vector3(0.7,2.8,0.2),wood)
+				_box(Vector3(edge*0.94,h+1.4,11),Vector3(0.1,2.8,0.24),door_wood)
+				_box(Vector3(edge*0.96,h+1.86,11.4),Vector3(0.16,3.72,1.2),wood)
+				_box(Vector3(edge*2.05,h+1.86,15.5),Vector3(0.18,3.72,7.2),wood)
+				_box(Vector3(edge*1.5,h+1.86,11.9),Vector3(1.1,3.72,0.18),wood)
+			_box(Vector3(0,h+2.85,11),Vector3(2.0,0.14,0.24),door_wood)
+			_box(Vector3(0,h+3.74,11.4),Vector3(2.08,0.12,1.2),cream,0,false)
+			_box(Vector3(0,h+1.86,19.1),Vector3(4.28,3.72,0.18),wood)
+			_box(Vector3(0,h-0.14,12.9),Vector3(3.9,0.28,1.2),marble)
+			_label("ZINA / 0–3",Vector3(0,h+3.15,10.85),PI,0.0035)
 			if level>0:
-				_stair_railing(Vector3(side*2.3,h,-16.98),Vector3(side*2.3,h,-16.32))
-				_box(Vector3(side*2.3,h+0.55,-16.65),Vector3(0.08,1.1,0.66),metal).visible = false
+				_stair_railing(Vector3(-0.25,h,13.5),Vector3(0.25,h,13.5))
+				_box(Vector3(0,h+0.55,13.5),Vector3(0.5,1.1,0.08),metal).visible = false
 			if level==FLOOR_COUNT-1: continue
-			_box(Vector3(side*5.35,h+1.86,-16.65),Vector3(1.1,0.28,3.9),marble,0,false)
-			_box(Vector3(side*5.35,h+1.86,-16.65),Vector3(1.1,0.28,0.7),marble)
-			_stair_railing(Vector3(side*5.9,h+2,-18.6),Vector3(side*5.9,h+2,-14.7))
-			_box(Vector3(side*5.9,h+2.55,-16.65),Vector3(0.08,1.1,3.9),metal).visible = false
-			for flight in range(2):
-				var assembly := Node3D.new()
-				assembly.name = "FrontStair_%d_%d_%d" % [int(side),level,flight]
-				assembly.position = Vector3(side*2.6,0,-17.8 if flight==0 else -15.5)
-				assembly.rotation.y = side*PI/2
-				add_child(assembly)
-				var first := get_child_count()
-				var start := 0.0 if flight==0 else 2.2
-				var end := 2.2 if flight==0 else 0.0
-				_stair_flight(0,h+flight*2,start,end,2,1.6,1.1 if flight==0 else 0.55,0.55 if flight==0 else 1.1)
-				for edge in [-0.8,0.8]:
-					_stair_railing(Vector3(edge,h+flight*2,start),Vector3(edge,h+flight*2+2,end))
-				for node in get_children().slice(first): node.reparent(assembly,false)
-			_label("%d → %d  QAVAT" % [level,level+1],Vector3(side*2.12,h+2.6,-16.65),side*PI/2,0.004)
+			_box(Vector3(0,h+1.86,18.15),Vector3(3.7,0.28,1.5),marble,0,false)
+			_box(Vector3(0,h+1.86,18.15),Vector3(0.5,0.28,1.5),marble)
+			_stair_railing(Vector3(-1.85,h+2,18.9),Vector3(1.85,h+2,18.9))
+			_box(Vector3(0,h+2.55,18.9),Vector3(3.7,1.1,0.08),metal).visible = false
+			_stair_flight(-1.05,h,13.8,17.4,2,1.6,1.5,0.8)
+			_stair_flight(1.05,h+2,17.4,13.8,2,1.6,1.0,1.5)
+			for edge in [-1.85,-0.25]:
+				_stair_railing(Vector3(edge,h,13.8),Vector3(edge,h+2,17.4))
+			for edge in [0.25,1.85]:
+				_stair_railing(Vector3(edge,h+2,17.4),Vector3(edge,h+4,13.8))
+		for node in get_children().slice(first): node.reparent(assembly,false)
 
 func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2,landing_extension: float=0.0,start_extension: float=0.0) -> void:
 	var steps := int(ceil(rise/0.16))
@@ -439,21 +449,31 @@ func _make_entrances() -> void:
 			var z := -32.5+i*1.1
 			var h := -0.9+(z+33)*0.49
 			_beam(Vector3(side*3.25,h,z),Vector3(side*3.25,h+1.0,z),0.025,metal)
-	# Ground-floor front entry beneath the raised main landing, approached from either side.
-	_box(Vector3(0,-0.14,-21.4),Vector3(4.2,0.28,2.4),marble)
+	# Sunken front forecourt: descend from courtyard -0.9 to the doorway at -1.8.
+	_box(Vector3(0,-1.94,-21.4),Vector3(4.2,0.28,2.4),marble)
+	_box(Vector3(0,-1.94,-19.5),Vector3(4.2,0.28,1.8),marble)
+	_stair_flight(0,-1.8,-18.8,-14.7,1.8,4.2,0.9,0.0)
+	_box(Vector3(0,-0.14,-14.25),Vector3(4.2,0.28,0.9),marble,0,false)
 	for side in [-1.0,1.0]:
-		_box(Vector3(side*1.5,1.4,-20.25),Vector3(0.12,2.8,0.25),door_wood)
-		_box(Vector3(side*1.28,1.35,-20.6),Vector3(0.08,2.7,0.8),bronze)
-	_box(Vector3(0,2.85,-20.25),Vector3(3.1,0.16,0.25),door_wood)
-	_label("OLD KIRISH / 0",Vector3(0,3.2,-20.4),PI,0.004)
+		_box(Vector3(side*1.5,-0.4,-20.25),Vector3(0.12,2.8,0.25),door_wood)
+		_box(Vector3(side*1.28,-0.45,-20.6),Vector3(0.08,2.7,0.8),bronze)
+		_box(Vector3(side*2.05,-0.9,-20),Vector3(1.1,1.8,0.45),limestone)
+	_box(Vector3(0,1.05,-20.25),Vector3(3.1,0.16,0.25),door_wood)
+	_box(Vector3(0,2.25,-20),Vector3(3,2.3,0.45),limestone)
+	_label("0-QAVAT KIRISH",Vector3(0,1.4,-20.4),PI,0.004)
 	for side in [-1.0,1.0]:
 		var approach := Node3D.new()
 		approach.position = Vector3(side*2.1,0,-21.4)
 		approach.rotation.y = side*PI/2
 		add_child(approach)
 		var first := get_child_count()
-		_stair_flight(0,-0.9,2.3,0,0.9,2.4)
+		_stair_flight(0,-1.8,0,2.3,0.9,2.4,0.8,0.0)
+		for edge in [-1.2,1.2]:
+			_stair_railing(Vector3(edge,-1.8,0),Vector3(edge,-0.9,2.3))
 		for node in get_children().slice(first): node.reparent(approach,false)
+		_box(Vector3(side*4.8,-1.04,-21.4),Vector3(0.8,0.28,2.4),marble,0,false)
+	_box(Vector3(0,-1.35,-22.75),Vector3(9.8,0.9,0.2),limestone)
+	_stair_railing(Vector3(-4.85,-0.9,-22.8),Vector3(4.85,-0.9,-22.8))
 	# Rear door is flush with the round wall; the long projecting porch is removed.
 	_box(Vector3(0,-0.14,20.7),Vector3(4.2,0.28,2.4),marble)
 	_stair_flight(0,-0.9,24.0,21.9,0.9,4.2)
@@ -551,13 +571,15 @@ func _make_lift() -> void:
 func _make_campus() -> void:
 	var asphalt := _textured_material("stone",Color("53575a"),0.98)
 	var grass := _textured_material("grass",Color("62694a"),1.0)
-	_box(Vector3(0,-1.08,0),Vector3(128,0.36,128),asphalt)
+	# Cut the asphalt below the sunken forecourt and its interior vestibule.
+	for bounds in [Vector4(-64,-64,64,-22.8),Vector4(-64,-14.1,64,64),Vector4(-64,-22.8,-4.9,-14.1),Vector4(4.9,-22.8,64,-14.1)]:
+		_box(Vector3((bounds.x+bounds.z)/2,-1.08,(bounds.y+bounds.w)/2),Vector3(bounds.z-bounds.x,0.36,bounds.w-bounds.y),asphalt)
 	for i in range(SEGMENTS):
 		_wedge(20.5,23.0,TAU*i/SEGMENTS,TAU*(i+1)/SEGMENTS,-0.86,0.09,paving,true)
 	for side in [-1.0,1.0]:
 		_box(Vector3(side*36,-0.88,0),Vector3(18,0.08,90),grass)
 		_box(Vector3(side*13,-0.88,-40),Vector3(13,0.08,20),grass)
-		for z in [-46.0,-31.0,-14.0,3.0,20.0,38.0,52.0]:
+		for z in ([-46.0,-31.0,-14.0,3.0,20.0,38.0,52.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in [-37.0,-12.0,13.0,38.0]:
 			_beam(Vector3(side*25,-0.9,z),Vector3(side*25,4.7,z),0.065,dark)
@@ -735,9 +757,9 @@ func _setup_navigation() -> void:
 		return
 	var nav := NavigationMesh.new()
 	nav.agent_height = 1.8
-	nav.agent_radius = 0.4
+	nav.agent_radius = 0.3
 	nav.agent_max_climb = 0.4
-	nav.cell_size = 0.2
+	nav.cell_size = 0.1
 	nav.cell_height = 0.1
 	nav.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	var source := NavigationMeshSourceGeometryData3D.new()
@@ -844,15 +866,26 @@ func _label(text_value: String, position_value: Vector3, yaw: float, pixel_size:
 
 
 func _wedge(inner: float, outer: float, a: float, b: float, top: float, thickness: float, material: Material, solid: bool) -> void:
-	if solid and inner == ROOM_RADIUS and top > 0.0:
+	if solid and ((inner == ROOM_RADIUS and top>=0.0) or inner==20.5):
 		var polygon := PackedVector2Array()
 		for point in [_polar(inner,a,0),_polar(outer,a,0),_polar(outer,b,0),_polar(inner,b,0)]:
 			polygon.append(Vector2(point.x,point.z))
-		var hole := PackedVector2Array([Vector2(LIFT_CENTER.x-1.35,14.9),Vector2(LIFT_CENTER.x+1.35,14.9),Vector2(LIFT_CENTER.x+1.35,17.5),Vector2(LIFT_CENTER.x-1.35,17.5)])
-		var stair_left := PackedVector2Array([Vector2(-5.9,-18.6),Vector2(-2.15,-18.6),Vector2(-2.15,-14.7),Vector2(-5.9,-14.7)])
-		var stair_right := PackedVector2Array([Vector2(2.15,-18.6),Vector2(5.9,-18.6),Vector2(5.9,-14.7),Vector2(2.15,-14.7)])
+		var openings: Array[PackedVector2Array] = []
+		if top>0:
+			openings.append(PackedVector2Array([Vector2(LIFT_CENTER.x-1.35,14.9),Vector2(LIFT_CENTER.x+1.35,14.9),Vector2(LIFT_CENTER.x+1.35,17.5),Vector2(LIFT_CENTER.x-1.35,17.5)]))
+			for side in [-1.0,1.0]:
+				var cut := PackedVector2Array()
+				for point in [Vector2(-1.9,13.5),Vector2(1.9,13.5),Vector2(1.9,18.9),Vector2(-1.9,18.9)]:
+					var p := stair_point(side,point.x,point.y,0)
+					cut.append(Vector2(p.x,p.z))
+				openings.append(cut)
+		else:
+			if inner==ROOM_RADIUS:
+				openings.append(PackedVector2Array([Vector2(-2.1,-20.5),Vector2(2.1,-20.5),Vector2(2.1,-14.1),Vector2(-2.1,-14.1)]))
+			else:
+				openings.append(PackedVector2Array([Vector2(-4.9,-22.8),Vector2(4.9,-22.8),Vector2(4.9,-19.4),Vector2(-4.9,-19.4)]))
 		var pieces: Array[PackedVector2Array] = [polygon]
-		for opening in [hole,stair_left,stair_right]:
+		for opening in openings:
 			var clipped: Array[PackedVector2Array] = []
 			for piece in pieces: clipped.append_array(Geometry2D.clip_polygons(piece,opening))
 			pieces = clipped

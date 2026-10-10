@@ -58,7 +58,7 @@ func run() -> void:
 	check(path.size()>2 and path[-1].distance_to(Vector3(-12.7,12,0))<1.0,"Navigation connects the ground lobby to the upper auditorium")
 	for side in [-1.0,1.0]:
 		for level in range(3):
-			var destination := Vector3(side*5.35,level*4+2,-16.65)
+			var destination: Vector3 = game.building.stair_point(side,0,18.15,level*4+2)
 			var stair_path := NavigationServer3D.map_get_path(map,Vector3(0,0,-13),destination,true)
 			check(stair_path.size()>2 and stair_path[-1].distance_to(destination)<0.4,"Bot navigation reaches front stair side %d turning landing %d" % [int(side),level])
 	var rear_path := NavigationServer3D.map_get_path(map,Vector3(0,0,5),Vector3(0,-0.9,40),true)
@@ -76,11 +76,11 @@ func run() -> void:
 	await settle(p)
 	check(absf(p.position.y+0.9)<0.1,"Player reaches courtyard ground elevation")
 	for side in [-1.0,1.0]:
-		p.reset_to(Vector3(0,0.05,-16.65),0)
+		p.reset_to(game.building.stair_point(side,0,9.4,0.05),0)
 		await settle(p)
 		var climbed := true
 		for level in range(3):
-			for target in [Vector3(side*2.6,level*4,-17.8),Vector3(side*5.35,level*4+2,-17.8),Vector3(side*5.35,level*4+2,-15.5),Vector3(side*2.6,level*4+4,-15.5),Vector3(0,level*4+4,-16.65)]:
+			for target in [game.building.stair_point(side,0,12.7,level*4),game.building.stair_point(side,-1.05,13.8,level*4),game.building.stair_point(side,-1.05,18.15,level*4+2),game.building.stair_point(side,1.05,18.15,level*4+2),game.building.stair_point(side,1.05,12.7,level*4+4),game.building.stair_point(side,0,12.7,level*4+4),game.building.stair_point(side,0,9.4,level*4+4)]:
 				if not await walk_to(p,target,180): climbed = false; break
 			await settle(p,4)
 			check(absf(p.position.y-(level+1)*4)<0.15,"Front stair side %d reaches level %d" % [int(side),level+1])
@@ -89,15 +89,21 @@ func run() -> void:
 		var descended := climbed
 		if climbed:
 			for level in [2,1,0]:
-				for target in [Vector3(side*2.6,(level+1)*4,-15.5),Vector3(side*5.35,level*4+2,-15.5),Vector3(side*5.35,level*4+2,-17.8),Vector3(side*2.6,level*4,-17.8),Vector3(0,level*4,-16.65)]:
+				for target in [game.building.stair_point(side,0,12.7,(level+1)*4),game.building.stair_point(side,1.05,13.8,(level+1)*4),game.building.stair_point(side,1.05,18.15,level*4+2),game.building.stair_point(side,-1.05,18.15,level*4+2),game.building.stair_point(side,-1.05,12.7,level*4),game.building.stair_point(side,0,12.7,level*4),game.building.stair_point(side,0,9.4,level*4)]:
 					if not await walk_to(p,target,180): descended = false; break
 				await settle(p,4)
 				check(absf(p.position.y-level*4)<0.15,"Front stair side %d descends to level %d" % [int(side),level])
 		check(descended,"Front stair side %d descends all floors without jumping" % int(side))
-	p.reset_to(Vector3(0,0.05,-15),0)
+	p.reset_to(Vector3(0,0.05,-13),0)
 	await settle(p)
-	check(await walk_to(p,Vector3(0,0,-21.4)),"New ground-floor front door is traversable beneath main stairs")
+	check(await walk_to(p,Vector3(0,-1.8,-21.4)),"Sunken front vestibule connects to ground-floor lobby")
 	check(await walk_to(p,Vector3(5,-0.9,-21.4)),"Ground-floor front door connects to courtyard by side steps")
+	await settle(p)
+	check(absf(p.position.y+0.9)<0.15,"Front side stairs reach courtyard elevation")
+	check(await walk_to(p,Vector3(0,-1.8,-21.4)),"Front side stairs descend into the lower doorway landing")
+	await settle(p)
+	check(absf(p.position.y+1.8)<0.15,"Front doorway landing is below the courtyard")
+	check(await walk_to(p,Vector3(0,0,-13)),"Sunken entrance can be walked into the building without jumping")
 	p.reset_to(Vector3(-9.5,12.05,0),PI/2)
 	await settle(p)
 	check(await walk_to(p,Vector3(-12.7,12,0)),"Auditorium entrance connects to upper balcony")
@@ -113,14 +119,14 @@ func run() -> void:
 	var stair_guards := true
 	for level in range(4):
 		for side in [-1.0,1.0]:
-			var wall_query := PhysicsRayQueryParameters3D.create(Vector3(side*4,level*4+1,-14.2),Vector3(side*4,level*4+1,-14.9))
+			var wall_query := PhysicsRayQueryParameters3D.create(game.building.stair_point(side,1.8,15,level*4+1),game.building.stair_point(side,2.3,15,level*4+1))
 			stair_walls = stair_walls and not p.get_world_3d().direct_space_state.intersect_ray(wall_query).is_empty()
 		if level>0:
 			p.reset_to(Vector3(14,level*4+0.05,0),0)
 			await settle(p)
 			check(absf(p.position.y-level*4)<0.15,"Removed east stairwell has a solid floor on level %d" % level)
 			for side in [-1.0,1.0]:
-				var guard_query := PhysicsRayQueryParameters3D.create(Vector3(side*2.1,level*4+0.55,-16.65),Vector3(side*2.5,level*4+0.55,-16.65))
+				var guard_query := PhysicsRayQueryParameters3D.create(game.building.stair_point(side,0,13.2,level*4+0.55),game.building.stair_point(side,0,13.8,level*4+0.55))
 				stair_guards = stair_guards and not p.get_world_3d().direct_space_state.intersect_ray(guard_query).is_empty()
 	check(stair_walls,"Both front stair bays have continuous room partitions on all floors")
 	check(stair_guards,"Front stair landing guards physically block accidental falls")

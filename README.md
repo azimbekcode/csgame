@@ -62,16 +62,17 @@ Birinchi raund $800 va pistol bilan boshlanadi. **B** bilan dastlabki 20 soniyad
 Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm olib tashlandi: auditoriya, xonalar va ichki zinapoya endi dumaloq bino ichida.
 
 - Rasmdagi och rangli dumaloq fasad, kulrang pastki qism, baland ravoqli oynalar, ustunlar va karnizlar. Ko‘k gumbaz old hovlida yer sathidan qaraganda ham ko‘rinishi uchun ko‘tarildi.
-- Old markaziy tashqi zina 1-qavatga olib chiqadi; uning tagidagi yangi eshikdan 0-qavatga, ikki yondagi pastki pog‘onalardan hovliga chiqiladi.
-- Old kirishning ichki ikki yonidagi buriladigan zinapoyalar 0–3-qavatlarni bog‘laydi. Eski o‘ng yon zina olib tashlandi, xona devorlaridagi ortiqcha ochilishlar yopildi.
+- Old markaziy tashqi zina 1-qavatga olib chiqadi; uning tagidagi 0-qavat eshigiga hovlidan ikki yon zinasi orqali pastga tushib kiriladi.
+- Atriumda old kirishning ikki yonidagi belgilangan joylarda kichik yog‘och yo‘laklar ochildi; ulardan kiriladigan alohida buriluvchi zinapoyalar 0–3-qavatlarni bog‘laydi. Eski o‘ng yon zina olib tashlandi, xona devorlaridagi ortiqcha ochilishlar yopildi.
 - Orqadagi ikkala zina rasmdagidek oraliq maydonchada burilib, bitta 1-qavat kirishiga birlashadi; uning tagidagi eshikdan 0-qavatga kiriladi.
 - Orqadan kirganda chapdagi lift barcha to‘rt qavatni bog‘laydi. Kabinada **E — keyingi qavat**, **Q — oldingi qavat**; kabina shu qavatda bo‘lsa yaqinlashganda ikki tabaqali eshik ochiladi; boshqa qavatda bo‘lsa **E — chaqirish tugmasi**.
 - Jigarrang yog‘och eshiklar, markaziy yo‘lakli pog‘onali partalar va qora o‘rindiqlar; zinada qadamga mos kamera va askar oyoq harakati. Har qavatda beshta kiriladigan xona, pog‘onali auditoriya, ochiq atrium, qora shishali panjaralar, yog‘och panellar va sariq taktil yo‘lak.
-- Shox va alohida barglardan qurilgan daraxtlar; kamuflyaj, dubulg‘a, himoya jihozlari va yurish animatsiyasi bor askarlar.
+- Old fasadga qaraganda chap tomondagi daraxtlar olib tashlandi. Qolgan daraxtlar shox va alohida barglardan qurilgan; kamuflyaj, dubulg‘a, himoya jihozlari va yurish animatsiyasi bor askarlar.
 - Monitorlar kirishning chapidagi pastki qismda; ichki zina yonida yopiq xona devorlari va panjaralar, tashqarini ko‘rsatadigan derazalar hamda lift oynasida o‘yinchi aksi.
 
 ![Yangi old fasad](docs/screenshots/front.png)
 ![Old hovlidan ko‘rinadigan ko‘k gumbaz](docs/screenshots/front_ground.png)
+![Daraxtlari olib tashlangan chap tomon](docs/screenshots/front_left_clear.png)
 ![Burilish maydonchali orqa zina](docs/screenshots/rear_stairs.png)
 ![Ikki tomonlama orqa zina](docs/screenshots/rear.png)
 ![Atrium va balkonlar](docs/screenshots/atrium.png)
@@ -79,8 +80,8 @@ Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm oli
 ![Chap tomondagi lift](docs/screenshots/lift.png)
 ![Liftning yopiq suriladigan eshiklari](docs/screenshots/lift_closed.png)
 ![Old kirish yonidagi ichki zina](docs/screenshots/inner_stairs.png)
-![Old kirishning ikkala ichki zinasi](docs/screenshots/front_stair_pair.png)
-![Old zinaning tagidagi 0-qavat eshigi](docs/screenshots/front_entry_zero.png)
+![Belgilangan joylardagi ikkala zina yo‘lagi](docs/screenshots/front_stair_pair.png)
+![Pastga tushib kiriladigan 0-qavat eshigi](docs/screenshots/front_entry_zero.png)
 ![Derazadan tashqi ko‘rinish](docs/screenshots/window_view.png)
 ![Lift oynasidagi o‘yinchi aksi](docs/screenshots/lift_mirror.png)
 ![Pog‘onali auditoriya](docs/screenshots/classroom.png)
@@ -101,6 +102,6 @@ bash tools/build_linux.sh
 
 `tools/check.sh` xaritada yurish, xonalar, to‘rt qavatli lift, jang mexanikalari va ikki raundli bot sinovini bajaradi. Windows va Linux export preset’lari barcha o‘yin resurslarini executable ichiga joylaydi. `tools/package_windows.py` va `tools/package_linux.py` ZIP hamda ikkala platforma uchun SHA-256 ro‘yxatini yaratadi. Xaritadagi collision geometriyasi o‘zgarsa, navigatsiya meshini qayta bake qilish kerak; [tools/bake_navigation.gd](tools/bake_navigation.gd) bilan bajarish mumkin.
 
-Yangi yig‘ilma 159 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
+Yangi yig‘ilma 163 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
 
 Godot va uchinchi tomon kutubxonalarining litsenziyalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [GODOT-COPYRIGHT.txt](GODOT-COPYRIGHT.txt). Asl reference videolar va ulardagi odamlar tasvirlari repozitoriy yoki tayyor ZIP’ga qo‘shilmagan.
