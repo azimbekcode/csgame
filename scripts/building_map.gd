@@ -8,6 +8,9 @@ const FLOOR_HEIGHT := 4.0
 const FLOOR_COUNT := 4
 const ROOM_RADIUS := 11.0
 const ROOF_HEIGHT := 16.0
+const DOME_RADIUS := 12.5
+const DOME_BASE := 17.4
+const DOME_RISE := 10.6
 const LIFT_CENTER := Vector3(4.4, 0, 16.2)
 
 var marble: StandardMaterial3D
@@ -109,6 +112,10 @@ func _make_facade() -> void:
 				win_width = 2.9
 				win_height = 2.5
 				sill = 3.7
+			if rear and level == 2:
+				win_width = 2.0
+				win_height = 1.8
+				sill = 4.5
 			if opening:
 				_local_box(a,Vector3(-2.05,base+height/2,20),Vector3(1.1,height,0.45),mat)
 				_local_box(a,Vector3(2.05,base+height/2,20),Vector3(1.1,height,0.45),mat)
@@ -119,7 +126,7 @@ func _make_facade() -> void:
 					_local_box(a,Vector3(side*(win_width+side_width)/2,base+height/2,20),Vector3(side_width+0.06,height,0.45),mat)
 				_local_box(a,Vector3(0,base+sill/2,20),Vector3(win_width,sill,0.45),mat)
 				_local_box(a,Vector3(0,base+(sill+win_height+height)/2,20),Vector3(win_width,height-sill-win_height,0.45),mat)
-				_window(_polar(20.02,a,base+sill+win_height/2),yaw,win_width,win_height,level==2)
+				_window(_polar(20.02,a,base+sill+win_height/2),yaw,win_width,win_height,level==2 and not rear)
 			# Fine horizontal rustication joints catch the light without noisy textures.
 			for row in range(int(height/0.45)):
 				var yy := base+0.2+row*0.45
@@ -288,7 +295,31 @@ func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,
 		var top := rise*(step+1)/steps
 		var z := lerpf(start_z,end_z,(step+0.5)/steps)
 		_box(Vector3(x,base+top-0.06,z),Vector3(width,0.12,absf(end_z-start_z)/steps+0.01),marble,0,false)
+	_stair_slab(x,width,base,start_z,end_z,rise)
 	_ramp(x,width,base,start_z,end_z,rise)
+
+func _stair_railing(a: Vector3,b: Vector3) -> void:
+	_beam(a+Vector3.UP,b+Vector3.UP,0.035,metal)
+	_beam(a+Vector3.UP*0.12,b+Vector3.UP*0.12,0.025,metal)
+	var count := maxi(1,int(ceil(a.distance_to(b)/0.38)))
+	for i in range(count+1):
+		var foot := a.lerp(b,float(i)/count)
+		_beam(foot+Vector3.UP*0.08,foot+Vector3.UP,0.018,dark)
+
+func _stair_slab(x: float,width: float,base: float,start_z: float,end_z: float,rise: float) -> void:
+	var points := PackedVector3Array([
+		Vector3(x-width/2,base-0.06,start_z),Vector3(x+width/2,base-0.06,start_z),
+		Vector3(x+width/2,base+rise-0.06,end_z),Vector3(x-width/2,base+rise-0.06,end_z)])
+	for i in range(4): points.append(points[i]-Vector3.UP*0.20)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_quad(st,points[0],points[3],points[2],points[1])
+	_quad(st,points[4],points[5],points[6],points[7])
+	for i in range(4): _quad(st,points[i],points[(i+1)%4],points[(i+1)%4+4],points[i+4])
+	var instance := MeshInstance3D.new()
+	instance.mesh = st.commit()
+	instance.material_override = paving
+	add_child(instance)
 
 func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: float) -> void:
 	var points := PackedVector3Array()
@@ -323,44 +354,62 @@ func _make_entrances() -> void:
 		_box(Vector3(side*1.55,1.4,20.4),Vector3(0.08,2.8,1.0),bronze)
 	_label("ORQA KIRISH",Vector3(0,3.25,20.3),0,0.005)
 	_box(Vector3(0,3.85,21.2),Vector3(5.5,0.3,3.2),marble)
+	# Mirrored L-shaped stairs: approach toward the wall, turn on a landing,
+	# then rise sideways to the common first-floor entrance (reference photo).
 	for side in [-1.0,1.0]:
+		var x: float = side*9.4
+		_stair_flight(x,-0.9,28.9,22.7,2.3,2.2)
+		_box(Vector3(x,1.26,21.6),Vector3(2.4,0.28,2.2),paving)
+		_box(Vector3(x,0.18,21.6),Vector3(0.38,2.16,0.38),limestone)
+		_stair_railing(Vector3(x-1.1,-0.9,28.9),Vector3(x-1.1,1.4,22.7))
+		_stair_railing(Vector3(x+1.1,-0.9,28.9),Vector3(x+1.1,1.4,22.7))
+		_stair_railing(Vector3(side*10.6,1.4,22.7),Vector3(side*10.6,1.4,20.5))
+		_stair_railing(Vector3(side*10.6,1.4,20.5),Vector3(side*8.2,1.4,20.5))
 		var assembly := Node3D.new()
 		assembly.position = Vector3(side*2.75,0,21.6)
 		assembly.rotation.y = side*PI/2
 		add_child(assembly)
 		var first := get_child_count()
-		_stair_flight(0,-0.9,10,0,4.9,2.2)
+		_stair_flight(0,1.4,5.45,0,2.6,2.2)
 		for edge in [-1.1,1.1]:
-			_beam(Vector3(edge,0.1,10),Vector3(edge,5,0),0.04,metal)
-			for n in range(11):
-				_beam(Vector3(edge,-0.9+n*0.49,10-n),Vector3(edge,0.1+n*0.49,10-n),0.025,metal)
+			_stair_railing(Vector3(edge,1.4,5.45),Vector3(edge,4,0))
 		for node in get_children().slice(first): node.reparent(assembly,false)
+		_box(Vector3(side*2.45,1.45,21.0),Vector3(0.30,4.6,0.36),limestone)
 	for x in [-2.65,2.65]:
 		_beam(Vector3(x,4,20),Vector3(x,5.05,20),0.04,metal)
 		_beam(Vector3(x,5.05,20),Vector3(x,5.05,22.75),0.04,metal)
+	# Pale recessed rectangular portal and cornice above the rear landing.
+	for x in [-2.45,2.45]:
+		_box(Vector3(x,6.0,20.36),Vector3(0.40,4.0,0.46),limestone,0,false)
+		_box(Vector3(x,6.0,20.64),Vector3(0.12,3.75,0.13),cream,0,false)
+		_box(Vector3(x,4.16,20.36),Vector3(0.63,0.32,0.58),cream,0,false)
+	for y in [7.86,8.05,8.24]:
+		_box(Vector3(0,y,20.4),Vector3(5.8+(y-7.86),0.16,0.72),cream,0,false)
+	for x in [-1.74,1.74]:
+		_box(Vector3(x,5.55,20.42),Vector3(0.12,2.8,0.22),cream,0,false)
 	_label("1-QAVAT",Vector3(0,7.3,20.35),0,0.005)
 	for z in range(11,20):
 		for rib in range(5):
 			_box(Vector3(-0.2+rib*0.1,0.025,z),Vector3(0.025,0.018,0.65),_material(Color("c9af62")),0,false)
 
 func _make_dome() -> void:
-	var roof_mat := _material(Color(0.48,0.62,0.71,0.7),0.22)
+	var roof_mat := _material(Color(0.16,0.38,0.64,0.88),0.22)
 	roof_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	roof_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	roof_mat.metallic = 0.5
-	# Small raised skylight drum instead of a dome covering the whole building.
+	# Raised blue skylight silhouette remains visible from the front courtyard.
 	for i in range(48):
 		var a := TAU*i/48
 		var b := TAU*(i+1)/48
-		_box(_polar(7.4,(a+b)/2,16.6),Vector3(0.91,1.0,0.08),glass,-(a+b)/2-PI/2,false)
-		_beam(_polar(7.4,a,16.1),_polar(7.4,a,17.1),0.055,bronze)
+		_box(_polar(DOME_RADIUS,(a+b)/2,(ROOF_HEIGHT+DOME_BASE)/2),Vector3(2*DOME_RADIUS*sin(PI/48),DOME_BASE-ROOF_HEIGHT,0.08),glass,-(a+b)/2-PI/2,false)
+		_beam(_polar(DOME_RADIUS,a,ROOF_HEIGHT),_polar(DOME_RADIUS,a,DOME_BASE),0.055,bronze)
 		for ring in range(8):
 			var t0 := PI/2*ring/8
 			var t1 := PI/2*(ring+1)/8
-			var r0 := 7.4*cos(t0)
-			var r1 := 7.4*cos(t1)
-			var y0 := 17.1+2.4*sin(t0)
-			var y1 := 17.1+2.4*sin(t1)
+			var r0 := DOME_RADIUS*cos(t0)
+			var r1 := DOME_RADIUS*cos(t1)
+			var y0 := DOME_BASE+DOME_RISE*sin(t0)
+			var y1 := DOME_BASE+DOME_RISE*sin(t1)
 			var st := SurfaceTool.new()
 			st.begin(Mesh.PRIMITIVE_TRIANGLES)
 			_quad(st,_polar(r0,a,y0),_polar(r1,a,y1),_polar(r1,b,y1),_polar(r0,b,y0))
@@ -590,14 +639,17 @@ func _setup_navigation() -> void:
 
 func _finish_navigation() -> void:
 	var map_rid := get_world_3d().navigation_map
-	await get_tree().process_frame
+	# Physics catch-up can emit many physics frames in one idle frame after
+	# scene construction. Wait for actual idle/server synchronization as well.
+	for frame in range(3):
+		await get_tree().physics_frame
+		await get_tree().process_frame
 	NavigationServer3D.map_force_update(map_rid)
-	for frame in range(8):
+	while NavigationServer3D.map_get_regions(map_rid).is_empty() or NavigationServer3D.map_get_iteration_id(map_rid)==0:
 		await get_tree().physics_frame
-	while NavigationServer3D.map_get_iteration_id(map_rid) == 0:
-		await get_tree().physics_frame
+		await get_tree().process_frame
+		NavigationServer3D.map_force_update(map_rid)
 	navigation_ready = true
-
 
 
 func _polar(radius: float, angle: float, height: float) -> Vector3:

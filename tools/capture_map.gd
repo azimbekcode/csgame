@@ -14,13 +14,17 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute("res://docs/screenshots")
 	var shots := {
 		"front": [Vector3(0,19,-47),Vector3(0,8,-4)],
-		"rear": [Vector3(29,9,45),Vector3(0,5,15)],
+		"front_ground": [Vector3(0,0.75,-46),Vector3(0,16,0)],
+		"rear": [Vector3(23,7,39),Vector3(2,4,20)],
+		"rear_stairs": [Vector3(16,2.3,34),Vector3(6,3,21.6)],
 		"atrium": [Vector3(3,1.9,5.2),Vector3(-2,4.8,-4)],
 		"gallery": [Vector3(8.2,13.7,0),Vector3(-3,10,0)],
 		"lift": [Vector3(0.5,1.6,13.8),Vector3(4.4,1.4,16.2)],
 		"classroom": [Vector3(-12.8,13.7,0),Vector3(-18.5,13.4,0)],
 		"garden": [Vector3(23,1.6,-23),Vector3(33,4,-15)]}
+	var selected := OS.get_cmdline_user_args()
 	for name in shots:
+		if not selected.is_empty() and not name in selected: continue
 		camera.global_position = shots[name][0]
 		camera.look_at(shots[name][1])
 		for frame in range(5): await process_frame
@@ -28,6 +32,11 @@ func run() -> void:
 		var image := root.get_texture().get_image()
 		image.save_png("res://docs/screenshots/"+name+".png")
 		print("CAPTURE ",name," draws=",Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+	if not selected.is_empty():
+		game.queue_free()
+		await process_frame
+		quit()
+		return
 	var soldier := Node3D.new()
 	soldier.set_script(load("res://scripts/soldier_model.gd"))
 	soldier.weapon = "m4"

@@ -61,14 +61,16 @@ Birinchi raund $800 va pistol bilan boshlanadi. **B** bilan dastlabki 20 soniyad
 
 Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm olib tashlandi: auditoriya, xonalar va ichki zinapoya endi dumaloq bino ichida.
 
-- Rasmdagi och rangli dumaloq fasad, kulrang pastki qism, baland ravoqli oynalar, ustunlar, karnizlar va markaziy shisha gumbaz.
+- Rasmdagi och rangli dumaloq fasad, kulrang pastki qism, baland ravoqli oynalar, ustunlar va karnizlar. Ko‘k gumbaz old hovlida yer sathidan qaraganda ham ko‘rinishi uchun ko‘tarildi.
 - Old markaziy zina 1-qavatga olib chiqadi.
-- Orqadagi ikki yon zina bitta 1-qavat maydonchasiga birlashadi; uning tagidagi eshikdan 0-qavatga kiriladi.
+- Orqadagi ikkala zina rasmdagidek oraliq maydonchada burilib, bitta 1-qavat kirishiga birlashadi; uning tagidagi eshikdan 0-qavatga kiriladi.
 - Orqadan kirganda chapdagi lift barcha to‘rt qavatni bog‘laydi. Kabinada **E — keyingi qavat**, **Q — oldingi qavat**; eshik oldida **E — chaqirish**.
 - Har qavatda beshta kiriladigan xona, pog‘onali auditoriya, ochiq atrium, qora shishali panjaralar, yog‘och panellar va sariq taktil yo‘lak.
 - Shox va alohida barglardan qurilgan daraxtlar; kamuflyaj, dubulg‘a, himoya jihozlari va yurish animatsiyasi bor askarlar.
 
 ![Yangi old fasad](docs/screenshots/front.png)
+![Old hovlidan ko‘rinadigan ko‘k gumbaz](docs/screenshots/front_ground.png)
+![Burilish maydonchali orqa zina](docs/screenshots/rear_stairs.png)
 ![Ikki tomonlama orqa zina](docs/screenshots/rear.png)
 ![Atrium va balkonlar](docs/screenshots/atrium.png)
 ![Askar modeli](docs/screenshots/soldier.png)
@@ -87,6 +89,6 @@ bash tools/build_linux.sh
 
 `tools/check.sh` xaritada yurish, xonalar, to‘rt qavatli lift, jang mexanikalari va ikki raundli bot sinovini bajaradi. Windows va Linux export preset’lari barcha o‘yin resurslarini executable ichiga joylaydi. `tools/package_windows.py` va `tools/package_linux.py` ZIP hamda ikkala platforma uchun SHA-256 ro‘yxatini yaratadi. Xaritadagi collision geometriyasi o‘zgarsa, navigatsiya meshini qayta bake qilish kerak; [tools/bake_navigation.gd](tools/bake_navigation.gd) bilan bajarish mumkin.
 
-Yangi yig‘ilma 100 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
+Yangi yig‘ilma 104 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
 
 Godot va uchinchi tomon kutubxonalarining litsenziyalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [GODOT-COPYRIGHT.txt](GODOT-COPYRIGHT.txt). Asl reference videolar va ulardagi odamlar tasvirlari repozitoriy yoki tayyor ZIP’ga qo‘shilmagan.

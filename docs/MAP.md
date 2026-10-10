@@ -14,8 +14,9 @@ this is a reference-based game reconstruction, not a surveyed digital twin.
 ## Entrances and circulation
 
 - A wide central front stair reaches level 1 through the framed front portal.
-- The rear entrance has two lateral stair flights meeting at a shared level-1
-  landing, as seen in IMG_0045. The door beneath the landing reaches level 0.
+- The rear entrance has mirrored L-shaped stairs: a lower flight toward the
+  building, an intermediate turning landing, and an upper lateral flight to
+  the shared level-1 landing, following the user's close-up reference photo. The door beneath the landing reaches level 0.
 - The rear interior passage follows IMG_0042: pale wood panels, glass doorway,
   tactile paving and small plants. The old long projecting rectangular porch
   is removed.
@@ -40,7 +41,8 @@ magazine pouches, knee protection, boots and walking animation. These remain
 procedural game assets, not photogrammetric humans or scanned vegetation.
 
 The building radius is approximately 20 m, atrium opening radius 6.5 m, floors
-are at 0/4/8/12 m, and the main roof is at 16 m. These are gameplay dimensions.
+are at 0/4/8/12 m, and the main roof is at 16 m. The raised blue dome is widened and elevated
+to remain visible from a ground-level front-courtyard view. These are gameplay dimensions.
 Original videos, private frames and the people visible in them are not shipped.
 
 ## Rebuild and validation

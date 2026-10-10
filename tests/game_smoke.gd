@@ -95,9 +95,11 @@ func run() -> void:
 		await settle(p,3)
 		check(await walk_to(p,entry),"Room doorway is walkable at %.1f, %.1f, %.1f" % [entry.x,entry.y,entry.z])
 	for side in [-1.0,1.0]:
-		p.reset_to(Vector3(side*13.1,-0.85,21.6),0)
+		p.reset_to(Vector3(side*9.4,-0.85,29.4),0)
 		await settle(p)
-		check(await walk_to(p,Vector3(side*2.4,4,21.6)),"Rear side %d stair reaches shared first-floor landing" % int(side))
+		check(await walk_to(p,Vector3(side*9.4,1.4,21.6)),"Rear lower flight reaches the turning landing")
+		check(absf(p.position.y-1.4)<0.15,"Rear turn landing is at intermediate height")
+		check(await walk_to(p,Vector3(side*7.8,1.6,21.6)) and await walk_to(p,Vector3(side*2.4,4,21.6)),"Rear side %d stair reaches shared first-floor landing" % int(side))
 		check(absf(p.position.y-4)<0.15,"Rear upper entrance is on level 1")
 		check(await walk_to(p,Vector3(0,4,21.0)) and await walk_to(p,Vector3(0,4,18)),"Raised rear door connects to interior")
 	p.reset_to(Vector3(0,-0.85,-33.5),0)
