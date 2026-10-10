@@ -50,23 +50,30 @@ Menyuda **CT bilan boshlash**, **T bilan boshlash** yoki **Xaritani erkin ko‘r
 | O‘ng sichqoncha tugmasi | Sniper zoom |
 | 1 / 2 / 3 / 4 | Asosiy qurol / pistol / pichoq / granata turini almashtirish |
 | R / B | Qayta o‘qlash / xarid |
-| E | Bomba o‘rnatish yoki zararsizlantirish |
+| E | Bomba o‘rnatish, zararsizlantirish yoki liftni boshqarish |
+| Q, lift ichida | Oldingi qavatga tushish |
 | Tab / Esc / F11 | Hisob / pauza / to‘liq ekran |
 | F1–F4, erkin ko‘rishda | Atrium / orqa kirish / auditoriya / yuqori balkon |
 
 Birinchi raund $800 va pistol bilan boshlanadi. **B** bilan dastlabki 20 soniyada, boshlanish joyidan 12 metr ichida xarid qilish mumkin. T: A yoki B nuqtada qimirlamasdan **E**’ni 3 soniya tuting. CT: bomba yonida **E**’ni 10 soniya tuting; kit bilan 5 soniya.
 
-## Video asosidagi xarita
+## Video va rasm asosidagi yangi xarita
 
-Ichki qism: yog‘och panelli dumaloq atrium, uchta yuqori balkon, metall va qoramtir shisha panjaralar, shisha gumbaz, qavatlararo zinapoyalar, pog‘onali auditoriya, partalar, minbar, ekran, orqa yo‘lak, sariq taktil yo‘lak va shisha kirish.
+Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm olib tashlandi: auditoriya, xonalar va ichki zinapoya endi dumaloq bino ichida.
 
-Tashqi qism: och rangli dumaloq fasad, uzun yuqori derazalar, ko‘tarilgan old kirish, tashqi zinapoyalar, orqa ayvon va ustunlar, hovli, xizmat binosi, yon binolar, bog‘, daraxtlar, yo‘llar, chiroqlar va perimetr to‘sig‘i. Yurish, zinapoyalar va balkon panjaralari to‘qnashuv bilan ishlaydi.
+- Rasmdagi och rangli dumaloq fasad, kulrang pastki qism, baland ravoqli oynalar, ustunlar, karnizlar va markaziy shisha gumbaz.
+- Old markaziy zina 1-qavatga olib chiqadi.
+- Orqadagi ikki yon zina bitta 1-qavat maydonchasiga birlashadi; uning tagidagi eshikdan 0-qavatga kiriladi.
+- Orqadan kirganda chapdagi lift barcha to‘rt qavatni bog‘laydi. Kabinada **E — keyingi qavat**, **Q — oldingi qavat**; eshik oldida **E — chaqirish**.
+- Har qavatda beshta kiriladigan xona, pog‘onali auditoriya, ochiq atrium, qora shishali panjaralar, yog‘och panellar va sariq taktil yo‘lak.
+- Shox va alohida barglardan qurilgan daraxtlar; kamuflyaj, dubulg‘a, himoya jihozlari va yurish animatsiyasi bor askarlar.
 
-**O‘lchamlar va xonalar yo‘nalishi videodan taxmin qilingan.** Bu o‘lchovli yoki fotogrammetrik nusxa emas. Faqat tashqaridan ko‘rsatilgan yon binolarning ichki xonalari yopiq; ko‘rinmagan xonalar tasvirlanmagan. Modellar va animatsiyalar sodda, dastlabki versiya darajasida. Batafsil manbalar: [xarita izohlari](docs/MAP.md).
+![Yangi old fasad](docs/screenshots/front.png)
+![Ikki tomonlama orqa zina](docs/screenshots/rear.png)
+![Atrium va balkonlar](docs/screenshots/atrium.png)
+![Askar modeli](docs/screenshots/soldier.png)
 
-![Atrium](docs/screenshots/atrium.png)
-
-![Tashqi qism](docs/screenshots/exterior.png)
+O‘lchamlar hamda videoda to‘liq ko‘rinmagan xonalarning joylashuvi taxminiy. Modellar protsedurali o‘yin grafikasidir; fotogrammetrik yoki fotoreal nusxa deb taqdim etilmaydi. Manbalar va tekshiruvlar: [xarita izohlari](docs/MAP.md).
 
 ## Ishlab chiqish va tekshirish
 
@@ -78,10 +85,8 @@ bash tools/build_windows.sh
 bash tools/build_linux.sh
 ```
 
-`tools/check.sh` 48 ta funksional tekshiruv va ikki raundli bot sinovini bajaradi. Windows va Linux export preset’lari barcha o‘yin resurslarini executable ichiga joylaydi. `tools/package_windows.py` va `tools/package_linux.py` ZIP hamda ikkala platforma uchun SHA-256 ro‘yxatini yaratadi. Xaritadagi collision geometriyasi o‘zgarsa, navigatsiya meshini qayta bake qilish kerak; [tools/bake_navigation.gd](tools/bake_navigation.gd) bilan bajarish mumkin.
+`tools/check.sh` xaritada yurish, xonalar, to‘rt qavatli lift, jang mexanikalari va ikki raundli bot sinovini bajaradi. Windows va Linux export preset’lari barcha o‘yin resurslarini executable ichiga joylaydi. `tools/package_windows.py` va `tools/package_linux.py` ZIP hamda ikkala platforma uchun SHA-256 ro‘yxatini yaratadi. Xaritadagi collision geometriyasi o‘zgarsa, navigatsiya meshini qayta bake qilish kerak; [tools/bake_navigation.gd](tools/bake_navigation.gd) bilan bajarish mumkin.
 
-Ushbu buildda manba va Windows EXE ichidagi o‘yin resurslari Linux Godot’da tekshirildi; grafik menyu, xarita va xarid oynasi ham ishga tushirildi. Windows x64 PE formati va ZIP butunligi tekshirildi. **Windows’ning o‘zida EXE’ni ishga tushirish bu bulut muhitida tekshirilmagan.**
-
-Linux standalone fayli **Debian 13 x64** muhitida bevosita ochildi: grafik menyudan CT o‘yini boshlandi, yurish, otish va botlar jang qilishi tekshirildi. Shu fayldagi o‘yin resurslari Godot orqali 48 funksional tekshiruvdan o‘tdi; bot sinovida ikki raund yakunlandi, 10 bot kill va bomba o‘rnatilishi kuzatildi. ZIP butunligi, faylning executable huquqi va SHA-256 tekshirildi. Kali’ning o‘zida sinov bajarilmagan.
+Yangi yig‘ilma 100 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
 
 Godot va uchinchi tomon kutubxonalarining litsenziyalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [GODOT-COPYRIGHT.txt](GODOT-COPYRIGHT.txt). Asl reference videolar va ulardagi odamlar tasvirlari repozitoriy yoki tayyor ZIP’ga qo‘shilmagan.

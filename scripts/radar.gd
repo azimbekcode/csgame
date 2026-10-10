@@ -14,10 +14,9 @@ func _draw() -> void:
 	if not is_instance_valid(game): return
 	draw_rect(Rect2(0,0,206,206),Color(0.015,0.03,0.04,0.8))
 	draw_rect(Rect2(0,0,206,206),Color("547a87"),false,1)
-	draw_circle(Vector2(103,103),17,Color("4a5d63"))
-	draw_rect(Rect2(98,119,10,30),Color("4a5d63"))
-	draw_rect(Rect2(120,97,11,12),Color("4a5d63"))
-	draw_rect(Rect2(64,93,21,20),Color("4a5d63"))
+	draw_circle(Vector2(103,103),28,Color("4a5d63"))
+	draw_circle(Vector2(103,103),9,Color("718084"),false,1)
+	draw_rect(Rect2(99,57,8,18),Color("4a5d63"))
 	for point in game.SITES:
 		draw_circle(_point(point),6,Color(0.9,0.63,0.2,0.6))
 	draw_string(ThemeDB.fallback_font,Vector2(98,107),"A",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color.WHITE)

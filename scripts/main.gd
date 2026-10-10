@@ -542,9 +542,9 @@ func explore_map() -> void:
 func explore_teleport(key: int) -> void:
 	match key:
 		KEY_F1: player.reset_to(Vector3(0,0.05,5),0)
-		KEY_F2: player.reset_to(Vector3(0,0.05,22),PI)
-		KEY_F3: player.reset_to(Vector3(-15.5,12.05,0),PI/2)
-		KEY_F4: player.reset_to(Vector3(10.2,12.05,0),PI/2)
+		KEY_F2: player.reset_to(Vector3(0,-0.85,27),PI)
+		KEY_F3: player.reset_to(Vector3(-12.7,12.05,0),PI/2)
+		KEY_F4: player.reset_to(Vector3(8.5,12.05,0),PI/2)
 
 
 func set_paused(value: bool) -> void:

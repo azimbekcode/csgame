@@ -54,21 +54,10 @@ func _make_model() -> void:
 		remove_child(model)
 		model.queue_free()
 	model = Node3D.new()
+	model.set_script(preload("res://scripts/soldier_model.gd"))
+	model.team = team
+	model.weapon = weapon
 	add_child(model)
-	var uniform := WEAPONS.material(Color("345b7e") if team == 0 else Color("b18d5e"))
-	var dark := WEAPONS.material(Color("242c35"))
-	var skin := WEAPONS.material(Color("bf967c"))
-	WEAPONS.box(model, Vector3(0,1.13,0), Vector3(0.49,0.65,0.27), uniform)
-	WEAPONS.box(model, Vector3(0,1.15,-0.15), Vector3(0.38,0.44,0.06), dark)
-	WEAPONS.box(model, Vector3(0,1.68,0), Vector3(0.27,0.3,0.26), skin)
-	WEAPONS.box(model, Vector3(0,1.83,0), Vector3(0.3,0.1,0.29), dark)
-	for side in [-1.0,1.0]:
-		WEAPONS.box(model, Vector3(side*0.13,0.42,0), Vector3(0.18,0.78,0.2), uniform)
-		WEAPONS.box(model, Vector3(side*0.13,0.08,-0.045), Vector3(0.2,0.16,0.29), dark)
-		WEAPONS.box(model, Vector3(side*0.31,1.15,-0.12), Vector3(0.14,0.46,0.2), uniform)
-	var gun := WEAPONS.make_model(weapon)
-	gun.position = Vector3(0.22,1.22,-0.26)
-	model.add_child(gun)
 
 
 func respawn(point: Vector3) -> void:
@@ -142,6 +131,7 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor(): velocity.y -= 18*delta
 	else: velocity.y = 0
 	move_and_slide()
+	model.animate(delta,Vector2(velocity.x,velocity.z).length(),reload_left>0)
 
 
 func _choose_target() -> void:

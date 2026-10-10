@@ -20,3 +20,8 @@ Erkin ko'rishda F1-F4 xaritadagi joylarga o'tkazadi.
 
 Bu video asosidagi taxminiy xarita va botlar bilan dastlabki versiya.
 Batafsil: https://github.com/azimbekcode/csgame
+
+YANGI XARITA: 0–3-qavatli dumaloq bino, har qavatda kiriladigan xonalar.
+Orqa ikki yon zina 1-qavatga, uning tagidagi eshik 0-qavatga olib kiradi.
+Lift: kabinada E — keyingi qavat, Q — oldingi qavat. Tashqarida E — chaqirish.
+Lift orqa eshikdan chiqishda o‘ngda, kirishda chapda.

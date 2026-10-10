@@ -1,4 +1,4 @@
-ATRIUM STRIKE v0.1 — Windows x64, offline botlar
+ATRIUM STRIKE v0.2 — Windows x64, offline botlar
 
 1. ZIP arxivni to‘liq oching (Extract All).
 2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.
@@ -22,8 +22,13 @@ T: A (atrium) yoki B (orqa hovli) nuqtada qimirlamasdan E ni 3 soniya tuting.
 CT: bomba yonida E ni 10 soniya tuting (kit bilan 5 soniya).
 O‘lgan o‘yinchi keyingi raundda qaytadi.
 
-Xarita 15 ta videodan taxminiy nisbatlarda qurildi.
+Xarita qayta yuborilgan video va fasad rasmi asosida yangilandi.
 Bu original CS 1.6 emas: original modellar, tovushlar va mustaqil kod ishlatilgan.
-Internet multiplayer, Android APK va yashirin xonalar bu versiyada yo‘q.
+Internet multiplayer va Android APK bu versiyada yo‘q.
 
 Kod va yangilanishlar: https://github.com/azimbekcode/csgame
+
+YANGI XARITA: 0–3-qavatli dumaloq bino, har qavatda kiriladigan xonalar.
+Orqa ikki yon zina 1-qavatga, uning tagidagi eshik 0-qavatga olib kiradi.
+Lift: kabinada E — keyingi qavat, Q — oldingi qavat. Tashqarida E — chaqirish.
+Lift orqa eshikdan chiqishda o‘ngda, kirishda chapda.

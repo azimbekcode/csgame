@@ -1,28 +1,65 @@
-# Reference map notes
+# Reference map — circular university building
 
-The playable campus is an estimated reconstruction, not a measured survey.
+This revision follows the user's front-elevation photograph and the reuploaded
+IMG_0038–IMG_0042 and IMG_0044–IMG_0047 videos. There are **four playable levels,
+numbered 0, 1, 2 and 3**. The photographs show three facade bands: the tall upper
+arched windows span the two upper internal levels.
 
-| Video | Observed features represented |
-| --- | --- |
-| IMG_0038 | Upper gallery door, tiered lecture room, desks, central aisle, wooden walls, podium, display, rear windows |
-| IMG_0039 | Circular upper gallery, open central void, three balcony rings above the ground floor, metal and dark glass rails, panel grid, glazed dome |
-| IMG_0040–0041 | Ground-floor atrium, circular floor medallion, displays, flags, internal stairs, gallery ceilings, side passage |
-| IMG_0042 | Rear corridor, yellow tactile paving, glass doors, porch columns, steps, paving, grass, low service building |
-| IMG_0043–0044 | Rear lawn, side paths, broad outdoor staircase and rails, neighboring pale building |
-| IMG_0045–0047 | Rounded pale facade, grey plinth, tall upper windows, external stairs, side access road and perimeter wall |
-| IMG_0048–0050 | Perimeter road, yellow edge line, lamps, rounded facade and raised front entrance |
-| IMG_0051–0052 | Front garden, trees, paths, fences, lamps and neighboring blocks |
+The previous rectangular auditorium and stair extensions have been removed.
+All classrooms, the tiered lecture room and the switchback staircase now fit
+inside the round shell. Every level has five accessible rooms. The room layout
+and dimensions remain estimates where the videos do not show a complete plan;
+this is a reference-based game reconstruction, not a surveyed digital twin.
 
-The atrium uses a 32-sided circle with an 8.5 m central opening and a 12 m outer gallery radius. Storeys are approximately 4 m high; the dome reaches 20 m. These are gameplay estimates. The lecture room is placed off the highest gallery; its exact geographic orientation is unknown. Outdoor block positions and garden extents are approximate.
+## Entrances and circulation
 
-The back entry connects the ground floor to a courtyard. The raised front entry connects to the first gallery. Internal switchback stairs reach all three upper galleries. The lecture room has a usable central aisle. A continuous campus road joins the exterior approaches.
+- A wide central front stair reaches level 1 through the framed front portal.
+- The rear entrance has two lateral stair flights meeting at a shared level-1
+  landing, as seen in IMG_0045. The door beneath the landing reaches level 0.
+- The rear interior passage follows IMG_0042: pale wood panels, glass doorway,
+  tactile paving and small plants. The old long projecting rectangular porch
+  is removed.
+- The lift is on the right when walking out through the rear passage, and on
+  the left when entering. Walk into the cabin, press **E** for the next level
+  or **Q** for the previous level. **E** on a landing calls the lift. Its four
+  stops are 0–3; landing gates close while the cabin is away or moving.
+- The internal stairs provide a continuous route for both the player and bots.
+  Navigation does not depend on the moving lift.
 
-Smooth collision ramps sit beneath the visible stair treads so the player and bots can walk upstairs. Balcony glass panels block walking into the central void. Closed room doors and exterior-only reference buildings are intentionally solid; unfilmed interiors are not fabricated.
+## Visual references
 
-The navigation mesh is saved in maps/campus_navigation.tres. After changing collision geometry, run:
+IMG_0038 informs the stepped lecture-room seating. IMG_0039–0041 inform the open
+central atrium, wood panel joints, polished floor medallion, dark glass balcony
+rails, ceiling lights and glazed skylight. IMG_0045–0047 inform the grey plinth,
+cream facade, pilasters, cornices and arched bronze-framed windows.
+
+Trees use tapered trunks, branching twigs and individually varied leaf meshes;
+foliage is instanced to limit draw calls. Soldiers use original articulated
+human-shaped meshes, procedural camouflage, helmet, goggles, plate carrier,
+magazine pouches, knee protection, boots and walking animation. These remain
+procedural game assets, not photogrammetric humans or scanned vegetation.
+
+The building radius is approximately 20 m, atrium opening radius 6.5 m, floors
+are at 0/4/8/12 m, and the main roof is at 16 m. These are gameplay dimensions.
+Original videos, private frames and the people visible in them are not shipped.
+
+## Rebuild and validation
 
 ```bash
 godot --headless --path . --script res://tools/bake_navigation.gd
+bash tools/check.sh
+bash tools/build_windows.sh
+bash tools/build_linux.sh
 ```
 
-Then run tools/check.sh and rebuild the Windows package. The bake tool bypasses the saved mesh so it always regenerates from current collision shapes. Images in docs/screenshots are rendered game captures, not frames from the user's private videos.
+The test suite walks every room entrance, all internal flights, front and rear
+stairs, and the four-stop lift, then checks combat/economy/bomb mechanics and a
+two-round bot match. Navigation is baked from collision geometry. Screenshot
+capture requires a display; on Linux it can run under Xvfb:
+
+```bash
+godot --path . --audio-driver Dummy --script res://tools/capture_map.gd
+```
+
+Screenshots in `docs/screenshots` are actual game renders. Windows export is
+cross-built on Linux; native Windows execution requires a Windows machine.

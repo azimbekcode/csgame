@@ -28,6 +28,7 @@ var crouched := false
 var bob_time := 0.0
 var footstep_time := 0.0
 var round_spawn := Vector3.ZERO
+var lift_riding := false
 var game: Node3D
 
 
@@ -80,6 +81,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_3: equip("knife")
 			KEY_4: cycle_grenade()
 			KEY_R: start_reload()
+			KEY_E: game.building.lift.interact(self)
+			KEY_Q: game.building.lift.interact(self,true)
 			KEY_F1, KEY_F2, KEY_F3, KEY_F4:
 				if game.exploring: game.explore_teleport(event.physical_keycode)
 	if event is InputEventMouseButton and event.pressed:
@@ -100,6 +103,9 @@ func cycle_grenade() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if lift_riding:
+		velocity = Vector3.ZERO
+		return
 	cooldown = maxf(0, cooldown - delta)
 	flash_left = maxf(0, flash_left - delta)
 	if reload_left > 0:
@@ -221,6 +227,8 @@ func take_damage(amount: int, attacker: Node3D) -> void:
 
 
 func reset_to(spawn_position: Vector3, yaw: float) -> void:
+	if is_instance_valid(game.building.lift): game.building.lift.detach_actor(self)
+	lift_riding = false
 	position = spawn_position
 	rotation.y = yaw
 	velocity = Vector3.ZERO

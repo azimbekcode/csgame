@@ -28,7 +28,8 @@ Godot also includes third party components. Their licenses and attribution
 are available at https://godotengine.org/license/ and in Godot's COPYRIGHT.txt:
 https://github.com/godotengine/godot/blob/4.6.3-stable/COPYRIGHT.txt
 
-Weapon meshes, building geometry, procedural textures and synthesized game
+Weapon and articulated soldier meshes, building geometry, instanced tree
+foliage, procedural textures and synthesized game
 sounds in this repository were created for this project. No Valve or
 Counter-Strike game assets are distributed. User reference videos and their
 extracted frames are not included in the repository or Windows download.
