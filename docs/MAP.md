@@ -6,7 +6,7 @@ numbered 0, 1, 2 and 3**. The photographs show three facade bands: the tall uppe
 arched windows span the two upper internal levels.
 
 The previous rectangular auditorium and stair extensions have been removed.
-All classrooms, the tiered lecture room and the switchback staircase now fit
+All classrooms, the tiered lecture room and the two front return staircases now fit
 inside the round shell. Every level has five accessible rooms. The room layout
 and dimensions remain estimates where the videos do not show a complete plan;
 this is a reference-based game reconstruction, not a surveyed digital twin.
@@ -70,4 +70,4 @@ Rooms now use brown panelled timber doors, four tiers of paired wooden desk bank
 
 Room door jambs are anchored at the circular corridor wall; open leaves pivot from their hinges into the room. Lift landings now have paired sliding metal doors, jambs, a floor indicator and a lit call button. Proximity opens only a present cabin; E on an absent landing calls the cabin to the caller’s level. Doors close before travel, remain closed at absent landings, and stay open while the player occupies the doorway.
 
-The stair opening is clipped to its rectangular footprint, preserving room floors beside it. Full-height partitions enclose its adjacent rooms, and barred handrails/physical edge guards protect the flights and opening. Classroom displays sit low on the entry-left side. Transparent glazing keeps window collision and permits outside views. The cabin mirror uses a shared-world reflection viewport with an off-axis camera and a mirror-only player body; mirror surfaces are excluded from that camera to prevent recursive feedback.
+The former east stairwell is removed and its floors and room partitions restored. Two mirrored return staircases now flank the front entrance corridor and each connects floors 0–3. Their floor openings are clipped to the two stair footprints; continuous wood partitions separate the neighbouring rooms. Barred rails and physical landing guards protect the openings. Collision ramps continue smoothly onto landings, and use thin sloped undersides to preserve headroom. The new ground-floor front entrance beneath the raised exterior stair landing has side steps to the courtyard. Classroom displays sit low on the entry-left side. Transparent glazing keeps window collision and permits outside views. The cabin mirror uses a shared-world reflection viewport with an off-axis camera and a mirror-only player body; mirror surfaces are excluded from that camera to prevent recursive feedback.

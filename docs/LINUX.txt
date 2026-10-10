@@ -25,3 +25,6 @@ YANGI XARITA: 0–3-qavatli dumaloq bino, har qavatda kiriladigan xonalar.
 Orqa ikki yon zina 1-qavatga, uning tagidagi eshik 0-qavatga olib kiradi.
 Lift: kabinada E — keyingi qavat, Q — oldingi qavat. Tashqarida E — chaqirish.
 Lift orqa eshikdan chiqishda o‘ngda, kirishda chapda.
+
+Old kirishning ikki ichki yonidagi zinapoyalar 0–3-qavatlarni bog‘laydi.
+Old tashqi zinaning tagidagi eshikdan 0-qavatga kiriladi; yon pog‘onalar hovliga olib chiqadi.
