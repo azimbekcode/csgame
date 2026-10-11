@@ -120,3 +120,9 @@ Old kirishdagi bitta keng zina ikki ko‘tarilish va tekis oraliq maydonchadan i
 ![Liftning yangi kirish tomoni](docs/screenshots/lift_open_lobby.png)
 
 Narvon old fasaddan qaraganda chap tarafda joylashgan. Tomning butun halqa qismi yurish uchun tayanchga ega; narvondan chiqqach tomda yurish mumkin.
+
+Orqa eshikdan chiqib o‘ng zinadan tushgach, keng tosh zina qo‘shni korpusga olib boradi. Zina metall panjaralar va yuqori yo‘lak bilan tutashgan. Lift ortidagi keraksiz bo‘shliq barcha qavatlarda yopilgan.
+
+![Orqa kirishdan qo‘shni korpusga yo‘l](docs/screenshots/campus_link.png)
+![Keng tosh zinaning ko‘rinishi](docs/screenshots/campus_link_front.png)
+![Lift ortidagi yopilgan bo‘shliq](docs/screenshots/lift_rear_filled.png)

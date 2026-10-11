@@ -87,7 +87,7 @@ func run() -> void:
 		var y := floor_y(level)+1.25
 		var opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,12),Vector3(-2.8,y,12),1)
 		var rear_opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,19),Vector3(-2.8,y,19),1)
-		check(game.get_world_3d().direct_space_state.intersect_ray(opening).is_empty() and game.get_world_3d().direct_space_state.intersect_ray(rear_opening).is_empty(),"Wooden partition beside lift is removed on level %d" % level)
+		check(game.get_world_3d().direct_space_state.intersect_ray(opening).is_empty() and not game.get_world_3d().direct_space_state.intersect_ray(rear_opening).is_empty(),"Lift front passage is clear and its unused rear recess is filled on level %d" % level)
 	for level in range(4):
 		var y := floor_y(level)+1.25
 		var room_wall := PhysicsRayQueryParameters3D.create(Vector3(-4.8,y,13),Vector3(-6,y,13),1)
@@ -181,6 +181,13 @@ func run() -> void:
 		check(await walk_to(p,Vector3(side*7.8,1.6,21.6)) and await walk_to(p,Vector3(side*2.4,4,21.6)),"Rear side %d stair reaches shared first-floor landing" % int(side))
 		check(absf(p.position.y-4)<0.15,"Rear upper entrance is on level 1")
 		check(await walk_to(p,Vector3(0,4,21.0)) and await walk_to(p,Vector3(0,4,18)),"Raised rear door connects to interior")
+	p.reset_to(Vector3(-9.4,-0.85,29.4),0)
+	await settle(p)
+	check(await walk_to(p,Vector3(-15.5,-0.9,30.0)),"Right rear stair exit connects to the neighbouring building approach")
+	check(await walk_to(p,Vector3(-15.5,2.4,46.0)),"Broad stone connecting stair reaches its raised walkway")
+	check(absf(p.position.y-2.4)<0.15,"Connecting stair landing has the correct elevation")
+	check(await walk_to(p,Vector3(-24,2.4,46.0)) and await walk_to(p,Vector3(-24,2.4,50.0)),"Raised path reaches the neighbouring building entrance")
+	check(await walk_to(p,Vector3(-24,2.4,46)) and await walk_to(p,Vector3(-15.5,2.4,46)) and await walk_to(p,Vector3(-15.5,-0.9,30)),"Connecting stair can be descended without jumping")
 	var front_flights := 0
 	for surface in game.building.stair_surfaces:
 		if surface.get_parent()==game.building.get_node("FrontEntranceStairs"): front_flights += 1

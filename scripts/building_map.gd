@@ -52,6 +52,7 @@ func _ready() -> void:
 	_make_lift()
 	_make_roof_ladder()
 	_make_campus()
+	_make_campus_link()
 	_make_lobby_fixtures()
 	_batch_static_visuals()
 	call_deferred("_setup_navigation")
@@ -405,13 +406,14 @@ func _make_stairs() -> void:
 				_stair_railing(Vector3(edge,h+half_rise,17.4),Vector3(edge,floor_height(level+1),13.8))
 		for node in get_children().slice(first): node.reparent(assembly,false)
 
-func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2,landing_extension: float=0.0,start_extension: float=0.0) -> void:
+func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2,landing_extension: float=0.0,start_extension: float=0.0,finish: Material=null) -> void:
+	var tread_finish: Material = marble if finish==null else finish
 	var steps := int(ceil(rise/0.16))
 	for step in range(steps):
 		var top := rise*(step+1)/steps
 		var tread_height := rise/steps+0.24
 		var z := lerpf(start_z,end_z,(step+0.5)/steps)
-		_box(Vector3(x,base+top-tread_height/2,z),Vector3(width,tread_height,absf(end_z-start_z)/steps+0.01),marble,0,false)
+		_box(Vector3(x,base+top-tread_height/2,z),Vector3(width,tread_height,absf(end_z-start_z)/steps+0.01),tread_finish,0,false)
 		var front_z := lerpf(start_z,end_z,float(step)/steps)+signf(end_z-start_z)*0.03
 		_box(Vector3(x,base+top+0.007,front_z),Vector3(width-0.08,0.014,0.055),dark,0,false).name = "TreadNosing"
 	_stair_slab(x,width,base,start_z,end_z,rise)
@@ -646,6 +648,7 @@ func _make_lift() -> void:
 	for level in range(FLOOR_COUNT):
 		var h := floor_height(level)
 		_box(Vector3(-4.4,h-0.14,14.45),Vector3(2.5,0.28,1.1),marble)
+		_fill_lift_rear(level,h,floor_height(level+1)-h)
 	# Doorway in the rear corridor's left wall is carved by replacing its lift-facing piece.
 	for node in get_children():
 		if node is StaticBody3D and absf(node.position.x+2.2)<0.01 and absf(node.position.z-15.25)<0.01:
@@ -653,6 +656,122 @@ func _make_lift() -> void:
 			var h: float = node.position.y-wall_size.y/2
 			node.queue_free()
 			_box(Vector3(-2.2,h+(wall_size.y+2.9)/2,16.2),Vector3(0.16,wall_size.y-2.9,5.2),cream)
+
+func _fill_lift_rear(level: int,h: float,height: float) -> void:
+	# Fill only behind the shaft; trim the back edge to the circular facade.
+	var footprint := PackedVector2Array([Vector2(-5.9,17.78),Vector2(-2.15,17.78)])
+	for x in [-2.15,-3.4,-4.7,-5.9]:
+		footprint.append(Vector2(x,sqrt(19.8*19.8-x*x)))
+	var points := PackedVector3Array()
+	for point in footprint: points.append(Vector3(point.x,h+height,point.y))
+	for point in footprint: points.append(Vector3(point.x,h,point.y))
+	var n := footprint.size()
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in range(1,n-1):
+		_quad(surface,points[0],points[i+1],points[i],points[0])
+		_quad(surface,points[n],points[n+i],points[n+i+1],points[n])
+	for i in range(n):
+		var j := (i+1)%n
+		_quad(surface,points[i],points[j],points[j+n],points[i+n])
+	var body := StaticBody3D.new()
+	body.name = "LiftRearInfill_%d" % level
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = surface.commit()
+	mesh.material_override = wood
+	body.add_child(mesh)
+	var collision := CollisionShape3D.new()
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = points
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+func _link_guard(a: Vector3,b: Vector3) -> void:
+	_stair_railing(a,b)
+	var points := PackedVector3Array()
+	for foot in [a,b]:
+		for x in [-0.045,0.045]:
+			for y in [-0.08,1.08]: points.append(foot+Vector3(x,y,0))
+	var body := StaticBody3D.new()
+	var collision := CollisionShape3D.new()
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = points
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+func _link_foundation() -> void:
+	# A filled stone base, rather than an exposed flight floating over ground.
+	var points := PackedVector3Array([
+		Vector3(-18.2,-0.96,30.5),Vector3(-12.8,-0.96,30.5),
+		Vector3(-12.8,2.34,44.5),Vector3(-18.2,2.34,44.5),
+		Vector3(-18.2,-1.05,30.5),Vector3(-12.8,-1.05,30.5),
+		Vector3(-12.8,-1.05,44.5),Vector3(-18.2,-1.05,44.5)])
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_quad(surface,points[0],points[3],points[2],points[1])
+	_quad(surface,points[4],points[5],points[6],points[7])
+	for i in range(4):
+		var j := (i+1)%4
+		_quad(surface,points[i],points[j],points[j+4],points[i+4])
+	var body := StaticBody3D.new()
+	body.name = "StoneStairFoundation"
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = surface.commit()
+	mesh.material_override = paving
+	body.add_child(mesh)
+	var collision := CollisionShape3D.new()
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = points
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+func _make_campus_link() -> void:
+	# Walking out of the rear entrance faces +Z: right is the -X stair.
+	var link := Node3D.new()
+	link.name = "RearCampusLink"
+	add_child(link)
+	var first := get_child_count()
+	var tiles := _textured_material("campus_tiles",Color("a9aa9e"),0.88)
+	_box(Vector3(-12.7,-0.93,30.0),Vector3(11.0,0.10,2.0),tiles,0,false)
+	_stair_flight(-15.5,-0.9,30.5,44.5,3.3,5.4,0.8,0.0,tiles)
+	_link_foundation()
+	_link_guard(Vector3(-18.25,-0.9,30.5),Vector3(-18.25,2.4,44.5))
+	_link_guard(Vector3(-12.75,-0.9,30.5),Vector3(-12.75,2.4,44.5))
+	_box(Vector3(-15.5,2.24,44.9),Vector3(5.8,0.32,0.8),tiles,0,false)
+	_box(Vector3(-20,0.6,46.75),Vector3(14.8,3.0,2.9),limestone)
+	_box(Vector3(-20,2.25,46.75),Vector3(14.8,0.30,2.9),tiles)
+	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-18.25,2.4,45.3))
+	_stair_railing(Vector3(-12.7,2.4,44.5),Vector3(-12.7,2.4,48.3))
+	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-27.3,2.4,48.3))
+	# The raised path reaches the neighbouring cream campus block's vestibule.
+	_box(Vector3(-24,0.6,52.5),Vector3(13,3.0,8.6),limestone)
+	_box(Vector3(-24,2.25,52.5),Vector3(13,0.30,8.6),tiles)
+	_box(Vector3(-24,13.65,52.5),Vector3(13.4,0.30,8.6),cream)
+	for x in [-30.4,-17.6]:
+		_box(Vector3(x,8.0,52.5),Vector3(0.24,11.2,8.2),limestone)
+	_box(Vector3(-24,8.0,56.55),Vector3(13,11.2,0.24),limestone)
+	for x in [-27.9,-20.1]:
+		_box(Vector3(x,8,48.45),Vector3(5.3,11.2,0.25),limestone)
+	_box(Vector3(-24,9.3,48.45),Vector3(2.5,8.6,0.25),limestone)
+	for level in range(3):
+		var base := 2.4+level*3.7
+		for x in [-29.0,-26.5,-24.0,-21.5,-19.0]:
+			if level==0 and x==-24.0: continue
+			_box(Vector3(x,base+2.0,48.28),Vector3(1.4,2.0,0.05),glass,0,false)
+			for edge in [-0.74,0.74]:
+				_box(Vector3(x+edge,base+2,48.20),Vector3(0.07,2.2,0.08),door_wood,0,false)
+			for y in [-1.05,0.0,1.05]:
+				_box(Vector3(x,base+2+y,48.20),Vector3(1.55,0.06,0.08),door_wood,0,false)
+		_box(Vector3(-24,base+3.55,48.25),Vector3(13.3,0.18,0.35),cream,0,false)
+	for x in [-30.5,-28.0,-25.2,-22.8,-20.0,-17.5]:
+		_box(Vector3(x,8,48.13),Vector3(0.18,11.1,0.24),cream,0,false)
+	for x in [-25.25,-22.75]:
+		_box(Vector3(x,3.7,48.26),Vector3(0.12,2.6,0.35),door_wood)
+	_box(Vector3(-24,5.1,48.05),Vector3(3.0,0.16,1.2),bronze,0,false)
+	for node in get_children().slice(first): node.reparent(link,false)
 
 func _make_roof_ladder() -> void:
 	var ladder := Node3D.new()
@@ -807,6 +926,12 @@ func _textured_material(kind: String, tint: Color, roughness: float) -> Standard
 				shade += grain*0.4 + sin(x*0.45+grain*6)*0.16
 			elif kind in ["stone", "grass"]:
 				shade += grain*0.09
+			elif kind == "campus_tiles":
+				var row := y/16
+				var shifted := x+(16 if row%2==0 else 0)
+				var tile := shifted/32
+				shade = 0.55+fmod(absf(sin(float(tile*13+row*31))*43758.5453),1.0)*0.65+grain*0.07
+				if shifted%32<1 or y%16<1: shade = 0.48
 			elif kind == "marble":
 				shade += grain * 0.1
 				shade -= pow(abs(sin(float(x + y) * 0.025 + grain * 2.0)), 18.0) * 0.1
@@ -822,6 +947,7 @@ func _textured_material(kind: String, tint: Color, roughness: float) -> Standard
 	result.roughness = roughness
 	result.albedo_texture = ImageTexture.create_from_image(image)
 	result.uv1_scale = Vector3(1.2, 1.2, 1.2) if kind != "wood" else Vector3(2.0, 0.6, 2.0)
+	if kind == "campus_tiles": result.uv1_scale = Vector3(0.35,0.35,0.35)
 	result.uv1_triplanar = true
 	result.uv1_world_triplanar = true
 	result.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS

@@ -1,4 +1,4 @@
-ATRIUM STRIKE v0.2.12 — Windows x64, offline botlar
+ATRIUM STRIKE v0.2.13 — Windows x64, offline botlar
 
 1. ZIP arxivni to‘liq oching (Extract All).
 2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.
@@ -48,3 +48,5 @@ Chap fasaddagi narvon bilan tomga chiqish mumkin: W/S — chiqish/tushish, E —
 
 Lift yonidagi xona devori barcha qavatlarda yopilgan.
 Narvon old fasaddan qaraganda chap tomonda; tomning poli mustahkam, unda yurish mumkin.
+
+Orqa eshikdan chiqib o‘ng zinadan tushgach, keng tosh zina qo‘shni korpusga olib boradi. Zina metall panjaralar va yuqori yo‘lak bilan tutashgan. Lift ortidagi keraksiz bo‘shliq barcha qavatlarda yopilgan.

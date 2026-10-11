@@ -15,6 +15,9 @@ func run() -> void:
 	var shots := {
 		"front": [Vector3(0,19,-47),Vector3(0,8,-4)],
 		"front_ground": [Vector3(0,0.75,-46),Vector3(0,16,0)],
+		"campus_link": [Vector3(-9,2,29.5),Vector3(-18,3,43)],
+		"campus_link_front": [Vector3(-15.5,0.75,28),Vector3(-15.5,3,44)],
+		"lift_rear_filled": [Vector3(0.5,0,19.1),Vector3(-4.4,-0.2,18.4)],
 		"rear": [Vector3(23,7,39),Vector3(2,4,20)],
 		"rear_stairs": [Vector3(16,2.3,34),Vector3(6,3,21.6)],
 		"atrium": [Vector3(3,1.9,5.2),Vector3(-2,4.8,-4)],
