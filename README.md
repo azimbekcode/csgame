@@ -141,3 +141,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 
 ![Rom ichiga kiradigan lift eshiklari](docs/screenshots/lift_retracted.png)
 ![Bino atrofidagi tosh yo‘lak](docs/screenshots/stone_walkway.png)
+
+0.2.17: Narvon tarafidagi katta maysazor o‘rniga bino yonida ingichka, mayda o‘tli maysa tasmasi qoldirildi. Uning yonidagi tor asfalt yo‘l old hovli tomon asta ko‘tariladi; tashqi cheti baland tosh devor bilan chegaralangan.
+
+![Narvon tarafidagi tor qiya yo‘l](docs/screenshots/left_lane.png)
+![Maysa va chegara devori](docs/screenshots/left_lane_overview.png)
