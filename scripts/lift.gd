@@ -163,14 +163,21 @@ func _update_gates() -> void:
 	cabin_gate.collision_layer = 0 if not moving and cabin_open>=0.98 else 1
 	for index in range(2):
 		var side := -1.0 if index==0 else 1.0
-		cabin_panels[index].position.z = side*(0.6+cabin_open*1.22)
+		_retract_leaf(cabin_panels[index],side,cabin_open)
 	for level in range(4):
 		gates[level].collision_layer = 0 if not moving and level==current_floor and door_open[level]>=0.98 else 1
 		for index in range(2):
 			var side := -1.0 if index==0 else 1.0
-			door_panels[level][index].position.z = side*(0.6+door_open[level]*1.22)
+			_retract_leaf(door_panels[level][index],side,door_open[level])
 		displays[level].text = "%d %s" % [current_floor,("▲" if target_floor>current_floor else "▼") if moving else ""]
 		call_lamps[level].material_override = button_lit if level==waiting_floor else button_idle
+
+func _retract_leaf(panel: Node3D,side: float,amount: float) -> void:
+	# Only the section inside the doorway remains visible as the leaf enters its pocket.
+	var travel := minf(1.19,amount*1.22)
+	panel.position.z = side*(0.6+travel/2)
+	panel.scale.z = maxf(0.0001,(1.19-travel)/1.19)
+	panel.visible = travel<1.189
 
 func contains_actor(actor: Node3D) -> bool:
 	var p := to_local(actor.global_position)-cabin.position

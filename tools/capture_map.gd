@@ -18,6 +18,8 @@ func run() -> void:
 		"front": [Vector3(0,19,-47),Vector3(0,8,-4)],
 		"front_ground": [Vector3(0,0.75,-46),Vector3(0,16,0)],
 		"campus_link_garden": [Vector3(-20,1.0,28),Vector3(-24,3.2,43)],
+		"stone_walkway": [Vector3(27,1.4,23),Vector3(18,-0.5,11)],
+		"lift_retracted": [Vector3(-2.2,-0.15,12),Vector3(-4.4,-0.45,16.2)],
 		"lift_button_right": [Vector3(-2.2,5.65,12),Vector3(-4.4,5.35,16.2)],
 		"campus_link": [Vector3(-9,2,29.5),Vector3(-18,3,43)],
 		"campus_link_front": [Vector3(-15.5,0.75,28),Vector3(-15.5,3,44)],
@@ -49,7 +51,10 @@ func run() -> void:
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:
 		if not selected.is_empty() and not name in selected: continue
-		if name=="lift_between":
+		if name=="lift_retracted":
+			game.player.global_position = game.building.lift.to_global(Vector3(-2.4,-1.75,0))
+			for frame in range(50): await physics_frame
+		elif name=="lift_between":
 			var lift = game.building.lift
 			lift.set_physics_process(false)
 			lift.cabin.position.y = 5.75

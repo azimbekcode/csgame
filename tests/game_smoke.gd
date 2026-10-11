@@ -185,11 +185,12 @@ func run() -> void:
 	await settle(p)
 	var link := game.building.get_node("RearCampusLink") as Node3D
 	check(absf(link.rotation.y+PI/2)<0.001,"Neighbouring stair and building turn right together")
-	check(await walk_to(p,link.to_global(Vector3(-15.5,-0.9,30.0))),"Right rear stair exit connects to the neighbouring building approach")
-	check(await walk_to(p,link.to_global(Vector3(-15.5,2.4,46.0))),"Broad stone connecting stair reaches its raised walkway")
+	check(await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30.0))),"Right rear stair exit connects to the neighbouring building approach")
+	check(await walk_to(p,link.to_global(Vector3(-14.0,2.4,46.0))),"Broad stone connecting stair reaches its raised walkway")
 	check(absf(p.position.y-2.4)<0.15,"Connecting stair landing has the correct elevation")
 	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46.0))) and await walk_to(p,link.to_global(Vector3(-24,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
-	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46))) and await walk_to(p,link.to_global(Vector3(-15.5,2.4,46))) and await walk_to(p,link.to_global(Vector3(-15.5,-0.9,30))),"Connecting stair can be descended without jumping")
+	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,46))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
+	check(is_equal_approx(link.get_node("ConnectingStoneStair").position.x,1.5),"Connecting stair shifts left while its neighbouring building stays in place")
 	var units := 0
 	for node in game.building.get_children():
 		if str(node.name).begins_with("GalleryAirConditioner_"): units += 1
@@ -251,6 +252,8 @@ func run() -> void:
 	check(lift.gates[1].collision_layer==1 and lift.door_open[1]==0,"An absent cabin leaves the other landing closed")
 	check(lift.find_child("CallButton_0",true,false)!=null,"Landing has a visible physical call button")
 	check(lift.cabin_panels.size()==2 and lift.cabin_gate.collision_layer==0,"Cabin has paired sliding doors that open at a landing")
+	for panels in [lift.cabin_panels,lift.door_panels[0]]:
+		check(not panels[0].visible and not panels[1].visible,"Open lift leaves retract completely into door pockets")
 	for height in [2.0,7.2,11.2]:
 		var from := lift.to_global(Vector3(0,height,0))
 		var to := lift.to_global(Vector3(-2,height,0))

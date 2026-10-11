@@ -136,3 +136,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 
 ![Zina yonidagi maysazor](docs/screenshots/campus_link_garden.png)
 ![Liftning o‘ng tomonidagi chaqirish tugmasi](docs/screenshots/lift_button_right.png)
+
+0.2.16: Lift eshik panellari ochilganda rom ichiga yashirinadi. Qo‘shni binoga olib boradigan zina 1,5 metr chapga surildi va uning chap tarafidagi daraxtlar olib tashlandi. Dumaloq bino atrofidagi yo‘lak zinaning o‘zi bilan bir xil rang-barang tosh qoplamadan foydalanadi.
+
+![Rom ichiga kiradigan lift eshiklari](docs/screenshots/lift_retracted.png)
+![Bino atrofidagi tosh yo‘lak](docs/screenshots/stone_walkway.png)

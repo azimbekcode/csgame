@@ -24,6 +24,7 @@ var cream: StandardMaterial3D
 var dark: StandardMaterial3D
 var metal: StandardMaterial3D
 var glass: StandardMaterial3D
+var campus_stone: StandardMaterial3D
 var paving: StandardMaterial3D
 var glow: StandardMaterial3D
 var limestone: StandardMaterial3D
@@ -40,6 +41,7 @@ var material_cache: Dictionary = {}
 
 func _ready() -> void:
 	_make_materials()
+	campus_stone = _textured_material("campus_tiles",Color("a9aa9e"),0.88)
 	limestone = _textured_material("stone", Color("e2d8bd"), 0.87)
 	bronze = _material(Color("55402c"), 0.42)
 	_make_environment()
@@ -773,17 +775,23 @@ func _make_campus_link() -> void:
 	link.name = "RearCampusLink"
 	add_child(link)
 	var first := get_child_count()
-	var tiles := _textured_material("campus_tiles",Color("a9aa9e"),0.88)
+	var tiles := campus_stone
+	var stair := Node3D.new()
+	stair.name = "ConnectingStoneStair"
+	add_child(stair)
+	var stair_first := get_child_count()
 	_box(Vector3(-12.7,-0.93,30.0),Vector3(11.0,0.10,2.0),tiles,0,false)
 	_stair_flight(-15.5,-0.9,30.5,44.5,3.3,5.4,0.8,0.0,tiles)
 	_link_foundation()
 	_link_guard(Vector3(-18.25,-0.9,30.5),Vector3(-18.25,2.4,44.5))
 	_link_guard(Vector3(-12.75,-0.9,30.5),Vector3(-12.75,2.4,44.5))
 	_box(Vector3(-15.5,2.24,44.9),Vector3(5.8,0.32,0.8),tiles,0,false)
-	_box(Vector3(-20,0.6,46.75),Vector3(14.8,3.0,2.9),limestone)
-	_box(Vector3(-20,2.25,46.75),Vector3(14.8,0.30,2.9),tiles)
-	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-18.25,2.4,45.3))
-	_stair_railing(Vector3(-12.7,2.4,44.5),Vector3(-12.7,2.4,48.3))
+	for node in get_children().slice(stair_first): node.reparent(stair,false)
+	stair.position.x = 1.5
+	_box(Vector3(-19.25,0.6,46.75),Vector3(16.3,3.0,2.9),limestone)
+	_box(Vector3(-19.25,2.25,46.75),Vector3(16.3,0.30,2.9),tiles)
+	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-16.75,2.4,45.3))
+	_stair_railing(Vector3(-11.2,2.4,44.5),Vector3(-11.2,2.4,48.3))
 	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-27.3,2.4,48.3))
 	# Three taller storeys share the round building's main roof elevation.
 	var base_height := 2.4
@@ -833,7 +841,7 @@ func _make_link_garden() -> void:
 	_box(Vector3(-23.25,-0.86,37.7),Vector3(9.4,0.16,13.8),lawn).name = "LawnBed"
 	_box(Vector3(-23.25,-0.81,30.55),Vector3(10.0,0.16,0.5),paving)
 	_box(Vector3(-28.2,-0.81,37.7),Vector3(0.50,0.16,14.8),paving)
-	_box(Vector3(-18.45,-0.81,37.7),Vector3(0.25,0.16,14.0),paving)
+	_box(Vector3(-17.65,-0.81,37.7),Vector3(1.80,0.16,14.0),campus_stone)
 	_box(Vector3(-23.25,0.61,45.0),Vector3(9.5,2.82,0.28),paving).name = "GardenRetainingWall"
 	_tree(Vector3(-23.5,-0.77,38.4),1515)
 	for point in [Vector3(-27,-0.77,43.5),Vector3(-20,-0.77,43.7),Vector3(-27,-0.77,32.5)]:
@@ -873,11 +881,11 @@ func _make_campus() -> void:
 	for i in range(SEGMENTS):
 		_wedge(20.0,90.0,TAU*i/SEGMENTS,TAU*(i+1)/SEGMENTS,-0.9,0.36,asphalt,true)
 	for i in range(SEGMENTS):
-		_wedge(20.5,23.0,TAU*i/SEGMENTS,TAU*(i+1)/SEGMENTS,-0.86,0.09,paving,true)
+		_wedge(20.5,23.0,TAU*i/SEGMENTS,TAU*(i+1)/SEGMENTS,-0.86,0.09,campus_stone,true)
 	for side in [-1.0,1.0]:
 		_box(Vector3(side*36,-0.88,0),Vector3(18,0.08,90),grass)
 		_box(Vector3(side*13,-0.88,-40),Vector3(13,0.08,20),grass)
-		for z in ([-46.0,-31.0,-14.0,3.0,20.0,38.0,52.0] if side<0 else []):
+		for z in ([-46.0,-31.0,-14.0,3.0,20.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in [-37.0,-12.0,13.0,38.0]:
 			_beam(Vector3(side*25,-0.9,z),Vector3(side*25,4.7,z),0.065,dark)
@@ -1083,6 +1091,11 @@ func _finish_navigation() -> void:
 		await get_tree().process_frame
 	NavigationServer3D.map_force_update(map_rid)
 	while NavigationServer3D.map_get_regions(map_rid).is_empty() or NavigationServer3D.map_get_iteration_id(map_rid)==0 or NavigationServer3D.region_get_iteration_id(navigation_region.get_rid())==0:
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		NavigationServer3D.map_force_update(map_rid)
+	# A nonzero server iteration can precede the first usable query after mesh loading.
+	while not NavigationServer3D.map_get_closest_point_owner(map_rid,Vector3(0,GROUND_FLOOR,0)).is_valid():
 		await get_tree().physics_frame
 		await get_tree().process_frame
 		NavigationServer3D.map_force_update(map_rid)
