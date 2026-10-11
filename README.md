@@ -126,3 +126,8 @@ Orqa eshikdan chiqib o‘ng zinadan tushgach, keng tosh zina qo‘shni korpusga 
 ![Orqa kirishdan qo‘shni korpusga yo‘l](docs/screenshots/campus_link.png)
 ![Keng tosh zinaning ko‘rinishi](docs/screenshots/campus_link_front.png)
 ![Lift ortidagi yopilgan bo‘shliq](docs/screenshots/lift_rear_filled.png)
+
+Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har qavati shiftida sakkiztadan kasseta konditsioneri bor. Ko‘k gumbaz markazidagi 3 metrli dumaloq ochiq joydan askar atriumga tushishi mumkin; uning atrofidagi shisha qismi jismoniy to‘siq bilan yopilgan.
+
+![Atrium shiftlari va konditsionerlar](docs/screenshots/atrium_ceiling.png)
+![Gumbazdagi dumaloq kirish](docs/screenshots/dome_oculus.png)

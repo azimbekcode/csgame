@@ -48,6 +48,7 @@ func _ready() -> void:
 	_make_rooms()
 	_make_stairs()
 	_make_entrances()
+	_make_gallery_air_conditioners()
 	_make_dome()
 	_make_lift()
 	_make_roof_ladder()
@@ -610,11 +611,35 @@ func _make_entrances() -> void:
 		for rib in range(5):
 			_box(Vector3(-0.2+rib*0.1,GROUND_FLOOR+0.025,z),Vector3(0.025,0.018,0.65),_material(Color("c9af62")),0,false).name = "GroundGuidance_%d_%d" % [z,rib]
 
+func _make_gallery_air_conditioners() -> void:
+	# Cassette units sit flush under each gallery ceiling, facing the floor below.
+	for level in range(FLOOR_COUNT):
+		for index in range(8):
+			var unit := Node3D.new()
+			unit.name = "GalleryAirConditioner_%d_%d" % [level,index]
+			add_child(unit)
+			var first := get_child_count()
+			var center := _polar(8.7,TAU*(index+0.25)/8.0,floor_height(level+1)-0.35)
+			_box(center,Vector3(1.15,0.12,1.15),cream,0,false)
+			_box(center+Vector3(0,-0.065,0),Vector3(0.65,0.018,0.65),dark,0,false)
+			for strip in range(9):
+				_box(center+Vector3(0,-0.079,-0.29+strip*0.0725),Vector3(0.63,0.012,0.018),metal,0,false)
+			for side in [-1.0,1.0]:
+				_box(center+Vector3(side*0.46,-0.065,0),Vector3(0.09,0.015,0.83),dark,0,false)
+				_box(center+Vector3(0,-0.065,side*0.46),Vector3(0.83,0.015,0.09),dark,0,false)
+			for node in get_children().slice(first): node.reparent(unit,false)
+
 func _make_dome() -> void:
 	var roof_mat := _material(Color(0.16,0.38,0.64,0.88),0.22)
 	roof_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	roof_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	roof_mat.metallic = 0.5
+	var opening_radius := 1.5
+	var max_angle := acos(opening_radius/DOME_RADIUS)
+	var opening_height := DOME_BASE+DOME_RISE*sin(max_angle)
+	var oculus := Node3D.new()
+	oculus.name = "DomeOculus"
+	add_child(oculus)
 	# Raised blue skylight silhouette remains visible from the front courtyard.
 	for i in range(48):
 		var a := TAU*i/48
@@ -622,8 +647,8 @@ func _make_dome() -> void:
 		_box(_polar(DOME_RADIUS,(a+b)/2,(ROOF_HEIGHT+DOME_BASE)/2),Vector3(2*DOME_RADIUS*sin(PI/48),DOME_BASE-ROOF_HEIGHT,0.08),glass,-(a+b)/2-PI/2,true)
 		_beam(_polar(DOME_RADIUS,a,ROOF_HEIGHT),_polar(DOME_RADIUS,a,DOME_BASE),0.055,bronze)
 		for ring in range(8):
-			var t0 := PI/2*ring/8
-			var t1 := PI/2*(ring+1)/8
+			var t0 := max_angle*ring/8
+			var t1 := max_angle*(ring+1)/8
 			var r0 := DOME_RADIUS*cos(t0)
 			var r1 := DOME_RADIUS*cos(t1)
 			var y0 := DOME_BASE+DOME_RISE*sin(t0)
@@ -635,8 +660,22 @@ func _make_dome() -> void:
 			mesh.mesh = st.commit()
 			mesh.material_override = roof_mat
 			add_child(mesh)
+			var body := StaticBody3D.new()
+			body.name = "DomeGlassPanel_%d_%d" % [i,ring]
+			var shape := ConvexPolygonShape3D.new()
+			var points := PackedVector3Array([_polar(r0,a,y0),_polar(r1,a,y1),_polar(r1,b,y1),_polar(r0,b,y0)])
+			for point in points.duplicate(): points.append(point-Vector3(0,0.06,0))
+			shape.points = points
+			var collision := CollisionShape3D.new()
+			collision.shape = shape
+			body.add_child(collision)
+			add_child(body)
 			if i%3==0: _beam(_polar(r0,a,y0+0.02),_polar(r1,a,y1+0.02),0.025,metal)
 			if ring in [1,3,5]: _beam(_polar(r0,a,y0+0.02),_polar(r0,b,y0+0.02),0.02,metal)
+
+		var first := get_child_count()
+		_wedge(opening_radius,opening_radius+0.16,a,b,opening_height+0.04,0.12,metal,true)
+		for node in get_children().slice(first): node.reparent(oculus,false)
 
 func _make_lift() -> void:
 	lift = Node3D.new()
@@ -772,6 +811,11 @@ func _make_campus_link() -> void:
 		_box(Vector3(x,3.7,48.26),Vector3(0.12,2.6,0.35),door_wood)
 	_box(Vector3(-24,5.1,48.05),Vector3(3.0,0.16,1.2),bronze,0,false)
 	for node in get_children().slice(first): node.reparent(link,false)
+
+	# Turn the entire assembly clockwise from its approach, keeping the stair foot fixed.
+	var pivot := Vector3(-15.5,0,30.5)
+	link.rotation.y = -PI/2
+	link.position = pivot-link.basis*pivot
 
 func _make_roof_ladder() -> void:
 	var ladder := Node3D.new()

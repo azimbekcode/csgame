@@ -183,11 +183,26 @@ func run() -> void:
 		check(await walk_to(p,Vector3(0,4,21.0)) and await walk_to(p,Vector3(0,4,18)),"Raised rear door connects to interior")
 	p.reset_to(Vector3(-9.4,-0.85,29.4),0)
 	await settle(p)
-	check(await walk_to(p,Vector3(-15.5,-0.9,30.0)),"Right rear stair exit connects to the neighbouring building approach")
-	check(await walk_to(p,Vector3(-15.5,2.4,46.0)),"Broad stone connecting stair reaches its raised walkway")
+	var link := game.building.get_node("RearCampusLink") as Node3D
+	check(absf(link.rotation.y+PI/2)<0.001,"Neighbouring stair and building turn right together")
+	check(await walk_to(p,link.to_global(Vector3(-15.5,-0.9,30.0))),"Right rear stair exit connects to the neighbouring building approach")
+	check(await walk_to(p,link.to_global(Vector3(-15.5,2.4,46.0))),"Broad stone connecting stair reaches its raised walkway")
 	check(absf(p.position.y-2.4)<0.15,"Connecting stair landing has the correct elevation")
-	check(await walk_to(p,Vector3(-24,2.4,46.0)) and await walk_to(p,Vector3(-24,2.4,50.0)),"Raised path reaches the neighbouring building entrance")
-	check(await walk_to(p,Vector3(-24,2.4,46)) and await walk_to(p,Vector3(-15.5,2.4,46)) and await walk_to(p,Vector3(-15.5,-0.9,30)),"Connecting stair can be descended without jumping")
+	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46.0))) and await walk_to(p,link.to_global(Vector3(-24,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
+	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46))) and await walk_to(p,link.to_global(Vector3(-15.5,2.4,46))) and await walk_to(p,link.to_global(Vector3(-15.5,-0.9,30))),"Connecting stair can be descended without jumping")
+	var units := 0
+	for node in game.building.get_children():
+		if str(node.name).begins_with("GalleryAirConditioner_"): units += 1
+	check(units==32,"Every gallery ceiling has eight cassette air conditioners")
+	var space := game.get_world_3d().direct_space_state
+	check(space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,32,0),Vector3(0,17,0),1)).is_empty(),"Dome oculus leaves a clear circular entry from above")
+	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(3,32,0),Vector3(3,20,0),1)).is_empty(),"Glass around the oculus remains solid")
+	p.reset_to(Vector3(0,30,0),0)
+	for frame in range(180):
+		await physics_frame
+		p.velocity = Vector3(0,p.velocity.y-18.0/60.0,0)
+		p.move_and_slide()
+	check(p.is_on_floor() and absf(p.position.y+1.8)<0.15,"Soldier drops through the dome opening to the atrium ground floor")
 	var front_flights := 0
 	for surface in game.building.stair_surfaces:
 		if surface.get_parent()==game.building.get_node("FrontEntranceStairs"): front_flights += 1

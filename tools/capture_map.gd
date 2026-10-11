@@ -13,6 +13,8 @@ func run() -> void:
 	camera.fov = 65
 	DirAccess.make_dir_recursive_absolute("res://docs/screenshots")
 	var shots := {
+		"atrium_ceiling": [Vector3(0,0.5,0),Vector3(1,20,0)],
+		"dome_oculus": [Vector3(5,33,-7),Vector3(0,27.5,0)],
 		"front": [Vector3(0,19,-47),Vector3(0,8,-4)],
 		"front_ground": [Vector3(0,0.75,-46),Vector3(0,16,0)],
 		"campus_link": [Vector3(-9,2,29.5),Vector3(-18,3,43)],
@@ -62,6 +64,8 @@ func run() -> void:
 			game.player.global_position = Vector3(0,0.05,5)
 			if name=="lift_closed":
 				for frame in range(230): await physics_frame
+		if name in ["campus_link","campus_link_front"]:
+			shots[name] = [game.building.get_node("RearCampusLink").to_global(shots[name][0]),game.building.get_node("RearCampusLink").to_global(shots[name][1])]
 		camera.global_position = shots[name][0]
 		camera.look_at(shots[name][1])
 		for frame in range(5): await process_frame
