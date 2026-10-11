@@ -31,6 +31,8 @@ var stair_view_offset := 0.0
 var footstep_time := 0.0
 var round_spawn := Vector3.ZERO
 var lift_riding := false
+var ladder_climbing := false
+var ladder_cooldown := 0.0
 var game: Node3D
 var reflection_body: Node3D
 
@@ -95,7 +97,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_3: equip("knife")
 			KEY_4: cycle_grenade()
 			KEY_R: start_reload()
-			KEY_E: game.building.lift.interact(self)
+			KEY_E:
+				if game.building.near_roof_ladder(global_position):
+					ladder_climbing = not ladder_climbing
+					velocity = Vector3.ZERO
+				else: game.building.lift.interact(self)
 			KEY_Q: game.building.lift.interact(self,true)
 			KEY_F1, KEY_F2, KEY_F3, KEY_F4:
 				if game.exploring: game.explore_teleport(event.physical_keycode)
@@ -117,6 +123,34 @@ func cycle_grenade() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	ladder_cooldown = maxf(0,ladder_cooldown-delta)
+	if not game.input_locked() and health>0 and not lift_riding:
+		if not ladder_climbing and ladder_cooldown<=0 and game.building.near_roof_ladder(global_position) and global_position.y<15.9 and Input.is_action_pressed("forward"):
+			var toward := -global_transform.basis.z
+			if toward.x>0.3: ladder_climbing = true
+		if ladder_climbing:
+			if Input.is_action_just_pressed("jump"):
+				ladder_climbing = false
+				ladder_cooldown = 0.8
+				velocity = Vector3(-3,3,0)
+			elif absf(Input.get_axis("left","right"))>0.1:
+				ladder_climbing = false
+				ladder_cooldown = 0.5
+			else:
+				var climb := Input.get_axis("back","forward")
+				global_position.x = -21.0
+				global_position.z = lerpf(global_position.z,0.0,minf(1.0,delta*12))
+				global_position.y += climb*3.5*delta
+				velocity = Vector3.ZERO
+				if global_position.y>=16.05:
+					global_position = game.building.LADDER_TOP
+					ladder_climbing = false
+					ladder_cooldown = 0.5
+				elif global_position.y<=-0.9 and climb<0:
+					global_position.y = -0.9
+					ladder_climbing = false
+					ladder_cooldown = 0.5
+				return
 	if lift_riding:
 		velocity = Vector3.ZERO
 		return
@@ -253,6 +287,8 @@ func take_damage(amount: int, attacker: Node3D) -> void:
 
 
 func reset_to(spawn_position: Vector3, yaw: float) -> void:
+	ladder_climbing = false
+	ladder_cooldown = 0.0
 	if is_instance_valid(game.building.lift): game.building.lift.detach_actor(self)
 	lift_riding = false
 	position = spawn_position

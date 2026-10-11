@@ -71,6 +71,7 @@ func run() -> void:
 	check(rear_path.size()>1 and rear_path[-1].distance_to(Vector3(0,-0.9,40))<1.0,"Navigation connects the lobby to the rear courtyard")
 	game.explore_map()
 	check(game.building.lift.position.x<0,"Lift is left when entering from the rear")
+	check(game.building.lift.to_global(Vector3(-2,0,0)).z<game.building.lift.global_position.z,"Lift entrance is rotated to its right side on all floors")
 	check(game.building.find_children("BrownRoomDoor_*","Node3D",false,false).size()==20,"All twenty rooms have brown timber doors")
 	check(game.building.find_children("TieredLectureRoom*","Node3D",false,false).size()==20,"All twenty rooms have tiered lecture seating")
 	var guidance: Array[Node] = game.building.find_children("GroundGuidance*","Node3D",false,false)
@@ -87,7 +88,7 @@ func run() -> void:
 		var opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,12),Vector3(-2.8,y,12),1)
 		var rear_opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,19),Vector3(-2.8,y,19),1)
 		check(game.get_world_3d().direct_space_state.intersect_ray(opening).is_empty() and game.get_world_3d().direct_space_state.intersect_ray(rear_opening).is_empty(),"Wooden partition beside lift is removed on level %d" % level)
-	check(game.building.has_node("FrontEntranceStairs"),"Front stairs have a shared landing and three parallel approaches")
+	check(game.building.has_node("FrontEntranceStairs"),"Front stairs have one broad approach with an intermediate landing")
 	p.reset_to(Vector3(0,-1.74,5),0)
 	await settle(p)
 	check(p.is_on_floor() and absf(p.position.y+1.8)<0.1,"Player spawns grounded at human eye height")
@@ -176,12 +177,14 @@ func run() -> void:
 		check(await walk_to(p,Vector3(side*7.8,1.6,21.6)) and await walk_to(p,Vector3(side*2.4,4,21.6)),"Rear side %d stair reaches shared first-floor landing" % int(side))
 		check(absf(p.position.y-4)<0.15,"Rear upper entrance is on level 1")
 		check(await walk_to(p,Vector3(0,4,21.0)) and await walk_to(p,Vector3(0,4,18)),"Raised rear door connects to interior")
-	for side in [-1.0,1.0]:
-		p.reset_to(Vector3(side*5.2,-0.85,-33.5),PI)
-		await settle(p)
-		check(await walk_to(p,Vector3(side*5.2,1.55,-27.35)),"Front side %d narrow stairs reach their landing" % int(side))
-		check(await walk_to(p,Vector3(side*5.2,4,-21.4)),"Front side %d narrow stairs join the main entrance" % int(side))
-		check(await walk_to(p,Vector3(side*5.2,4,-22.25)) and await walk_to(p,Vector3(0,4,-22.25)) and await walk_to(p,Vector3(0,4,-21.4)),"Front shared landing links side %d around the doorway jamb to the central door" % int(side))
+	var front_flights := 0
+	for surface in game.building.stair_surfaces:
+		if surface.get_parent()==game.building.get_node("FrontEntranceStairs"): front_flights += 1
+	check(front_flights==2,"Front stairs use one broad two-flight approach without narrow side stairs")
+	p.reset_to(Vector3(0,-0.85,-33.5),0)
+	await settle(p)
+	check(await walk_to(p,Vector3(0,1.55,-27.35)),"Wide front stairs reach the intermediate landing")
+	check(await walk_to(p,Vector3(0,4,-21.4)),"Wide upper flight connects to the main door")
 	p.reset_to(Vector3(0,-0.85,-33.5),0)
 	await settle(p)
 	check(await walk_to(p,Vector3(0,4,-21.5)),"Wide front stairs are climbable without jumping")
@@ -237,10 +240,10 @@ func run() -> void:
 		while lift.moving and Time.get_ticks_msec()<limit: await physics_frame
 		check(not lift.moving and absf(p.position.y-floor_y(floor_index))<0.15,"Lift carries player to level %d" % floor_index)
 		check(not p.lift_riding,"Lift releases movement after arrival")
-		check(await walk_to(p,Vector3(-1.4,floor_y(floor_index),16.2)),"Lift exit is walkable on level %d" % floor_index)
+		check(await walk_to(p,lift.to_global(Vector3(-2.4,floor_y(floor_index),0))),"Lift exit is walkable on level %d" % floor_index)
 		check(await walk_to(p,lift.global_position+Vector3(0,floor_y(floor_index),0)),"Lift can be reentered on level %d" % floor_index)
 	# Calling the empty lift must not carry a player standing on the landing.
-	p.reset_to(Vector3(-1.7,-1.75,16.2),0)
+	p.reset_to(lift.to_global(Vector3(-2.4,-1.75,0)),0)
 	check(lift.request_floor(2),"Empty lift can be dispatched")
 	while lift.moving: await physics_frame
 	check(not p.lift_riding and p.position.y<0.2,"Calling lift leaves the waiting player on the landing")

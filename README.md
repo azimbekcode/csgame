@@ -112,6 +112,9 @@ Yig‘ilma xarita, eshiklar, lift, zinadagi harakat va ikki raundli bot sinovlar
 
 Godot va uchinchi tomon kutubxonalarining litsenziyalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [GODOT-COPYRIGHT.txt](GODOT-COPYRIGHT.txt). Asl reference videolar va ulardagi odamlar tasvirlari repozitoriy yoki tayyor ZIP’ga qo‘shilmagan.
 
-Old zina rasmlarga mos keng markaziy yo‘l, ikki tor yon zina va qoramtir shisha panjarali umumiy maydonchadan iborat. Lift oldidagi yog‘och to‘siq olib tashlangan.
+Old kirishdagi bitta keng zina ikki ko‘tarilish va tekis oraliq maydonchadan iborat; yon zinalar olib tashlangan. Lift eshigi o‘ng yoniga aylantirilgan, yonidagi belgilangan devorlar barcha qavatlarda olib tashlangan. Chap fasaddagi narvonda W/S bilan tomga chiqish va tushish, E bilan ushlash, Space bilan qo‘yib yuborish mumkin.
 
 ![Old kirish zinasi](docs/screenshots/front_reference.png)
+
+![Chap fasaddagi tom narvoni](docs/screenshots/roof_ladder.png)
+![Liftning yangi kirish tomoni](docs/screenshots/lift_open_lobby.png)

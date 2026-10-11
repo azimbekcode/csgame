@@ -34,6 +34,8 @@ var navigation_region: NavigationRegion3D
 var room_entries: Array[Vector3] = []
 var stair_surfaces: Array[Node3D] = []
 var lift: Node3D
+const LADDER_BASE := Vector3(-21.0,-0.9,0)
+const LADDER_TOP := Vector3(-19.0,16.05,0)
 var material_cache: Dictionary = {}
 
 func _ready() -> void:
@@ -48,6 +50,7 @@ func _ready() -> void:
 	_make_entrances()
 	_make_dome()
 	_make_lift()
+	_make_roof_ladder()
 	_make_campus()
 	_make_lobby_fixtures()
 	_batch_static_visuals()
@@ -227,6 +230,8 @@ func _make_rooms() -> void:
 			var a := TAU*(i+0.5)/SEGMENTS
 			var degrees := rad_to_deg(a)
 			var doorway := absf(degrees-90)<10 or absf(degrees-270)<10
+			# Open the lift alcove into the rear lobby at every landing.
+			if degrees>100 and degrees<125: doorway = true
 			for d in door_angles+[247.5,292.5]:
 				doorway = doorway or absf(degrees-d)<6
 			var width := 2*ROOM_RADIUS*sin(PI/SEGMENTS)+0.018
@@ -239,7 +244,7 @@ func _make_rooms() -> void:
 				for band in [0.10,1.35,2.65,3.68]:
 					_box(_polar(ROOM_RADIUS-0.10,a,h+band),Vector3(width,0.022,0.025),dark,-a-PI/2,false)
 				_box(_polar(ROOM_RADIUS-0.1,a,h+1.05),Vector3(width,0.04,0.035),bronze,-a-PI/2,false)
-		for d in [22.5,67.5,112.5,157.5,202.5,337.5]:
+		for d in [22.5,67.5,157.5,202.5,337.5]:
 			var a := deg_to_rad(d)
 			_box(_polar(15.4,a,h+height/2),Vector3(8.7,height,0.17),wood,-a)
 		for index in range(door_angles.size()):
@@ -514,33 +519,24 @@ func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: f
 	add_child(body)
 
 func _make_entrances() -> void:
-	# Reference frontage: broad central flight flanked by two narrow stairways,
-	# dark glass balustrades and a shared raised landing on stone supports.
+	# One broad entrance stair inherits the former side flight profile,
+	# with an intermediate landing and dark glass balustrades.
 	var frontage := Node3D.new()
 	frontage.name = "FrontEntranceStairs"
 	add_child(frontage)
 	var front_first := get_child_count()
-	_box(Vector3(0,3.85,-21.4),Vector3(12.4,0.3,3.2),marble,0,false)
-	# The flight's flat extension supports the first 0.8 m of the landing.
-	# Start the shared collider after it so its vertical edge cannot catch a
-	# player's capsule while their feet are still on the final sloping tread.
-	_box(Vector3(0,3.85,-21),Vector3(12.4,0.3,2.4),marble).visible = false
-	_stair_flight(0,-0.9,-33,-23,4.9,8.4,0.8)
+	_box(Vector3(0,3.85,-21.4),Vector3(8.6,0.3,3.2),marble,0,false)
+	_box(Vector3(0,3.85,-21),Vector3(8.6,0.3,2.4),marble).visible = false
+	_stair_flight(0,-0.9,-33,-28,2.45,8.4,1.3)
+	_box(Vector3(0,1.41,-27.35),Vector3(8.4,0.28,1.3),marble,0,false)
+	_stair_flight(0,1.55,-26.7,-23,2.45,8.4,0.8)
 	for side in [-1.0,1.0]:
-		var x: float = side*5.2
-		_stair_flight(x,-0.9,-33,-28,2.45,1.6,1.3)
-		_box(Vector3(x,1.41,-27.35),Vector3(1.6,0.28,1.3),marble,0,false)
-		_stair_flight(x,1.55,-26.7,-23,2.45,1.6,0.8)
-		_glass_guard(Vector3(side*4.25,-0.9,-33),Vector3(side*4.25,4,-23))
-		_glass_guard(Vector3(side*6.05,-0.9,-33),Vector3(side*6.05,1.55,-28))
-		_glass_guard(Vector3(side*6.05,1.55,-28),Vector3(side*6.05,1.55,-26.7))
-		_glass_guard(Vector3(side*6.05,1.55,-26.7),Vector3(side*6.05,4,-23))
-		_glass_guard(Vector3(side*6.05,4,-23),Vector3(side*6.05,4,-19.85))
-		_glass_guard(Vector3(side*3.0,4,-23),Vector3(side*4.25,4,-23))
-		_glass_guard(Vector3(side*4.25,4,-23),Vector3(side*4.25,4,-22.6))
-		# Leave the lower side approaches clear underneath the landing.
-		_box(Vector3(side*5.9,1.45,-20.1),Vector3(0.35,4.6,0.35),limestone)
-		_box(Vector3(side*5.2,1.2,-27.35),Vector3(1.6,0.14,1.3),paving,0,false)
+		var x: float = side*4.25
+		_glass_guard(Vector3(x,-0.9,-33),Vector3(x,1.55,-28))
+		_glass_guard(Vector3(x,1.55,-28),Vector3(x,1.55,-26.7))
+		_glass_guard(Vector3(x,1.55,-26.7),Vector3(x,4,-23))
+		_glass_guard(Vector3(x,4,-23),Vector3(x,4,-19.85))
+		_box(Vector3(side*4.05,1.45,-20.1),Vector3(0.35,4.6,0.35),limestone)
 	for node in get_children().slice(front_first): node.reparent(frontage,false)
 	# Sunken front forecourt: descend from courtyard -0.9 to the doorway at -1.8.
 	_box(Vector3(0,-1.94,-21.4),Vector3(4.2,0.28,2.4),marble)
@@ -644,12 +640,12 @@ func _make_lift() -> void:
 	lift = Node3D.new()
 	lift.set_script(preload("res://scripts/lift.gd"))
 	lift.position = LIFT_CENTER
-	lift.rotation.y = PI
+	lift.rotation.y = -PI/2
 	add_child(lift)
 	# Facing inward from the rear (+Z), negative X is the visitor's left.
 	for level in range(FLOOR_COUNT):
 		var h := floor_height(level)
-		_box(Vector3(-2.65,h-0.14,16.2),Vector3(1.0,0.28,2.5),marble)
+		_box(Vector3(-4.4,h-0.14,14.45),Vector3(2.5,0.28,1.1),marble)
 	# Doorway in the rear corridor's left wall is carved by replacing its lift-facing piece.
 	for node in get_children():
 		if node is StaticBody3D and absf(node.position.x+2.2)<0.01 and absf(node.position.z-15.25)<0.01:
@@ -657,6 +653,27 @@ func _make_lift() -> void:
 			var h: float = node.position.y-wall_size.y/2
 			node.queue_free()
 			_box(Vector3(-2.2,h+(wall_size.y+2.9)/2,16.2),Vector3(0.16,wall_size.y-2.9,5.2),cream)
+
+func _make_roof_ladder() -> void:
+	var ladder := Node3D.new()
+	ladder.name = "RoofAccessLadder"
+	add_child(ladder)
+	var first := get_child_count()
+	for z in [-0.48,0.48]:
+		_beam(Vector3(-20.55,-0.9,z),Vector3(-20.55,17.1,z),0.055,metal)
+		_beam(Vector3(-20.55,17.1,z),Vector3(-19.2,17.1,z),0.055,metal)
+		for y in [0.0,4.0,8.0,12.0,15.7]:
+			_beam(Vector3(-20.55,y,z),Vector3(-19.85,y,z),0.04,dark)
+	for step in range(55):
+		var y := -0.65+step*0.31
+		_beam(Vector3(-20.55,y,-0.48),Vector3(-20.55,y,0.48),0.045,metal)
+	_box(Vector3(-19.85,15.92,0),Vector3(1.9,0.26,1.1),metal)
+	for node in get_children().slice(first): node.reparent(ladder,false)
+
+func near_roof_ladder(point: Vector3) -> bool:
+	var exterior := point.x>-22.0 and point.x<-20.6
+	var roof_exit := point.y>15.75 and point.x>-22.0 and point.x<-18.7
+	return (exterior or roof_exit) and absf(point.z)<0.85 and point.y>-1.3 and point.y<16.5
 
 func _make_campus() -> void:
 	var asphalt := _textured_material("stone",Color("53575a"),0.98)
@@ -965,7 +982,7 @@ func _wedge(inner: float, outer: float, a: float, b: float, top: float, thicknes
 			polygon.append(Vector2(point.x,point.z))
 		var openings: Array[PackedVector2Array] = []
 		if top>0:
-			openings.append(PackedVector2Array([Vector2(LIFT_CENTER.x-1.35,14.9),Vector2(LIFT_CENTER.x+1.35,14.9),Vector2(LIFT_CENTER.x+1.35,17.5),Vector2(LIFT_CENTER.x-1.35,17.5)]))
+			openings.append(PackedVector2Array([Vector2(LIFT_CENTER.x-1.35,14.85),Vector2(LIFT_CENTER.x+1.35,14.85),Vector2(LIFT_CENTER.x+1.35,17.55),Vector2(LIFT_CENTER.x-1.35,17.55)]))
 			for side in [-1.0,1.0]:
 				var cut := PackedVector2Array()
 				for point in [Vector2(-1.9,13.5),Vector2(1.9,13.5),Vector2(1.9,18.9),Vector2(-1.9,18.9)]:

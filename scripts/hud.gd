@@ -353,6 +353,7 @@ func _process(delta: float) -> void:
 	else: objective_label.text = "A · atrium   B · orqa hovli" + ("   BOMBA SIZDA — E" if game.bomb_carrier == p else "")
 	var lift_prompt: String = game.building.lift.prompt(p)
 	if not lift_prompt.is_empty(): objective_label.text = lift_prompt
+	if game.building.near_roof_ladder(p.global_position): objective_label.text = "NARVON · E — ushlash  /  W–S — chiqish–tushish  /  Space — qo‘yib yuborish"
 	if game.interact_progress > 0: objective_label.text += "  [%.1f s]" % game.interact_progress
 	if shop_open and not game.can_buy(): toggle_shop()
 	scoreboard.visible = Input.is_action_pressed("scoreboard") and not game.paused
