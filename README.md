@@ -146,3 +146,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 
 ![Narvon tarafidagi tor qiya yo‘l](docs/screenshots/left_lane.png)
 ![Maysa va chegara devori](docs/screenshots/left_lane_overview.png)
+
+0.2.18: Eski sariq tashqi devor va aylana yon devor olib tashlandi. Narvon tarafidagi devor 10 metr tashqariga surildi; hovli uch tarafdan to‘g‘ri devor, old tarafdan ularga tutash metall panjara bilan o‘ralgan. Old panjarada markaziy kirish ochiq; uning ortida ikki yo‘nalishli, chiziqlar bilan ajratilgan asfalt yo‘l bor.
+
+![To‘g‘ri devorlar va old panjara](docs/screenshots/perimeter_overview.png)
+![Old tarafdagi ikki yo‘nalishli yo‘l](docs/screenshots/perimeter_front.png)

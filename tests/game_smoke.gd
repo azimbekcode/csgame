@@ -210,7 +210,7 @@ func run() -> void:
 		var button := game.building.lift.get_node("CallButton_%d" % level) as Node3D
 		var approach: Vector3 = game.building.lift.to_global(Vector3(-2.4,floor_y(level)+1.23,button.position.z))
 		check(button.position.z>0 and button.position.z<1.5 and space.intersect_ray(PhysicsRayQueryParameters3D.create(approach,button.global_position,1)).is_empty(),"Lift call button is visible on the visitor's right on floor %d" % level)
-	check(game.building.has_node("LeftFacadeLane/BoundaryWall_20"),"Ladder-side lane has a physical perimeter wall")
+	check(game.building.has_node("RectangularBoundary/LadderSideWall"),"Ladder-side lane has a physical perimeter wall")
 	p.reset_to(game.building._polar(27.3,0.7,-0.85),0)
 	await settle(p)
 	var lane_start_height := p.position.y
@@ -219,7 +219,12 @@ func run() -> void:
 		point.y = game.building.side_lane_height(point.z)
 		check(await walk_to(p,point),"Narrow side lane is walkable toward the front at %.2f" % angle)
 	check(p.position.y>lane_start_height+0.6,"Ladder-side road gradually rises toward the front courtyard")
-	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(27,-0.5+1.2,0),Vector3(33,-0.5+1.2,0),1)).is_empty(),"Outside wall bounds the narrow ladder-side road")
+	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(27,-0.5+1.2,0),Vector3(43,-0.5+1.2,0),1)).is_empty(),"Moved straight wall bounds the ladder-side courtyard")
+	check(space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(27,0.7,0),Vector3(33,0.7,0),1)).is_empty(),"Previous curved wall leaves ten metres of extra clearance")
+	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,0.7,48),Vector3(0,0.7,52),1)).is_empty(),"Straight rear wall encloses the team approach")
+	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-48,0.7,-43),Vector3(-48,0.7,-45),1)).is_empty(),"Front grille connects to the side wall")
+	check(space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,0.7,-43),Vector3(0,0.7,-45),1)).is_empty(),"Front grille leaves the central pedestrian entrance open")
+	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,0,-52),Vector3(0,-2,-52),1)).is_empty(),"Two-way asphalt road beyond the front fence has a physical surface")
 	var front_flights := 0
 	for surface in game.building.stair_surfaces:
 		if surface.get_parent()==game.building.get_node("FrontEntranceStairs"): front_flights += 1

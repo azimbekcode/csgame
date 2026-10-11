@@ -18,6 +18,8 @@ func run() -> void:
 		"front": [Vector3(0,19,-47),Vector3(0,8,-4)],
 		"front_ground": [Vector3(0,0.75,-46),Vector3(0,16,0)],
 		"campus_link_garden": [Vector3(-20,1.0,28),Vector3(-24,3.2,43)],
+		"perimeter_front": [Vector3(0,8,-65),Vector3(0,5,-7)],
+		"perimeter_overview": [Vector3(65,48,-72),Vector3(-3,2,1)],
 		"left_lane": [Vector3(23.7,1.05,14.5),Vector3(25,1.1,-15)],
 		"left_lane_overview": [Vector3(44,17,29),Vector3(22,2,0)],
 		"stone_walkway": [Vector3(27,1.4,23),Vector3(18,-0.5,11)],

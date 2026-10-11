@@ -56,6 +56,7 @@ func _ready() -> void:
 	_make_roof_ladder()
 	_make_campus()
 	_make_left_facade_lane()
+	_make_rectangular_boundary()
 	_make_campus_link()
 	_make_lobby_fixtures()
 	_batch_static_visuals()
@@ -885,14 +886,12 @@ func _make_campus() -> void:
 		_wedge(20.5,23.0,TAU*i/SEGMENTS,TAU*(i+1)/SEGMENTS,-0.86,0.09,campus_stone,true)
 	for side in [-1.0,1.0]:
 		if side<0: _box(Vector3(side*36,-0.88,0),Vector3(18,0.08,90),grass)
-		_box(Vector3(side*13,-0.88,-40),Vector3(13,0.08,20),grass)
+		_box(Vector3(side*13,-0.88,-38),Vector3(13,0.08,14),grass)
 		for z in ([-46.0,-31.0,-14.0,3.0,20.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in ([-37.0,-12.0,13.0,38.0] if side<0 else []):
 			_beam(Vector3(side*25,-0.9,z),Vector3(side*25,4.7,z),0.065,dark)
 			_box(Vector3(side*25,4.7,z),Vector3(0.6,0.1,0.28),glow,0,false)
-	for z in [-60.0,60.0]: _box(Vector3(0,0.2,z),Vector3(120,2.2,0.25),limestone)
-	for x in [-60.0,60.0]: _box(Vector3(x,0.2,0),Vector3(0.25,2.2,120),limestone)
 	# Low stone planters/benches replace floating-looking wooden cover cubes.
 	for point in [Vector3(7,-0.9,35),Vector3(-7,-0.9,38),Vector3(-25,-0.9,-15)]:
 		_box(point+Vector3(0,0.42,0),Vector3(2.6,0.84,1.1),limestone)
@@ -927,6 +926,51 @@ func _terrain_patch(corners: PackedVector3Array,depth: float,mat: Material) -> N
 	add_child(body)
 	return body
 
+func _make_rectangular_boundary() -> void:
+	var boundary := Node3D.new()
+	boundary.name = "RectangularBoundary"
+	add_child(boundary)
+	var first := get_child_count()
+	var stone := _textured_material("stone",Color("aaa79b"),0.93)
+	# The ladder-side wall is 10 metres beyond the previous curved boundary.
+	# Rear clearance keeps the neighbouring block and team approach inside.
+	_box(Vector3(40.8,0.45,3),Vector3(0.35,2.7,94),stone).name = "LadderSideWall"
+	_box(Vector3(-48,0.45,3),Vector3(0.35,2.7,94),stone).name = "OppositeSideWall"
+	_box(Vector3(-3.6,0.45,50),Vector3(89.15,2.7,0.35),stone).name = "RearWall"
+	for x in [-48.0,40.8]:
+		for z in range(-44,51,6):
+			_box(Vector3(x,0.5,z),Vector3(0.52,2.8,0.52),stone)
+	for x in range(-42,40,6):
+		_box(Vector3(x,0.5,50),Vector3(0.52,2.8,0.52),stone)
+	# Grille fence joins both side walls, with a pedestrian entrance at centre.
+	for span in [Vector2(-48,-4),Vector2(4,40.8)]:
+		var centre: float = (span.x+span.y)/2
+		var width: float = span.y-span.x
+		for y in [-0.62,1.1]:
+			_box(Vector3(centre,y,-44),Vector3(width,0.07,0.08),metal)
+		for i in range(int(ceil(width/0.25))+1):
+			var x := lerpf(span.x,span.y,float(i)/ceil(width/0.25))
+			_box(Vector3(x,0.25,-44),Vector3(0.035,2.3,0.035),dark)
+		for i in range(int(ceil(width/3))+1):
+			var x := lerpf(span.x,span.y,float(i)/ceil(width/3))
+			_box(Vector3(x,0.3,-44),Vector3(0.14,2.4,0.14),metal)
+	for node in get_children().slice(first): node.reparent(boundary,false)
+	var road := Node3D.new()
+	road.name = "FrontPublicRoad"
+	add_child(road)
+	first = get_child_count()
+	var asphalt := _textured_material("stone",Color("414448"),0.98)
+	var paint := _material(Color("e1dfcd"),1.0)
+	_box(Vector3(0,-0.98,-52),Vector3(160,0.2,9),asphalt).name = "TwoWayAsphalt"
+	for z in [-46.2,-57.8]:
+		_box(Vector3(0,-0.87,z),Vector3(160,0.1,2.6),campus_stone)
+	for z in [-47.75,-56.25]:
+		_box(Vector3(0,-0.873,z),Vector3(160,0.012,0.10),paint,0,false)
+	for x in range(-77,80,6):
+		_box(Vector3(x,-0.873,-52),Vector3(3,0.012,0.12),paint,0,false)
+	for node in get_children().slice(first): node.reparent(road,false)
+
+
 func _make_left_facade_lane() -> void:
 	var lane := Node3D.new()
 	lane.name = "LeftFacadeLane"
@@ -934,7 +978,6 @@ func _make_left_facade_lane() -> void:
 	var first := get_child_count()
 	var road := _textured_material("stone",Color("55575a"),0.98)
 	var lawn := _textured_material("grass",Color("637544"),1.0)
-	var boundary := _textured_material("stone",Color("aaa79b"),0.93)
 	for i in range(44):
 		var a := -1.2+float(i)/20
 		var b := -1.2+float(i+1)/20
@@ -956,18 +999,6 @@ func _make_left_facade_lane() -> void:
 			point.y = side_lane_corner_height(point.z,polar.y)+0.11
 			curb_points.append(point)
 		_terrain_patch(curb_points,0.18,paving)
-		var wall_points := PackedVector3Array()
-		for polar in [Vector2(30.65,a),Vector2(30.95,a),Vector2(30.95,b),Vector2(30.65,b)]:
-			var point := _polar(polar.x,polar.y,0)
-			point.y = side_lane_corner_height(point.z,polar.y)+2.6
-			wall_points.append(point)
-		_terrain_patch(wall_points,2.72,boundary).name = "BoundaryWall_%d" % i
-		var angle := (a+b)/2
-		if i%4==0:
-			var foot := _polar(30.65,angle,0)
-			foot.y = side_lane_corner_height(foot.z,angle)
-			_box(foot+Vector3(0,1.35,0),Vector3(0.42,2.7,0.22),paving,-angle-PI/2)
-			_beam(foot+Vector3(0,2.7,0),foot+_polar(-0.32,angle,3.1),0.025,dark)
 	for angle in [-0.7,0.65]:
 		var point := _polar(29.9,angle,0)
 		point.y = side_lane_corner_height(point.z,angle)
