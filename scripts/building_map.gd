@@ -440,6 +440,40 @@ func _stair_railing(a: Vector3,b: Vector3) -> void:
 		_beam(foot+Vector3.UP*0.08,foot+Vector3.UP,0.018,dark)
 	for node in get_children().slice(first): node.reparent(railing,false)
 
+func _glass_guard(a: Vector3,b: Vector3) -> void:
+	var root := Node3D.new()
+	root.name = "FrontGlassGuard_%d" % get_child_count()
+	add_child(root)
+	var first := get_child_count()
+	var count := maxi(1,int(ceil(a.distance_to(b)/1.4)))
+	var normal := (b-a).normalized().cross(Vector3.UP).normalized()*0.03
+	for segment in range(count):
+		var lo := a.lerp(b,float(segment)/count)
+		var hi := a.lerp(b,float(segment+1)/count)
+		var points := PackedVector3Array([lo+Vector3.UP*0.12-normal,hi+Vector3.UP*0.12-normal,hi+Vector3.UP*1.0-normal,lo+Vector3.UP*1.0-normal])
+		for i in range(4): points.append(points[i]+normal*2)
+		var surface := SurfaceTool.new()
+		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		_quad(surface,points[0],points[3],points[2],points[1])
+		_quad(surface,points[4],points[5],points[6],points[7])
+		for i in range(4): _quad(surface,points[i],points[(i+1)%4],points[(i+1)%4+4],points[i+4])
+		var instance := MeshInstance3D.new()
+		instance.mesh = surface.commit()
+		instance.material_override = glass
+		add_child(instance)
+		var body := StaticBody3D.new()
+		var collision := CollisionShape3D.new()
+		var shape := ConvexPolygonShape3D.new()
+		shape.points = points
+		collision.shape = shape
+		body.add_child(collision)
+		add_child(body)
+	for i in range(count+1):
+		var foot := a.lerp(b,float(i)/count)
+		_beam(foot,foot+Vector3.UP*1.06,0.035,dark)
+	_beam(a+Vector3.UP*1.06,b+Vector3.UP*1.06,0.035,metal)
+	for node in get_children().slice(first): node.reparent(root,false)
+
 func _stair_slab(x: float,width: float,base: float,start_z: float,end_z: float,rise: float) -> void:
 	var points := PackedVector3Array([
 		Vector3(x-width/2,base-0.06,start_z),Vector3(x+width/2,base-0.06,start_z),
@@ -480,15 +514,34 @@ func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: f
 	add_child(body)
 
 func _make_entrances() -> void:
-	# Broad front stair, on the centerline of the reference photograph.
-	_box(Vector3(0,3.85,-21.5),Vector3(6.4,0.3,3.0),marble)
-	_stair_flight(0,-0.9,-33.0,-23.0,4.9,6.4)
+	# Reference frontage: broad central flight flanked by two narrow stairways,
+	# dark glass balustrades and a shared raised landing on stone supports.
+	var frontage := Node3D.new()
+	frontage.name = "FrontEntranceStairs"
+	add_child(frontage)
+	var front_first := get_child_count()
+	_box(Vector3(0,3.85,-21.4),Vector3(12.4,0.3,3.2),marble,0,false)
+	# The flight's flat extension supports the first 0.8 m of the landing.
+	# Start the shared collider after it so its vertical edge cannot catch a
+	# player's capsule while their feet are still on the final sloping tread.
+	_box(Vector3(0,3.85,-21),Vector3(12.4,0.3,2.4),marble).visible = false
+	_stair_flight(0,-0.9,-33,-23,4.9,8.4,0.8)
 	for side in [-1.0,1.0]:
-		_beam(Vector3(side*3.25,0.1,-33),Vector3(side*3.25,5,-23),0.045,metal)
-		for i in range(9):
-			var z := -32.5+i*1.1
-			var h := -0.9+(z+33)*0.49
-			_beam(Vector3(side*3.25,h,z),Vector3(side*3.25,h+1.0,z),0.025,metal)
+		var x: float = side*5.2
+		_stair_flight(x,-0.9,-33,-28,2.45,1.6,1.3)
+		_box(Vector3(x,1.41,-27.35),Vector3(1.6,0.28,1.3),marble,0,false)
+		_stair_flight(x,1.55,-26.7,-23,2.45,1.6,0.8)
+		_glass_guard(Vector3(side*4.25,-0.9,-33),Vector3(side*4.25,4,-23))
+		_glass_guard(Vector3(side*6.05,-0.9,-33),Vector3(side*6.05,1.55,-28))
+		_glass_guard(Vector3(side*6.05,1.55,-28),Vector3(side*6.05,1.55,-26.7))
+		_glass_guard(Vector3(side*6.05,1.55,-26.7),Vector3(side*6.05,4,-23))
+		_glass_guard(Vector3(side*6.05,4,-23),Vector3(side*6.05,4,-19.85))
+		_glass_guard(Vector3(side*3.0,4,-23),Vector3(side*4.25,4,-23))
+		_glass_guard(Vector3(side*4.25,4,-23),Vector3(side*4.25,4,-22.6))
+		# Leave the lower side approaches clear underneath the landing.
+		_box(Vector3(side*5.9,1.45,-20.1),Vector3(0.35,4.6,0.35),limestone)
+		_box(Vector3(side*5.2,1.2,-27.35),Vector3(1.6,0.14,1.3),paving,0,false)
+	for node in get_children().slice(front_first): node.reparent(frontage,false)
 	# Sunken front forecourt: descend from courtyard -0.9 to the doorway at -1.8.
 	_box(Vector3(0,-1.94,-21.4),Vector3(4.2,0.28,2.4),marble)
 	_box(Vector3(0,-1.94,-19.5),Vector3(4.2,0.28,1.8),marble)
@@ -603,8 +656,6 @@ func _make_lift() -> void:
 			var wall_size: Vector3 = (node.get_child(0).mesh as BoxMesh).size
 			var h: float = node.position.y-wall_size.y/2
 			node.queue_free()
-			_box(Vector3(-2.2,h+wall_size.y/2,12.05),Vector3(0.16,wall_size.y,2.8),wood)
-			_box(Vector3(-2.2,h+wall_size.y/2,19.0),Vector3(0.16,wall_size.y,1.7),wood)
 			_box(Vector3(-2.2,h+(wall_size.y+2.9)/2,16.2),Vector3(0.16,wall_size.y-2.9,5.2),cream)
 
 func _make_campus() -> void:

@@ -85,7 +85,7 @@ Bino **0, 1, 2, 3-qavatlardan iborat**. Oldingi ikki to‘rtburchak yon hajm oli
 
 ![0-qavat eshigidan atriumgacha tekis yo‘lak](docs/screenshots/front_entry_flat.png)
 
-Ichki zina pog‘onalari qiya taglik ustida aniq ko‘rinadi; panjaralar oraliq maydonchalargacha tutashgan. Zinada tezlik, oyoq qo‘yish balandligi, kamera va qadam tovushi pog‘ona o‘lchamiga moslanadi. Orqa kirishdagi sariq yo‘lak belgisi 0-qavat polida turadi. Lift kabinasining o‘z suriladigan eshiklari va qavatlar orasini yopadigan shaxta devorlari bor.
+Ichki zina pog‘onalari qiya taglik ustida aniq ko‘rinadi; panjaralar oraliq maydonchalargacha tutashgan. Zinada odatiy o‘yin tezligi saqlanadi; pog‘onadagi kuchli kamera silkinishi olib tashlangan. Orqa kirishdagi sariq yo‘lak belgisi 0-qavat polida turadi. Lift kabinasining o‘z suriladigan eshiklari va qavatlar orasini yopadigan shaxta devorlari bor.
 
 ![Ichki zinaning yuqoridan ko‘rinishi](docs/screenshots/stairs_top.png)
 ![Derazadan tashqi ko‘rinish](docs/screenshots/window_view.png)
@@ -108,6 +108,10 @@ bash tools/build_linux.sh
 
 `tools/check.sh` xaritada yurish, xonalar, to‘rt qavatli lift, jang mexanikalari va ikki raundli bot sinovini bajaradi. Windows va Linux export preset’lari barcha o‘yin resurslarini executable ichiga joylaydi. `tools/package_windows.py` va `tools/package_linux.py` ZIP hamda ikkala platforma uchun SHA-256 ro‘yxatini yaratadi. Xaritadagi collision geometriyasi o‘zgarsa, navigatsiya meshini qayta bake qilish kerak; [tools/bake_navigation.gd](tools/bake_navigation.gd) bilan bajarish mumkin.
 
-Yangi yig‘ilma 163 ta funksional tekshiruv va ikki raundli bot sinovidan o‘tdi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
+Yig‘ilma xarita, eshiklar, lift, zinadagi harakat va ikki raundli bot sinovlari bilan tekshiriladi. Linux standalone ishga tushishi va ichiga joylangan resurslarda to‘rt qavat, 20 xona kirishi, lift va harakatlanuvchi askarlar tekshirildi. Ikkala ZIP arxivning butunligi hamda SHA-256 qiymatlari tasdiqlandi. Windows x64 EXE Linuxdan eksport qilindi; Windows tizimida bevosita ishga tushirish tekshirilmagan.
 
 Godot va uchinchi tomon kutubxonalarining litsenziyalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [GODOT-COPYRIGHT.txt](GODOT-COPYRIGHT.txt). Asl reference videolar va ulardagi odamlar tasvirlari repozitoriy yoki tayyor ZIP’ga qo‘shilmagan.
+
+Old zina rasmlarga mos keng markaziy yo‘l, ikki tor yon zina va qoramtir shisha panjarali umumiy maydonchadan iborat. Lift oldidagi yog‘och to‘siq olib tashlangan.
+
+![Old kirish zinasi](docs/screenshots/front_reference.png)

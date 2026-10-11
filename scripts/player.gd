@@ -28,7 +28,6 @@ var crouched := false
 var bob_time := 0.0
 var stair_amount := 0.0
 var stair_view_offset := 0.0
-var stair_stride := 0.0
 var footstep_time := 0.0
 var round_spawn := Vector3.ZERO
 var lift_riding := false
@@ -141,7 +140,6 @@ func _physics_process(delta: float) -> void:
 	if not locked and Input.is_action_pressed("walk"): speed = 2.8
 	if crouched: speed = 2.2
 	if scoped: speed *= 0.65
-	if not game.building.stair_surface_at(global_position).is_empty() and is_on_floor(): speed = minf(speed,1.65)
 	if game.phase == "freeze" and not game.exploring: speed = 0
 	velocity.x = move_toward(velocity.x, direction.x * speed, delta * 35.0)
 	velocity.z = move_toward(velocity.z, direction.z * speed, delta * 35.0)
@@ -158,14 +156,11 @@ func _physics_process(delta: float) -> void:
 	var climbing := is_on_floor() and horizontal_speed>0.4 and not tread.is_empty() and absf(height_speed)>0.15
 	stair_amount = move_toward(stair_amount,1.0 if climbing else 0.0,delta*8.0)
 	bob_time += delta*horizontal_speed*2.0
-	# Each tread gives a short rise and footfall rather than a floating camera.
-	if climbing: stair_stride += delta*horizontal_speed/maxf(float(tread.depth)*2.0,0.32)
-	var tread_phase := TAU*stair_stride
-	var tread_offset: float = tread.get("offset",0.0)
-	stair_view_offset = (tread_offset+sin(tread_phase)*0.055)*stair_amount
+	# CS-style traversal: preserve movement speed and a small, steady view bob.
+	stair_view_offset = sin(bob_time*2.0)*0.006*stair_amount
 	var walk_bob := sin(bob_time*2.0)*0.012 if is_on_floor() and horizontal_speed>0.4 else 0.0
 	view_camera.position.y = lerpf(view_camera.position.y,(1.03 if crouched else 1.65)+walk_bob+stair_view_offset,delta*20.0)
-	view_camera.rotation.z = lerpf(view_camera.rotation.z,sin(tread_phase)*0.018*stair_amount,delta*10.0)
+	view_camera.rotation.z = lerpf(view_camera.rotation.z,0.0,delta*10.0)
 	view_camera.fov = lerpf(view_camera.fov, 28.0 if scoped else 80.0, delta * 15.0)
 	if is_instance_valid(weapon_model):
 		weapon_model.position = Vector3(0.22, -0.23 + sin(bob_time) * 0.008 + stair_view_offset*0.45, -0.35 + recoil * 0.055)
@@ -173,8 +168,8 @@ func _physics_process(delta: float) -> void:
 		weapon_model.rotation.z = sin(bob_time * 0.5) * 0.012
 		weapon_model.visible = not scoped and game.phase != "menu" and not game.exploring
 	footstep_time -= delta
-	if footstep_time <= 0 and is_on_floor() and horizontal_speed > (0.4 if climbing else 3.0):
-		footstep_time = maxf(0.24,float(tread.depth)*2.0/horizontal_speed) if climbing else 0.42
+	if footstep_time <= 0 and is_on_floor() and horizontal_speed > 3.0:
+		footstep_time = 0.42
 		game.play_sound("step", global_position, -25.0)
 	if locked or not game.can_fire():
 		return
@@ -266,7 +261,6 @@ func reset_to(spawn_position: Vector3, yaw: float) -> void:
 	view_camera.rotation = Vector3.ZERO
 	stair_amount = 0.0
 	stair_view_offset = 0.0
-	stair_stride = 0.0
 	bob_time = 0.0
 
 

@@ -1,4 +1,4 @@
-ATRIUM STRIKE v0.2.9 — Windows x64, offline botlar
+ATRIUM STRIKE v0.2.10 — Windows x64, offline botlar
 
 1. ZIP arxivni to‘liq oching (Extract All).
 2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.
@@ -39,5 +39,8 @@ Eshikdan bino ichiga tekis pol orqali kiriladi; ichkarida ortiqcha zina yo‘q.
 Old fasadning chap tarafidagi daraxtlar olib tashlandi.
 
 Ichki zina pog‘onalari va maydoncha panjaralari tutashtirilgan.
-Zinada yurish sekinlashadi, ko‘rinish va qadam tovushi pog‘onaga moslanadi.
+Tekislik va zinada odatiy o‘yin tezligi saqlanadi; kuchli kamera silkinishi olib tashlangan.
 Lift kabinasining ichki eshiklari harakat vaqtida yopiladi; shaxta yopiq.
+
+Old kirish keng markaziy zina, ikki yon zina va shisha panjarali umumiy maydonchadan iborat.
+Lift bilan atrium orasidagi yog‘och to‘siq olib tashlangan.

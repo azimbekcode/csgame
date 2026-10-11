@@ -82,6 +82,12 @@ func run() -> void:
 		var bay: Node3D = game.building.get_node("MarkedStairBay_%d" % side)
 		check(bay.find_children("StairRailing*","Node3D",false,false).size()==36,"Stair bay %d has joined flight and landing railings" % side)
 	check(game.building.stair_surfaces.size()>12,"Controller can identify actual tread dimensions on all stair flights")
+	for level in range(4):
+		var y := floor_y(level)+1.25
+		var opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,12),Vector3(-2.8,y,12),1)
+		var rear_opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,19),Vector3(-2.8,y,19),1)
+		check(game.get_world_3d().direct_space_state.intersect_ray(opening).is_empty() and game.get_world_3d().direct_space_state.intersect_ray(rear_opening).is_empty(),"Wooden partition beside lift is removed on level %d" % level)
+	check(game.building.has_node("FrontEntranceStairs"),"Front stairs have a shared landing and three parallel approaches")
 	p.reset_to(Vector3(0,-1.74,5),0)
 	await settle(p)
 	check(p.is_on_floor() and absf(p.position.y+1.8)<0.1,"Player spawns grounded at human eye height")
@@ -170,6 +176,12 @@ func run() -> void:
 		check(await walk_to(p,Vector3(side*7.8,1.6,21.6)) and await walk_to(p,Vector3(side*2.4,4,21.6)),"Rear side %d stair reaches shared first-floor landing" % int(side))
 		check(absf(p.position.y-4)<0.15,"Rear upper entrance is on level 1")
 		check(await walk_to(p,Vector3(0,4,21.0)) and await walk_to(p,Vector3(0,4,18)),"Raised rear door connects to interior")
+	for side in [-1.0,1.0]:
+		p.reset_to(Vector3(side*5.2,-0.85,-33.5),PI)
+		await settle(p)
+		check(await walk_to(p,Vector3(side*5.2,1.55,-27.35)),"Front side %d narrow stairs reach their landing" % int(side))
+		check(await walk_to(p,Vector3(side*5.2,4,-21.4)),"Front side %d narrow stairs join the main entrance" % int(side))
+		check(await walk_to(p,Vector3(side*5.2,4,-22.25)) and await walk_to(p,Vector3(0,4,-22.25)) and await walk_to(p,Vector3(0,4,-21.4)),"Front shared landing links side %d around the doorway jamb to the central door" % int(side))
 	p.reset_to(Vector3(0,-0.85,-33.5),0)
 	await settle(p)
 	check(await walk_to(p,Vector3(0,4,-21.5)),"Wide front stairs are climbable without jumping")
@@ -184,7 +196,7 @@ func run() -> void:
 		await physics_frame
 		up_offset = maxf(up_offset,absf(p.stair_view_offset))
 	Input.action_release("forward")
-	check(up_offset>0.04 and p.position.y>-0.1,"Ascending stairs produces tread-paced camera motion")
+	check(up_offset<=0.01 and p.position.y>0.5,"Ascending stairs preserves speed without strong camera shake")
 	p.rotation.y = 0
 	Input.action_press("forward")
 	var down_offset := 0.0
@@ -192,7 +204,7 @@ func run() -> void:
 		await physics_frame
 		down_offset = maxf(down_offset,absf(p.stair_view_offset))
 	Input.action_release("forward")
-	check(down_offset>0.02,"Descending stairs produces tread-paced camera motion")
+	check(down_offset<=0.01,"Descending stairs keeps camera shake small")
 	await frames(35)
 	check(p.stair_amount<0.01,"Stair motion settles when the player stops")
 	p.set_physics_process(false)
