@@ -785,37 +785,63 @@ func _make_campus_link() -> void:
 	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-18.25,2.4,45.3))
 	_stair_railing(Vector3(-12.7,2.4,44.5),Vector3(-12.7,2.4,48.3))
 	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-27.3,2.4,48.3))
-	# The raised path reaches the neighbouring cream campus block's vestibule.
+	# Three taller storeys share the round building's main roof elevation.
+	var base_height := 2.4
+	var roof_height := ROOF_HEIGHT
+	var wall_height := roof_height-0.30-base_height
+	var wall_mid := base_height+wall_height/2
+	var storey_height := (roof_height-base_height)/3
 	_box(Vector3(-24,0.6,52.5),Vector3(13,3.0,8.6),limestone)
 	_box(Vector3(-24,2.25,52.5),Vector3(13,0.30,8.6),tiles)
-	_box(Vector3(-24,13.65,52.5),Vector3(13.4,0.30,8.6),cream)
+	_box(Vector3(-24,roof_height-0.15,52.5),Vector3(13.4,0.30,8.6),cream).name = "NeighbourRoof"
 	for x in [-30.4,-17.6]:
-		_box(Vector3(x,8.0,52.5),Vector3(0.24,11.2,8.2),limestone)
-	_box(Vector3(-24,8.0,56.55),Vector3(13,11.2,0.24),limestone)
+		_box(Vector3(x,wall_mid,52.5),Vector3(0.24,wall_height,8.2),limestone)
+	_box(Vector3(-24,wall_mid,56.55),Vector3(13,wall_height,0.24),limestone)
 	for x in [-27.9,-20.1]:
-		_box(Vector3(x,8,48.45),Vector3(5.3,11.2,0.25),limestone)
-	_box(Vector3(-24,9.3,48.45),Vector3(2.5,8.6,0.25),limestone)
+		_box(Vector3(x,wall_mid,48.45),Vector3(5.3,wall_height,0.25),limestone)
+	_box(Vector3(-24,(5.0+roof_height-0.30)/2,48.45),Vector3(2.5,roof_height-0.30-5.0,0.25),limestone)
 	for level in range(3):
-		var base := 2.4+level*3.7
+		var base := base_height+level*storey_height
 		for x in [-29.0,-26.5,-24.0,-21.5,-19.0]:
 			if level==0 and x==-24.0: continue
-			_box(Vector3(x,base+2.0,48.28),Vector3(1.4,2.0,0.05),glass,0,false)
+			_box(Vector3(x,base+2.45,48.28),Vector3(1.4,2.6,0.05),glass,0,false)
 			for edge in [-0.74,0.74]:
-				_box(Vector3(x+edge,base+2,48.20),Vector3(0.07,2.2,0.08),door_wood,0,false)
-			for y in [-1.05,0.0,1.05]:
-				_box(Vector3(x,base+2+y,48.20),Vector3(1.55,0.06,0.08),door_wood,0,false)
-		_box(Vector3(-24,base+3.55,48.25),Vector3(13.3,0.18,0.35),cream,0,false)
+				_box(Vector3(x+edge,base+2.45,48.20),Vector3(0.07,2.8,0.08),door_wood,0,false)
+			for y in [-1.35,0.0,1.35]:
+				_box(Vector3(x,base+2.45+y,48.20),Vector3(1.55,0.06,0.08),door_wood,0,false)
+		_box(Vector3(-24,base+storey_height-0.15,48.25),Vector3(13.3,0.18,0.35),cream,0,false)
 	for x in [-30.5,-28.0,-25.2,-22.8,-20.0,-17.5]:
-		_box(Vector3(x,8,48.13),Vector3(0.18,11.1,0.24),cream,0,false)
+		_box(Vector3(x,wall_mid,48.13),Vector3(0.18,wall_height-0.10,0.24),cream,0,false)
 	for x in [-25.25,-22.75]:
 		_box(Vector3(x,3.7,48.26),Vector3(0.12,2.6,0.35),door_wood)
 	_box(Vector3(-24,5.1,48.05),Vector3(3.0,0.16,1.2),bronze,0,false)
+	_make_link_garden()
 	for node in get_children().slice(first): node.reparent(link,false)
 
 	# Turn the entire assembly clockwise from its approach, keeping the stair foot fixed.
 	var pivot := Vector3(-15.5,0,30.5)
 	link.rotation.y = -PI/2
 	link.position = pivot-link.basis*pivot
+
+func _make_link_garden() -> void:
+	# The stair's right side has a planted courtyard below the raised walkway.
+	var garden := Node3D.new()
+	garden.name = "LinkSideGarden"
+	add_child(garden)
+	var first := get_child_count()
+	var lawn := _textured_material("grass",Color("607642"),1.0)
+	_box(Vector3(-23.25,-0.86,37.7),Vector3(9.4,0.16,13.8),lawn).name = "LawnBed"
+	_box(Vector3(-23.25,-0.81,30.55),Vector3(10.0,0.16,0.5),paving)
+	_box(Vector3(-28.2,-0.81,37.7),Vector3(0.50,0.16,14.8),paving)
+	_box(Vector3(-18.45,-0.81,37.7),Vector3(0.25,0.16,14.0),paving)
+	_box(Vector3(-23.25,0.61,45.0),Vector3(9.5,2.82,0.28),paving).name = "GardenRetainingWall"
+	_tree(Vector3(-23.5,-0.77,38.4),1515)
+	for point in [Vector3(-27,-0.77,43.5),Vector3(-20,-0.77,43.7),Vector3(-27,-0.77,32.5)]:
+		_shrub(point+Vector3(0,0.4,0))
+	for x in [-26.0,-21.0]:
+		for z in [33.5,40.5]:
+			_box(Vector3(x,-0.74,z),Vector3(0.07,0.12,0.07),dark,0,false)
+	for node in get_children().slice(first): node.reparent(garden,false)
 
 func _make_roof_ladder() -> void:
 	var ladder := Node3D.new()

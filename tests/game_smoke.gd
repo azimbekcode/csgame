@@ -203,6 +203,12 @@ func run() -> void:
 		p.velocity = Vector3(0,p.velocity.y-18.0/60.0,0)
 		p.move_and_slide()
 	check(p.is_on_floor() and absf(p.position.y+1.8)<0.15,"Soldier drops through the dome opening to the atrium ground floor")
+	check(link.has_node("LinkSideGarden/LawnBed") and link.has_node("LinkSideGarden/GardenRetainingWall"),"Connecting stair has a planted side courtyard with a retaining wall")
+	check(absf(link.get_node("NeighbourRoof").position.y+0.15-game.building.ROOF_HEIGHT)<0.001,"Three-storey neighbouring building matches the main roof height")
+	for level in range(4):
+		var button := game.building.lift.get_node("CallButton_%d" % level) as Node3D
+		var approach: Vector3 = game.building.lift.to_global(Vector3(-2.4,floor_y(level)+1.23,button.position.z))
+		check(button.position.z>0 and button.position.z<1.5 and space.intersect_ray(PhysicsRayQueryParameters3D.create(approach,button.global_position,1)).is_empty(),"Lift call button is visible on the visitor's right on floor %d" % level)
 	var front_flights := 0
 	for surface in game.building.stair_surfaces:
 		if surface.get_parent()==game.building.get_node("FrontEntranceStairs"): front_flights += 1

@@ -131,3 +131,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 
 ![Atrium shiftlari va konditsionerlar](docs/screenshots/atrium_ceiling.png)
 ![Gumbazdagi dumaloq kirish](docs/screenshots/dome_oculus.png)
+
+0.2.15: Lift chaqirish tugmasi barcha qavatlarda eshikning o‘ng tomonida. Qo‘shni bino uch qavatli, asosiy tom balandligi dumaloq bino bilan teng. Unga boradigan zina yonida maysazor, daraxt, butalar va tosh tayanch devor bor.
+
+![Zina yonidagi maysazor](docs/screenshots/campus_link_garden.png)
+![Liftning o‘ng tomonidagi chaqirish tugmasi](docs/screenshots/lift_button_right.png)
