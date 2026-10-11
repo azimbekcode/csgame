@@ -26,7 +26,7 @@ func run() -> void:
 		"front_reference": [Vector3(18,4,-36),Vector3(0,2.3,-25)],
 		"front_reference_other": [Vector3(-18,3.5,-36),Vector3(0,2.3,-25)],
 		"lift_open_lobby": [Vector3(-1,5.65,12.8),Vector3(-4.4,5.5,16.2)],
-		"roof_ladder": [Vector3(-35,7,-8),Vector3(-20,7,0)],
+		"roof_ladder": [Vector3(35,7,-8),Vector3(20,7,0)],
 		"rear_guidance": [Vector3(0,-0.15,19.5),Vector3(0,-0.8,11)],
 		"stairs_top": [game.building.stair_point(-1,1.05,13.5,13.65),game.building.stair_point(-1,0,18.2,10)],
 		"lift_between": [Vector3(-4.4,7.4,16.2),Vector3(-2.8,7.4,16.2)],

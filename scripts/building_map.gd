@@ -34,8 +34,8 @@ var navigation_region: NavigationRegion3D
 var room_entries: Array[Vector3] = []
 var stair_surfaces: Array[Node3D] = []
 var lift: Node3D
-const LADDER_BASE := Vector3(-21.0,-0.9,0)
-const LADDER_TOP := Vector3(-19.0,16.05,0)
+const LADDER_BASE := Vector3(21.0,-0.9,0)
+const LADDER_TOP := Vector3(19.0,16.05,0)
 var material_cache: Dictionary = {}
 
 func _ready() -> void:
@@ -68,7 +68,7 @@ func _make_floors() -> void:
 			if level > 0:
 				_make_balcony_rail(a,b,h)
 				_wedge(INNER_RADIUS,ROOM_RADIUS,a,b,h-0.29,0.025,cream,false)
-			if level == FLOOR_COUNT-1: _wedge(INNER_RADIUS,OUTER_RADIUS,a,b,ROOF_HEIGHT,0.23,cream,false)
+			if level == FLOOR_COUNT-1: _wedge(INNER_RADIUS,OUTER_RADIUS,a,b,ROOF_HEIGHT,0.23,cream,true)
 		for light_index in range(16):
 			var lamp := OmniLight3D.new()
 			lamp.position = _polar(9.0,TAU*light_index/16.0,h+3.4)
@@ -231,7 +231,7 @@ func _make_rooms() -> void:
 			var degrees := rad_to_deg(a)
 			var doorway := absf(degrees-90)<10 or absf(degrees-270)<10
 			# Open the lift alcove into the rear lobby at every landing.
-			if degrees>100 and degrees<125: doorway = true
+			if degrees>100 and degrees<112.5: doorway = true
 			for d in door_angles+[247.5,292.5]:
 				doorway = doorway or absf(degrees-d)<6
 			var width := 2*ROOM_RADIUS*sin(PI/SEGMENTS)+0.018
@@ -244,7 +244,7 @@ func _make_rooms() -> void:
 				for band in [0.10,1.35,2.65,3.68]:
 					_box(_polar(ROOM_RADIUS-0.10,a,h+band),Vector3(width,0.022,0.025),dark,-a-PI/2,false)
 				_box(_polar(ROOM_RADIUS-0.1,a,h+1.05),Vector3(width,0.04,0.035),bronze,-a-PI/2,false)
-		for d in [22.5,67.5,157.5,202.5,337.5]:
+		for d in [22.5,67.5,112.5,157.5,202.5,337.5]:
 			var a := deg_to_rad(d)
 			_box(_polar(15.4,a,h+height/2),Vector3(8.7,height,0.17),wood,-a)
 		for index in range(door_angles.size()):
@@ -617,7 +617,7 @@ func _make_dome() -> void:
 	for i in range(48):
 		var a := TAU*i/48
 		var b := TAU*(i+1)/48
-		_box(_polar(DOME_RADIUS,(a+b)/2,(ROOF_HEIGHT+DOME_BASE)/2),Vector3(2*DOME_RADIUS*sin(PI/48),DOME_BASE-ROOF_HEIGHT,0.08),glass,-(a+b)/2-PI/2,false)
+		_box(_polar(DOME_RADIUS,(a+b)/2,(ROOF_HEIGHT+DOME_BASE)/2),Vector3(2*DOME_RADIUS*sin(PI/48),DOME_BASE-ROOF_HEIGHT,0.08),glass,-(a+b)/2-PI/2,true)
 		_beam(_polar(DOME_RADIUS,a,ROOF_HEIGHT),_polar(DOME_RADIUS,a,DOME_BASE),0.055,bronze)
 		for ring in range(8):
 			var t0 := PI/2*ring/8
@@ -657,6 +657,8 @@ func _make_lift() -> void:
 func _make_roof_ladder() -> void:
 	var ladder := Node3D.new()
 	ladder.name = "RoofAccessLadder"
+	# Front view faces +Z, so its left-hand facade is +X.
+	ladder.rotation.y = PI
 	add_child(ladder)
 	var first := get_child_count()
 	for z in [-0.48,0.48]:
@@ -671,8 +673,8 @@ func _make_roof_ladder() -> void:
 	for node in get_children().slice(first): node.reparent(ladder,false)
 
 func near_roof_ladder(point: Vector3) -> bool:
-	var exterior := point.x>-22.0 and point.x<-20.6
-	var roof_exit := point.y>15.75 and point.x>-22.0 and point.x<-18.7
+	var exterior := point.x<22.0 and point.x>20.6
+	var roof_exit := point.y>15.75 and point.x<22.0 and point.x>18.7
 	return (exterior or roof_exit) and absf(point.z)<0.85 and point.y>-1.3 and point.y<16.5
 
 func _make_campus() -> void:

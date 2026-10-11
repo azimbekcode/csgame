@@ -1,4 +1,4 @@
-ATRIUM STRIKE v0.2.11 — Windows x64, offline botlar
+ATRIUM STRIKE v0.2.12 — Windows x64, offline botlar
 
 1. ZIP arxivni to‘liq oching (Extract All).
 2. AtriumStrike papkasidagi AtriumStrike.exe ni oching.
@@ -43,5 +43,8 @@ Tekislik va zinada odatiy o‘yin tezligi saqlanadi; kuchli kamera silkinishi ol
 Lift kabinasining ichki eshiklari harakat vaqtida yopiladi; shaxta yopiq.
 
 Old kirishda bitta keng zina bor: ikki ko‘tarilish orasida tekis maydoncha va yonlarida shisha panjaralar.
-Lift yonidagi belgilangan devorlar barcha qavatlarda olib tashlangan. Lift eshigi o‘ng yoniga aylantirilgan.
+Lift oldidagi yo‘l ochiq. Lift eshigi o‘ng yoniga aylantirilgan.
 Chap fasaddagi narvon bilan tomga chiqish mumkin: W/S — chiqish/tushish, E — ushlash, Space — qo‘yib yuborish.
+
+Lift yonidagi xona devori barcha qavatlarda yopilgan.
+Narvon old fasaddan qaraganda chap tomonda; tomning poli mustahkam, unda yurish mumkin.

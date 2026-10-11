@@ -9,7 +9,7 @@ func run() -> void:
 	game.explore_map()
 	game.set_process(false)
 	var player = game.player
-	player.reset_to(Vector3(-21,-0.85,0),-PI/2)
+	player.reset_to(Vector3(21,-0.85,0),PI/2)
 	Input.action_press("forward")
 	var reached_roof := false
 	for frame in range(340):
@@ -27,6 +27,22 @@ func run() -> void:
 		push_error("Roof ladder exit must leave the player on a solid roof landing")
 		quit(1)
 		return
+	# Walk past the small ladder platform: the entire roof must support us.
+	Input.action_press("forward")
+	for frame in range(50): await physics_frame
+	Input.action_release("forward")
+	for frame in range(10): await physics_frame
+	if player.position.y<15.9 or not player.is_on_floor() or player.position.x>17:
+		push_error("Player must remain on the roof after walking away from the ladder")
+		quit(1)
+		return
+	player.rotation.y = -PI/2
+	Input.action_press("forward")
+	for frame in range(100):
+		await physics_frame
+		if player.position.x>=18.9: break
+	Input.action_release("forward")
+	for frame in range(8): await physics_frame
 	var event := InputEventKey.new()
 	event.physical_keycode = KEY_E
 	event.pressed = true
@@ -43,7 +59,7 @@ func run() -> void:
 		push_error("Roof ladder must let the player descend to the courtyard")
 		quit(1)
 		return
-	print("LADDER PASS: courtyard ascent, solid roof exit and full descent")
+	print("LADDER PASS: courtyard ascent, left facade, walkable roof beyond ladder platform and full descent")
 	game.queue_free()
 	await process_frame
 	await process_frame

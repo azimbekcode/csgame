@@ -127,18 +127,18 @@ func _physics_process(delta: float) -> void:
 	if not game.input_locked() and health>0 and not lift_riding:
 		if not ladder_climbing and ladder_cooldown<=0 and game.building.near_roof_ladder(global_position) and global_position.y<15.9 and Input.is_action_pressed("forward"):
 			var toward := -global_transform.basis.z
-			if toward.x>0.3: ladder_climbing = true
+			if toward.x< -0.3: ladder_climbing = true
 		if ladder_climbing:
 			if Input.is_action_just_pressed("jump"):
 				ladder_climbing = false
 				ladder_cooldown = 0.8
-				velocity = Vector3(-3,3,0)
+				velocity = Vector3(3,3,0)
 			elif absf(Input.get_axis("left","right"))>0.1:
 				ladder_climbing = false
 				ladder_cooldown = 0.5
 			else:
 				var climb := Input.get_axis("back","forward")
-				global_position.x = -21.0
+				global_position.x = game.building.LADDER_BASE.x
 				global_position.z = lerpf(global_position.z,0.0,minf(1.0,delta*12))
 				global_position.y += climb*3.5*delta
 				velocity = Vector3.ZERO

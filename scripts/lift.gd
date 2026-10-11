@@ -114,8 +114,8 @@ func _ready() -> void:
 			_part(panel,Vector3(-0.041,0,-side*0.56),Vector3(0.012,2.66,0.016),black,false)
 			panels.append(panel)
 		door_panels.append(panels)
-		_part(self,Vector3(-1.46,h+1.25,1.86),Vector3(0.06,0.42,0.23),steel,false)
-		var button := _part(self,Vector3(-1.505,h+1.23,1.86),Vector3(0.035,0.13,0.13),button_idle,false)
+		_part(self,Vector3(-1.46,h+1.25,-1.86),Vector3(0.06,0.42,0.23),steel,false)
+		var button := _part(self,Vector3(-1.505,h+1.23,-1.86),Vector3(0.035,0.13,0.13),button_idle,false)
 		button.name = "CallButton_%d" % level
 		call_lamps.append(button.get_child(0) as MeshInstance3D)
 		_part(self,Vector3(-1.46,h+3.05,0),Vector3(0.04,0.22,0.62),black,false)

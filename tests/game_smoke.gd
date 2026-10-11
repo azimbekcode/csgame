@@ -88,6 +88,10 @@ func run() -> void:
 		var opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,12),Vector3(-2.8,y,12),1)
 		var rear_opening := PhysicsRayQueryParameters3D.create(Vector3(-1.8,y,19),Vector3(-2.8,y,19),1)
 		check(game.get_world_3d().direct_space_state.intersect_ray(opening).is_empty() and game.get_world_3d().direct_space_state.intersect_ray(rear_opening).is_empty(),"Wooden partition beside lift is removed on level %d" % level)
+	for level in range(4):
+		var y := floor_y(level)+1.25
+		var room_wall := PhysicsRayQueryParameters3D.create(Vector3(-4.8,y,13),Vector3(-6,y,13),1)
+		check(not game.get_world_3d().direct_space_state.intersect_ray(room_wall).is_empty(),"Room beside the lift is enclosed on level %d" % level)
 	check(game.building.has_node("FrontEntranceStairs"),"Front stairs have one broad approach with an intermediate landing")
 	p.reset_to(Vector3(0,-1.74,5),0)
 	await settle(p)
