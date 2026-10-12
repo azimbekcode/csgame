@@ -413,10 +413,10 @@ func _make_stairs() -> void:
 
 func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2,landing_extension: float=0.0,start_extension: float=0.0,finish: Material=null) -> void:
 	var tread_finish: Material = marble if finish==null else finish
-	var steps := int(ceil(rise/0.16))
+	var steps := int(ceil(absf(rise)/0.16))
 	for step in range(steps):
 		var top := rise*(step+1)/steps
-		var tread_height := rise/steps+0.24
+		var tread_height := absf(rise)/steps+0.24
 		var z := lerpf(start_z,end_z,(step+0.5)/steps)
 		_box(Vector3(x,base+top-tread_height/2,z),Vector3(width,tread_height,absf(end_z-start_z)/steps+0.01),tread_finish,0,false)
 		var front_z := lerpf(start_z,end_z,float(step)/steps)+signf(end_z-start_z)*0.03
@@ -482,7 +482,9 @@ func _glass_guard(a: Vector3,b: Vector3) -> void:
 		add_child(body)
 	for i in range(count+1):
 		var foot := a.lerp(b,float(i)/count)
-		_beam(foot,foot+Vector3.UP*1.06,0.035,dark)
+		_box(foot+Vector3.UP*0.51,Vector3(0.07,1.02,0.07),metal,0,false)
+		_box(foot+Vector3.UP*0.025,Vector3(0.16,0.05,0.16),metal,0,false)
+		_box(foot+Vector3.UP*1.055,Vector3(0.12,0.045,0.12),metal,0,false)
 	_beam(a+Vector3.UP*1.06,b+Vector3.UP*1.06,0.035,metal)
 	for node in get_children().slice(first): node.reparent(root,false)
 
@@ -525,6 +527,56 @@ func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: f
 	body.add_child(collision)
 	add_child(body)
 
+func _make_front_left_stair_side() -> void:
+	# Looking at the front (+Z), the photograph's left side is positive X.
+	var assembly := Node3D.new()
+	assembly.name = "FrontLeftStonePassage"
+	add_child(assembly)
+	var first := get_child_count()
+	var granite := _textured_material("stone",Color("878c8c"),0.82)
+	var cap := _textured_material("stone",Color("a9adab"),0.52)
+	# Deep stringers have stepped upper edges and an open underside.
+	for flight in [Vector4(-33,-28,-0.9,2.45),Vector4(-26.7,-23,1.55,2.45)]:
+		var steps := int(ceil(flight.w/0.16))
+		var depth: float = (flight.y-flight.x)/steps
+		for step in range(steps):
+			var top: float = flight.z+flight.w*(step+1)/steps
+			var z: float = flight.x+depth*(step+0.5)
+			_box(Vector3(4.23,top-0.40,z),Vector3(0.34,0.80,depth+0.012),granite).name = "LeftGraniteStringer"
+			_box(Vector3(4.23,top+0.014,z),Vector3(0.40,0.028,depth+0.018),cap,0,false)
+	_box(Vector3(4.23,1.15,-27.35),Vector3(0.34,0.80,1.3),granite)
+	_box(Vector3(4.23,1.564,-27.35),Vector3(0.40,0.028,1.3),cap,0,false)
+	_box(Vector3(4.23,3.60,-21.4),Vector3(0.34,0.80,3.2),granite)
+	# Fluted square piers support the upper flight and entrance landing.
+	for pier in [Vector2(-25.6,1.5),Vector2(-20.5,3.2)]:
+		var bottom := -1.70
+		_box(Vector3(3.85,bottom-0.02,pier.x),Vector3(0.92,0.20,0.92),granite)
+		_box(Vector3(3.85,(bottom+pier.y)/2,pier.x),Vector3(0.62,pier.y-bottom,0.62),granite)
+		_box(Vector3(3.85,pier.y+0.06,pier.x),Vector3(0.85,0.12,0.85),cap)
+		for offset in [-0.22,-0.11,0.0,0.11,0.22]:
+			_box(Vector3(4.17,(bottom+pier.y)/2,pier.x+offset),Vector3(0.028,pier.y-bottom-0.16,0.038),paving,0,false)
+	# Shallow descending steps lead to a level passage and the level-0 door.
+	_stair_flight(5.88,-0.9,-32,-28,-0.9,2.56,0,0,cap)
+	_box(Vector3(5.88,-1.94,-24.5),Vector3(2.56,0.28,7.0),cap).name = "LeftLowerPassageFloor"
+	_box(Vector3(3.6,-1.94,-21.4),Vector3(3.0,0.28,2.4),cap)
+	_box(Vector3(3.4,-1.94,-27.1),Vector3(2.6,0.28,10.2),_textured_material("stone",Color("4f5553"),1.0)).name = "UnderStairGravelBed"
+	# Retaining wall with wide coping separates the route from the paving.
+	_box(Vector3(7.35,-1.29,-24.5),Vector3(0.38,1.58,7.0),granite).name = "LeftPassageRetainingWall"
+	_box(Vector3(7.35,-0.486,-24.5),Vector3(0.52,0.05,7.0),cap)
+	_terrain_patch(PackedVector3Array([Vector3(7.16,-0.9,-32),Vector3(7.54,-0.9,-32),Vector3(7.54,-0.5,-28),Vector3(7.16,-0.5,-28)]),1.18,granite)
+	_terrain_patch(PackedVector3Array([Vector3(7.09,-0.88,-32),Vector3(7.61,-0.88,-32),Vector3(7.61,-0.475,-28),Vector3(7.09,-0.475,-28)]),0.05,cap)
+	_box(Vector3(5.88,-1.29,-20.8),Vector3(2.56,1.58,0.30),granite)
+	# Stop the inner curb before the turn so the lower doorway stays accessible.
+	_box(Vector3(4.55,-1.53,-25.35),Vector3(0.30,0.54,5.3),granite)
+	_box(Vector3(4.62,-1.795,-24.5),Vector3(0.46,0.01,6.8),_textured_material("stone",Color("4f5553"),1.0),0,false)
+	# Stone paving and planting continue outside the retaining wall.
+	_box(Vector3(8.65,-0.91,-25.6),Vector3(2.1,0.10,8.4),campus_stone)
+	for z in [-28.3,-25.7,-23.1]:
+		_shrub(Vector3(9.45,-0.83,z))
+		for offset in [-0.25,0.0,0.25]:
+			_sphere(Vector3(9.05+offset,-0.49,z-0.40),0.09,_material(Color("d78089")))
+	for node in get_children().slice(first): node.reparent(assembly,false)
+
 func _make_entrances() -> void:
 	# One broad entrance stair inherits the former side flight profile,
 	# with an intermediate landing and dark glass balustrades.
@@ -545,6 +597,7 @@ func _make_entrances() -> void:
 		_glass_guard(Vector3(x,4,-23),Vector3(x,4,-19.85))
 		_box(Vector3(side*4.05,1.45,-20.1),Vector3(0.35,4.6,0.35),limestone)
 	for node in get_children().slice(front_first): node.reparent(frontage,false)
+	_make_front_left_stair_side()
 	# Sunken front forecourt: descend from courtyard -0.9 to the doorway at -1.8.
 	_box(Vector3(0,-1.94,-21.4),Vector3(4.2,0.28,2.4),marble)
 	_box(Vector3(0,-1.94,-19.5),Vector3(4.2,0.28,1.8),marble)
@@ -558,6 +611,8 @@ func _make_entrances() -> void:
 	_box(Vector3(0,2.25,-20),Vector3(3,2.3,0.45),limestone)
 	_label("0-QAVAT KIRISH",Vector3(0,1.4,-20.4),PI,0.004)
 	for side in [-1.0,1.0]:
+		# The reference's left route now approaches along the stair, not across it.
+		if side>0: continue
 		var approach := Node3D.new()
 		approach.position = Vector3(side*2.1,0,-21.4)
 		approach.rotation.y = side*PI/2
@@ -1339,6 +1394,8 @@ func _wedge(inner: float, outer: float, a: float, b: float, top: float, thicknes
 					cut.append(Vector2(p.x,p.z))
 				openings.append(cut)
 		elif inner in [20.0,20.5]:
+			# Clear the reference's sunken passage beside the front-left stair.
+			openings.append(PackedVector2Array([Vector2(2.1,-32),Vector2(7.55,-32),Vector2(7.55,-20.6),Vector2(2.1,-20.6)]))
 			openings.append(PackedVector2Array([Vector2(-4.9,-22.8),Vector2(4.9,-22.8),Vector2(4.9,-19.4),Vector2(-4.9,-19.4)]))
 			openings.append(PackedVector2Array([Vector2(-2.1,19.4),Vector2(2.1,19.4),Vector2(2.1,24.6),Vector2(-2.1,24.6)]))
 		var pieces: Array[PackedVector2Array] = [polygon]

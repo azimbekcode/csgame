@@ -151,3 +151,7 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 
 ![To‘g‘ri devorlar va old panjara](docs/screenshots/perimeter_overview.png)
 ![Old tarafdagi ikki yo‘nalishli yo‘l](docs/screenshots/perimeter_front.png)
+
+0.2.19: Asosiy old zinaning chap tarafi yangi rasmga moslandi: kulrang granit yon qoplama, metall ustunli oynali panjara, o‘yiqli tosh tayanch ustunlar va pastki kirishga olib boradigan pastga tushuvchi yo‘lak. Yo‘lak chetida keng qopqoqli past tosh devor, tosh yo‘lak va gullar bor.
+
+![Asosiy zinaning chap tarafi](docs/screenshots/front_left_passage.png)

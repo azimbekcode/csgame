@@ -5,6 +5,7 @@
 # Exported builds
 /build/
 /dist/
+/work/
 *.exe
 *.pck
 

@@ -14,6 +14,10 @@ this is a reference-based game reconstruction, not a surveyed digital twin.
 ## Entrances and circulation
 
 - A wide central front stair reaches level 1 through the framed front portal.
+- Its left side follows the close-up stair reference: grey granite stringers,
+  capped metal posts and dark glass, fluted stone supports, and a sunken stone
+  passage behind a low retaining wall. Shallow steps from the courtyard lead
+  along the stair and turn beneath its upper landing into the level-0 doorway.
 - The rear entrance has mirrored L-shaped stairs: a lower flight toward the
   building, an intermediate turning landing, and an upper lateral flight to
   the shared level-1 landing, following the user's close-up reference photo. The door beneath the landing reaches level 0.
