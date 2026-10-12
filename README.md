@@ -155,3 +155,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 0.2.19: Asosiy old zinaning chap tarafi yangi rasmga moslandi: kulrang granit yon qoplama, metall ustunli oynali panjara, o‘yiqli tosh tayanch ustunlar va pastki kirishga olib boradigan pastga tushuvchi yo‘lak. Yo‘lak chetida keng qopqoqli past tosh devor, tosh yo‘lak va gullar bor.
 
 ![Asosiy zinaning chap tarafi](docs/screenshots/front_left_passage.png)
+
+0.2.20: Asosiy zina tagidagi kirishning chap kichik zinapoyasi 0.2.18 dagi joyiga qaytarildi. Chap bo‘ylama yo‘lak endi qisqa zina, tekis oraliq maydoncha va yana qisqa zinadan iborat. Yo‘lak asosiy zina ostidagi burilish orqali pastki kirishga ulanadi.
+
+![Chap yo‘lakdagi ikki zina va tekis maydoncha](docs/screenshots/front_left_passage_landing.png)
+![Pastki kirishning ikki tarafidagi kichik zinapoyalar](docs/screenshots/front_lower_side_steps.png)

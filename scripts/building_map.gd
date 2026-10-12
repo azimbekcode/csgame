@@ -555,8 +555,10 @@ func _make_front_left_stair_side() -> void:
 		_box(Vector3(3.85,pier.y+0.06,pier.x),Vector3(0.85,0.12,0.85),cap)
 		for offset in [-0.22,-0.11,0.0,0.11,0.22]:
 			_box(Vector3(4.17,(bottom+pier.y)/2,pier.x+offset),Vector3(0.028,pier.y-bottom-0.16,0.038),paving,0,false)
-	# Shallow descending steps lead to a level passage and the level-0 door.
-	_stair_flight(5.88,-0.9,-32,-28,-0.9,2.56,0,0,cap)
+	# Like the main stair: a short flight, level landing, then another flight.
+	_stair_flight(5.88,-0.9,-32,-30.5,-0.45,2.56,0,0,cap)
+	_box(Vector3(5.88,-1.49,-30),Vector3(2.56,0.28,1.0),cap).name = "LeftPassageIntermediateLanding"
+	_stair_flight(5.88,-1.35,-29.5,-28,-0.45,2.56,0,0,cap)
 	_box(Vector3(5.88,-1.94,-24.5),Vector3(2.56,0.28,7.0),cap).name = "LeftLowerPassageFloor"
 	_box(Vector3(3.6,-1.94,-21.4),Vector3(3.0,0.28,2.4),cap)
 	_box(Vector3(3.4,-1.94,-27.1),Vector3(2.6,0.28,10.2),_textured_material("stone",Color("4f5553"),1.0)).name = "UnderStairGravelBed"
@@ -565,9 +567,10 @@ func _make_front_left_stair_side() -> void:
 	_box(Vector3(7.35,-0.486,-24.5),Vector3(0.52,0.05,7.0),cap)
 	_terrain_patch(PackedVector3Array([Vector3(7.16,-0.9,-32),Vector3(7.54,-0.9,-32),Vector3(7.54,-0.5,-28),Vector3(7.16,-0.5,-28)]),1.18,granite)
 	_terrain_patch(PackedVector3Array([Vector3(7.09,-0.88,-32),Vector3(7.61,-0.88,-32),Vector3(7.61,-0.475,-28),Vector3(7.09,-0.475,-28)]),0.05,cap)
-	_box(Vector3(5.88,-1.29,-20.8),Vector3(2.56,1.58,0.30),granite)
+	# Courtyard-height arrival for the restored lateral doorway steps.
+	_box(Vector3(5.8,-1.04,-21.4),Vector3(2.4,0.28,2.4),cap).name = "LeftSideStepsArrival"
 	# Stop the inner curb before the turn so the lower doorway stays accessible.
-	_box(Vector3(4.55,-1.53,-25.35),Vector3(0.30,0.54,5.3),granite)
+	_box(Vector3(4.55,-1.53,-25.9),Vector3(0.30,0.54,4.2),granite)
 	_box(Vector3(4.62,-1.795,-24.5),Vector3(0.46,0.01,6.8),_textured_material("stone",Color("4f5553"),1.0),0,false)
 	# Stone paving and planting continue outside the retaining wall.
 	_box(Vector3(8.65,-0.91,-25.6),Vector3(2.1,0.10,8.4),campus_stone)
@@ -611,9 +614,8 @@ func _make_entrances() -> void:
 	_box(Vector3(0,2.25,-20),Vector3(3,2.3,0.45),limestone)
 	_label("0-QAVAT KIRISH",Vector3(0,1.4,-20.4),PI,0.004)
 	for side in [-1.0,1.0]:
-		# The reference's left route now approaches along the stair, not across it.
-		if side>0: continue
 		var approach := Node3D.new()
+		approach.name = "FrontLowerSideStairs_%d" % int(side)
 		approach.position = Vector3(side*2.1,0,-21.4)
 		approach.rotation.y = side*PI/2
 		add_child(approach)
@@ -621,7 +623,11 @@ func _make_entrances() -> void:
 		_stair_flight(0,-1.8,0,2.3,0.9,2.4,0.8,0.0)
 		for node in get_children().slice(first): node.reparent(approach,false)
 		_box(Vector3(side*4.8,-1.04,-21.4),Vector3(0.8,0.28,2.4),marble,0,false)
-	_box(Vector3(0,-1.35,-22.75),Vector3(9.8,0.9,0.2),limestone)
+	# The longitudinal passage turns beneath the flight and enters between jambs.
+	# Keep a central opening so it coexists with both original lateral stairs.
+	for x in [-3.05,3.05]:
+		_box(Vector3(x,-1.35,-22.75),Vector3(3.7,0.9,0.2),limestone)
+	_box(Vector3(0,-1.94,-23.05),Vector3(9.2,0.28,1.5),marble).name = "UnderStairPassageTurn"
 	# Rear door is flush with the round wall; the long projecting porch is removed.
 	_box(Vector3(0,GROUND_FLOOR-0.14,20.7),Vector3(4.2,0.28,2.4),marble)
 	_stair_flight(0,GROUND_FLOOR,21.9,24.0,0.9,4.2,0.8)
@@ -941,7 +947,12 @@ func _make_campus() -> void:
 		_wedge(20.5,23.0,TAU*i/SEGMENTS,TAU*(i+1)/SEGMENTS,-0.86,0.09,campus_stone,true)
 	for side in [-1.0,1.0]:
 		if side<0: _box(Vector3(side*36,-0.88,0),Vector3(18,0.08,90),grass)
-		_box(Vector3(side*13,-0.88,-38),Vector3(13,0.08,14),grass)
+		if side>0:
+			# Leave the descending passage's courtyard threshold free of lawn.
+			_box(Vector3(13,-0.88,-38.5),Vector3(13,0.08,13),grass)
+			_box(Vector3(13.6,-0.88,-31.5),Vector3(11.8,0.08,1),grass)
+		else:
+			_box(Vector3(side*13,-0.88,-38),Vector3(13,0.08,14),grass)
 		for z in ([-46.0,-31.0,-14.0,3.0,20.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in ([-37.0,-12.0,13.0,38.0] if side<0 else []):
@@ -1396,7 +1407,7 @@ func _wedge(inner: float, outer: float, a: float, b: float, top: float, thicknes
 		elif inner in [20.0,20.5]:
 			# Clear the reference's sunken passage beside the front-left stair.
 			openings.append(PackedVector2Array([Vector2(2.1,-32),Vector2(7.55,-32),Vector2(7.55,-20.6),Vector2(2.1,-20.6)]))
-			openings.append(PackedVector2Array([Vector2(-4.9,-22.8),Vector2(4.9,-22.8),Vector2(4.9,-19.4),Vector2(-4.9,-19.4)]))
+			openings.append(PackedVector2Array([Vector2(-4.9,-23.8),Vector2(4.9,-23.8),Vector2(4.9,-19.4),Vector2(-4.9,-19.4)]))
 			openings.append(PackedVector2Array([Vector2(-2.1,19.4),Vector2(2.1,19.4),Vector2(2.1,24.6),Vector2(-2.1,24.6)]))
 		var pieces: Array[PackedVector2Array] = [polygon]
 		for opening in openings:

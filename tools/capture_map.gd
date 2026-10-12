@@ -38,6 +38,8 @@ func run() -> void:
 		"inner_stairs": [game.building.stair_point(-1,0,12.5,5.65),game.building.stair_point(-1,-1.05,17.7,6.2)],
 		"front_reference": [Vector3(18,4,-36),Vector3(0,2.3,-25)],
 		"front_left_passage": [Vector3(8.1,1.5,-33.7),Vector3(4.7,1.2,-23)],
+		"front_left_passage_landing": [Vector3(8.8,2.2,-34.3),Vector3(5.5,-0.9,-29)],
+		"front_lower_side_steps": [Vector3(-6,1.0,-24.1),Vector3(1.2,-0.4,-21.2)],
 		"front_reference_other": [Vector3(-18,3.5,-36),Vector3(0,2.3,-25)],
 		"lift_open_lobby": [Vector3(-1,5.65,12.8),Vector3(-4.4,5.5,16.2)],
 		"roof_ladder": [Vector3(35,7,-8),Vector3(20,7,0)],
