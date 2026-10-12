@@ -527,6 +527,36 @@ func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: f
 	body.add_child(collision)
 	add_child(body)
 
+func _make_front_stair_supports(side: float,tag: String,granite: Material,cap: Material) -> void:
+	# Deep stringers have stepped upper edges and an open underside.
+	for flight in [Vector4(-33,-28,-0.9,2.45),Vector4(-26.7,-23,1.55,2.45)]:
+		var steps := int(ceil(flight.w/0.16))
+		var depth: float = (flight.y-flight.x)/steps
+		for step in range(steps):
+			var top: float = flight.z+flight.w*(step+1)/steps
+			var z: float = flight.x+depth*(step+0.5)
+			_box(Vector3(side*4.23,top-0.40,z),Vector3(0.34,0.80,depth+0.012),granite).name = tag+"GraniteStringer"
+			_box(Vector3(side*4.23,top+0.014,z),Vector3(0.40,0.028,depth+0.018),cap,0,false)
+	_box(Vector3(side*4.23,1.15,-27.35),Vector3(0.34,0.80,1.3),granite)
+	_box(Vector3(side*4.23,1.564,-27.35),Vector3(0.40,0.028,1.3),cap,0,false)
+	_box(Vector3(side*4.23,3.60,-21.4),Vector3(0.34,0.80,3.2),granite)
+	# Three fluted piers in approach order. The doorway turn is between 2 and 3;
+	# the restored lateral steps sit behind pier 3, nearest the facade.
+	var pier_index := 0
+	for pier in [Vector2(-27.35,1.17),Vector2(-25.3,2.10),Vector2(-22.9,3.58)]:
+		pier_index += 1
+		var support := Node3D.new()
+		support.name = "Front%sPier_%d" % [tag,pier_index]
+		add_child(support)
+		var pier_first := get_child_count()
+		var bottom := -1.70
+		_box(Vector3(side*3.85,bottom-0.02,pier.x),Vector3(0.92,0.20,0.92),granite).name = "Base"
+		_box(Vector3(side*3.85,(bottom+pier.y)/2,pier.x),Vector3(0.62,pier.y-bottom,0.62),granite).name = "Shaft"
+		_box(Vector3(side*3.85,pier.y+0.06,pier.x),Vector3(0.85,0.12,0.85),cap).name = "Capital"
+		for offset in [-0.22,-0.11,0.0,0.11,0.22]:
+			_box(Vector3(side*4.17,(bottom+pier.y)/2,pier.x+offset),Vector3(0.028,pier.y-bottom-0.16,0.038),paving,0,false)
+		for node in get_children().slice(pier_first): node.reparent(support,false)
+
 func _make_front_left_stair_side() -> void:
 	# Looking at the front (+Z), the photograph's left side is positive X.
 	var assembly := Node3D.new()
@@ -535,34 +565,7 @@ func _make_front_left_stair_side() -> void:
 	var first := get_child_count()
 	var granite := _textured_material("stone",Color("878c8c"),0.82)
 	var cap := _textured_material("stone",Color("a9adab"),0.52)
-	# Deep stringers have stepped upper edges and an open underside.
-	for flight in [Vector4(-33,-28,-0.9,2.45),Vector4(-26.7,-23,1.55,2.45)]:
-		var steps := int(ceil(flight.w/0.16))
-		var depth: float = (flight.y-flight.x)/steps
-		for step in range(steps):
-			var top: float = flight.z+flight.w*(step+1)/steps
-			var z: float = flight.x+depth*(step+0.5)
-			_box(Vector3(4.23,top-0.40,z),Vector3(0.34,0.80,depth+0.012),granite).name = "LeftGraniteStringer"
-			_box(Vector3(4.23,top+0.014,z),Vector3(0.40,0.028,depth+0.018),cap,0,false)
-	_box(Vector3(4.23,1.15,-27.35),Vector3(0.34,0.80,1.3),granite)
-	_box(Vector3(4.23,1.564,-27.35),Vector3(0.40,0.028,1.3),cap,0,false)
-	_box(Vector3(4.23,3.60,-21.4),Vector3(0.34,0.80,3.2),granite)
-	# Three fluted piers in approach order. The doorway turn is between 2 and 3;
-	# the restored lateral steps sit behind pier 3, nearest the facade.
-	var pier_index := 0
-	for pier in [Vector2(-27.35,1.17),Vector2(-25.3,2.10),Vector2(-22.9,3.58)]:
-		pier_index += 1
-		var support := Node3D.new()
-		support.name = "FrontLeftPier_%d" % pier_index
-		add_child(support)
-		var pier_first := get_child_count()
-		var bottom := -1.70
-		_box(Vector3(3.85,bottom-0.02,pier.x),Vector3(0.92,0.20,0.92),granite).name = "Base"
-		_box(Vector3(3.85,(bottom+pier.y)/2,pier.x),Vector3(0.62,pier.y-bottom,0.62),granite).name = "Shaft"
-		_box(Vector3(3.85,pier.y+0.06,pier.x),Vector3(0.85,0.12,0.85),cap).name = "Capital"
-		for offset in [-0.22,-0.11,0.0,0.11,0.22]:
-			_box(Vector3(4.17,(bottom+pier.y)/2,pier.x+offset),Vector3(0.028,pier.y-bottom-0.16,0.038),paving,0,false)
-		for node in get_children().slice(pier_first): node.reparent(support,false)
+	_make_front_stair_supports(1.0,"Left",granite,cap)
 	# Like the main stair: a short flight, level landing, then another flight.
 	_stair_flight(5.88,-0.9,-32,-30.5,-0.45,2.56,0,0,cap)
 	_box(Vector3(5.88,-1.49,-30),Vector3(2.56,0.28,1.0),cap).name = "LeftPassageIntermediateLanding"
@@ -588,6 +591,134 @@ func _make_front_left_stair_side() -> void:
 			_sphere(Vector3(9.05+offset,-0.49,z-0.40),0.09,_material(Color("d78089")))
 	for node in get_children().slice(first): node.reparent(assembly,false)
 
+func _make_front_right_stair_side() -> void:
+	# Photo: broad stone foreground, shallow descent near the facade, coping,
+	# patterned walk, roses, slender evergreens and bent black light standards.
+	var assembly := Node3D.new()
+	assembly.name = "FrontRightStonePassage"
+	add_child(assembly)
+	var first := get_child_count()
+	var granite := _textured_material("stone",Color("878c8c"),0.82)
+	var cap := _textured_material("stone",Color("8f9694"),0.62)
+	_make_front_stair_supports(-1.0,"Right",granite,cap)
+	_box(Vector3(-5.92,-1.04,-30.35),Vector3(2.64,0.28,5.3),cap).name = "RightUpperStonePassage"
+	_stair_flight(-5.92,-0.9,-27.7,-26.5,-0.45,2.64,0,0,cap)
+	_box(Vector3(-5.92,-1.49,-26.05),Vector3(2.64,0.28,0.9),cap).name = "RightPassageIntermediateLanding"
+	_stair_flight(-5.92,-1.35,-25.6,-24.4,-0.45,2.64,0,0,cap)
+	_box(Vector3(-5.92,-1.94,-23.4),Vector3(2.64,0.28,2.0),cap).name = "RightLowerStonePassage"
+	_box(Vector3(-3.4,-1.94,-27.1),Vector3(2.6,0.28,10.2),_textured_material("stone",Color("555954"),1.0))
+	_box(Vector3(-5.8,-1.04,-21.4),Vector3(2.4,0.28,2.4),cap).name = "RightSideStepsArrival"
+	# Broad polished coping remains at garden level beside the sunken floor.
+	_box(Vector3(-7.48,-1.25,-27.6),Vector3(0.42,1.5,10.8),granite).name = "RightPassageRetainingWall"
+	_box(Vector3(-7.48,-0.48,-27.6),Vector3(0.64,0.08,10.8),cap)
+	_box(Vector3(-4.54,-1.53,-26.4),Vector3(0.28,0.54,3.2),granite)
+	_box(Vector3(-4.54,-1.23,-26.4),Vector3(0.34,0.06,3.2),cap,0,false)
+	# Subtle joints define the large rectangular stone slabs visible in the photo.
+	for z in [-32.1,-30.5,-28.9]:
+		_box(Vector3(-5.92,-0.896,z),Vector3(2.62,0.005,0.012),paving,0,false)
+	_box(Vector3(-5.92,-0.895,-30.35),Vector3(0.012,0.005,5.3),paving,0,false)
+	# Multicolour paving runs outside the coping and joins the facade walkway.
+	_box(Vector3(-8.96,-0.91,-26.6),Vector3(2.28,0.10,12.8),campus_stone).name = "RightGardenPaving"
+	_box(Vector3(-8.8,-0.91,-19.8),Vector3(5.6,0.10,1.2),campus_stone)
+	var lawn := _textured_material("grass",Color("51633a"),1.0)
+	_box(Vector3(-13.45,-0.91,-26.1),Vector3(6.7,0.10,11.8),lawn).name = "RightRoseGarden"
+	_reference_garden_grass(Vector3(-16.8,-0.84,-32),Vector2(6.7,11.8))
+	# Roses line the walk and cross the lawn, rather than sitting on the paving.
+	for i in range(13):
+		_reference_rose_bush(Vector3(-10.43,-0.84,-31.4+i*0.83),220+i)
+	for i in range(7):
+		_reference_rose_bush(Vector3(-11.3-i*0.72,-0.84,-25.2),260+i)
+	for point in [Vector3(-11.4,-0.84,-28.3),Vector3(-12.1,-0.84,-22.3),Vector3(-15.0,-0.84,-21.7)]:
+		_reference_conifer(point)
+	for z in [-29.0,-23.3]:
+		var foot := Vector3(-9.88,-0.85,z)
+		_box(foot+Vector3(0,0.025,0),Vector3(0.24,0.05,0.24),dark,0,false)
+		_beam(foot,foot+Vector3(0,2.75,0),0.045,dark)
+		_beam(foot+Vector3(0,2.75,0),foot+Vector3(-0.65,3.4,0),0.045,dark)
+		_beam(foot+Vector3(-0.65,3.4,0),foot+Vector3(0.12,4.55,0),0.065,dark)
+		_beam(foot+Vector3(-0.50,3.62,0),foot+Vector3(0.12,4.55,0),0.10,dark)
+		_beam(foot+Vector3(-0.45,3.59,-0.065),foot+Vector3(0.13,4.45,-0.065),0.022,glow)
+	# Low stone terrace behind the planting, matching the garden's far edge.
+	_box(Vector3(-13.45,-0.60,-20.15),Vector3(6.7,0.6,0.35),granite)
+	_box(Vector3(-13.45,-0.28,-20.15),Vector3(6.82,0.06,0.48),cap)
+	for node in get_children().slice(first): node.reparent(assembly,false)
+
+func _reference_rose_bush(origin: Vector3,seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var foliage := _material(Color("384e29"),0.95)
+	var pink := _material(Color("e5a0ae"),0.85)
+	var blush := _material(Color("f1c1b4"),0.85)
+	for stem in range(7):
+		var tip := origin+Vector3(rng.randf_range(-0.28,0.28),rng.randf_range(0.28,0.64),rng.randf_range(-0.25,0.25))
+		_beam(origin,tip,0.009,foliage)
+		for leaf in range(4):
+			var centre := origin.lerp(tip,0.2+leaf*0.18)+Vector3(0.07 if leaf%2==0 else -0.07,0,0)
+			var blade := _sphere(centre,0.065,foliage)
+			blade.scale = Vector3(1.0,0.25,1.7)
+			blade.rotation.y = rng.randf_range(0,TAU)
+		for petal in range(5):
+			var angle := petal*TAU/5
+			var bloom := _sphere(tip+Vector3(cos(angle)*0.045,0,sin(angle)*0.045),0.043,pink if stem%2 else blush)
+			bloom.scale.y = 0.48
+		_sphere(tip+Vector3.UP*0.015,0.024,blush)
+
+func _reference_conifer(origin: Vector3) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(absf(origin.z)*107)
+	_beam(origin,origin+Vector3.UP*2.9,0.032,wood)
+	var mesh := SphereMesh.new()
+	mesh.radius = 1.0
+	mesh.height = 2.0
+	mesh.radial_segments = 6
+	mesh.rings = 4
+	var foliage := MultiMesh.new()
+	foliage.transform_format = MultiMesh.TRANSFORM_3D
+	foliage.use_colors = true
+	foliage.mesh = mesh
+	foliage.instance_count = 1500
+	for i in range(foliage.instance_count):
+		var y := rng.randf_range(0.16,3.05)
+		var angle := rng.randf_range(0,TAU)
+		var radius := (0.035+0.39*pow(1.0-y/3.15,0.65))*sqrt(rng.randf())
+		var centre := Vector3(cos(angle)*radius,y,sin(angle)*radius)
+		var basis := Basis.from_euler(Vector3(rng.randf_range(-0.3,0.3),angle,rng.randf_range(-0.35,0.35))).scaled(Vector3(0.025,0.13,0.038)*rng.randf_range(0.7,1.35))
+		foliage.set_instance_transform(i,Transform3D(basis,centre))
+		foliage.set_instance_color(i,Color("637b3d")*rng.randf_range(0.65,1.16))
+	var instance := MultiMeshInstance3D.new()
+	instance.multimesh = foliage
+	instance.position = origin
+	var mat := _material(Color.WHITE,1.0)
+	mat.vertex_color_use_as_albedo = true
+	instance.material_override = mat
+	add_child(instance)
+
+func _reference_garden_grass(origin: Vector3,size: Vector2) -> void:
+	var blade := SurfaceTool.new()
+	blade.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for vertex in [Vector3(-0.015,0,0),Vector3(0.015,0,0),Vector3(0.02,0.12,0)]:
+		blade.set_normal(Vector3.FORWARD)
+		blade.add_vertex(vertex)
+	var blades := MultiMesh.new()
+	blades.transform_format = MultiMesh.TRANSFORM_3D
+	blades.use_colors = true
+	blades.mesh = blade.commit()
+	blades.instance_count = 5000
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2222
+	for i in range(blades.instance_count):
+		var basis := Basis(Vector3.UP,rng.randf_range(0,TAU)).scaled(Vector3.ONE*rng.randf_range(0.55,1.0))
+		blades.set_instance_transform(i,Transform3D(basis,Vector3(rng.randf()*size.x,0,rng.randf()*size.y)))
+		blades.set_instance_color(i,Color("526d37")*rng.randf_range(0.75,1.15))
+	var instance := MultiMeshInstance3D.new()
+	instance.multimesh = blades
+	instance.position = origin
+	var mat := _material(Color.WHITE,1.0)
+	mat.vertex_color_use_as_albedo = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	instance.material_override = mat
+	add_child(instance)
+
 func _make_entrances() -> void:
 	# One broad entrance stair inherits the former side flight profile,
 	# with an intermediate landing and dark glass balustrades.
@@ -606,9 +737,9 @@ func _make_entrances() -> void:
 		_glass_guard(Vector3(x,1.55,-28),Vector3(x,1.55,-26.7))
 		_glass_guard(Vector3(x,1.55,-26.7),Vector3(x,4,-23))
 		_glass_guard(Vector3(x,4,-23),Vector3(x,4,-19.85))
-		if side<0: _box(Vector3(side*4.05,1.45,-20.1),Vector3(0.35,4.6,0.35),limestone)
 	for node in get_children().slice(front_first): node.reparent(frontage,false)
 	_make_front_left_stair_side()
+	_make_front_right_stair_side()
 	# Sunken front forecourt: descend from courtyard -0.9 to the doorway at -1.8.
 	_box(Vector3(0,-1.94,-21.4),Vector3(4.2,0.28,2.4),marble)
 	_box(Vector3(0,-1.94,-19.5),Vector3(4.2,0.28,1.8),marble)
@@ -961,7 +1092,8 @@ func _make_campus() -> void:
 			_box(Vector3(13,-0.88,-38.5),Vector3(13,0.08,13),grass)
 			_box(Vector3(13.6,-0.88,-31.5),Vector3(11.8,0.08,1),grass)
 		else:
-			_box(Vector3(side*13,-0.88,-38),Vector3(13,0.08,14),grass)
+			_box(Vector3(-13,-0.88,-39),Vector3(13,0.08,12),grass)
+			_box(Vector3(-14.85,-0.88,-32),Vector3(9.3,0.08,2),grass)
 		for z in ([-46.0,-31.0,-14.0,3.0,20.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in ([-37.0,-12.0,13.0,38.0] if side<0 else []):
@@ -1414,6 +1546,7 @@ func _wedge(inner: float, outer: float, a: float, b: float, top: float, thicknes
 					cut.append(Vector2(p.x,p.z))
 				openings.append(cut)
 		elif inner in [20.0,20.5]:
+			openings.append(PackedVector2Array([Vector2(-7.72,-33),Vector2(-2.1,-33),Vector2(-2.1,-20.6),Vector2(-7.72,-20.6)]))
 			# Clear the reference's sunken passage beside the front-left stair.
 			openings.append(PackedVector2Array([Vector2(2.1,-32),Vector2(7.55,-32),Vector2(7.55,-20.6),Vector2(2.1,-20.6)]))
 			openings.append(PackedVector2Array([Vector2(-4.9,-24.85),Vector2(4.9,-24.85),Vector2(4.9,-19.4),Vector2(-4.9,-19.4)]))

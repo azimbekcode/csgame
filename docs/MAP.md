@@ -21,6 +21,10 @@ this is a reference-based game reconstruction, not a surveyed digital twin.
   turns between the second and third piers into the level-0 doorway. Both original
   lateral doorway stairs remain accessible; the restored left stair sits behind
   the third pier, nearest the facade.
+- The right side follows the garden-side photo: a broad stone approach descends
+  in two short flights toward the lower doorway. A wide granite coping separates
+  it from the patterned garden walk, pink rose borders, slender evergreens and
+  black bent light standards. The original lateral doorway steps remain open.
 - The rear entrance has mirrored L-shaped stairs: a lower flight toward the
   building, an intermediate turning landing, and an upper lateral flight to
   the shared level-1 landing, following the user's close-up reference photo. The door beneath the landing reaches level 0.

@@ -164,3 +164,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 0.2.21: Yangi rasmga muvofiq asosiy zinaning chap tagida uchta o‘yiqli granit ustun joylashtirildi. Ikkinchi ustundan keyin, ikkinchi va uchinchi ustun orasidan kirish eshigiga yo‘lak buriladi. Eski joyiga qaytarilgan kichik zinapoya uchinchi ustunning orqasida qoldi.
 
 ![Uchta ustun va kirishga buriluvchi yo‘lak](docs/screenshots/front_three_piers.png)
+
+0.2.22: Asosiy zinaning o‘ng tarafi yangi rasmga moslandi: keng tosh yo‘lak va pastga tushuvchi qisqa zinalar, keng granit qopqoqli devor, rang-barang tosh yo‘lak, pushti atirgullar, archalar, maysazor va egilgan qora chiroqlar. O‘ng yo‘lak zina ostidagi kirish eshigiga ulanadi.
+
+![Asosiy zinaning o‘ng tarafi](docs/screenshots/front_right_reference.png)
+![O‘ng tomondagi gulzor va tosh yo‘lak](docs/screenshots/front_right_garden.png)

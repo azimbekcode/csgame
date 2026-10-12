@@ -43,6 +43,8 @@ func run() -> void:
 		"front_three_piers": [Vector3(9.4,1.6,-30.4),Vector3(3.7,0.6,-24.5)],
 		"front_pier_doorway": [Vector3(5.9,-0.15,-24.1),Vector3(0,-0.1,-24.1)],
 		"front_reference_other": [Vector3(-18,3.5,-36),Vector3(0,2.3,-25)],
+		"front_right_reference": [Vector3(-6.0,0.75,-32.2),Vector3(-7.0,-0.3,-25.0)],
+		"front_right_garden": [Vector3(-18,5.5,-35),Vector3(-7.8,0.2,-25)],
 		"lift_open_lobby": [Vector3(-1,5.65,12.8),Vector3(-4.4,5.5,16.2)],
 		"roof_ladder": [Vector3(35,7,-8),Vector3(20,7,0)],
 		"rear_guidance": [Vector3(0,-0.15,19.5),Vector3(0,-0.8,11)],
@@ -60,6 +62,8 @@ func run() -> void:
 	var selected := OS.get_cmdline_user_args()
 	for name in shots:
 		if not selected.is_empty() and not name in selected: continue
+		root.size = Vector2i(900,1080) if name=="front_right_reference" else Vector2i(1440,900)
+		root.content_scale_size = Vector2i(900,1080) if name=="front_right_reference" else Vector2i(1280,720)
 		if name=="lift_retracted":
 			game.player.global_position = game.building.lift.to_global(Vector3(-2.4,-1.75,0))
 			for frame in range(50): await physics_frame
