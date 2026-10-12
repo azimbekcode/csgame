@@ -135,7 +135,13 @@ func run() -> void:
 	check(absf(p.position.y+0.9)<0.15,"Restored left lateral steps reach courtyard elevation")
 	check(await walk_to(p,Vector3(0,-1.8,-21.4)),"Restored left lateral steps descend back to the doorway")
 	check(game.building.has_node("FrontLeftStonePassage"),"Front-left stair has its reference stone passage")
-	check(await walk_to(p,Vector3(0,-1.8,-23.25)) and await walk_to(p,Vector3(5.88,-1.8,-23.25)),"Lower doorway connects to the left passage through the turn beneath the main stair")
+	var piers: Array[Node] = game.building.get_node("FrontLeftStonePassage").find_children("FrontLeftPier_*","Node3D",false,false)
+	check(piers.size()==3,"Front-left stair has exactly three stone support piers")
+	var second_pier := game.building.get_node("FrontLeftStonePassage/FrontLeftPier_2/Shaft") as Node3D
+	var third_pier := game.building.get_node("FrontLeftStonePassage/FrontLeftPier_3/Shaft") as Node3D
+	check(second_pier.global_position.z<-24.1 and third_pier.global_position.z>-24.1,"Doorway passage turns between the second and third piers")
+	check(game.building.get_node("FrontLowerSideStairs_1").global_position.z>third_pier.global_position.z,"Restored small lateral steps sit behind the third pier")
+	check(await walk_to(p,Vector3(0,-1.8,-24.1)) and await walk_to(p,Vector3(5.88,-1.8,-24.1)),"Lower doorway connects through the opening between the second and third piers")
 	check(await walk_to(p,Vector3(5.88,-1.8,-27.5)),"Left passage stays clear beside the stone piers")
 	await settle(p)
 	check(absf(p.position.y+1.8)<0.15,"Left passage floor matches the lower doorway elevation")
@@ -146,7 +152,7 @@ func run() -> void:
 	await settle(p)
 	check(absf(p.position.y+0.9)<0.15,"Left passage steps reach the courtyard elevation")
 	check(await walk_to(p,Vector3(5.88,-1.8,-27.5)),"Left passage steps descend without jumping")
-	check(await walk_to(p,Vector3(5.88,-1.8,-23.25)) and await walk_to(p,Vector3(0,-1.8,-23.25)) and await walk_to(p,Vector3(0,-1.8,-21.4)),"Left passage returns beneath the main stair to the lower doorway")
+	check(await walk_to(p,Vector3(5.88,-1.8,-24.1)) and await walk_to(p,Vector3(0,-1.8,-24.1)) and await walk_to(p,Vector3(0,-1.8,-21.4)),"Left passage returns between the second and third piers to the lower doorway")
 	var passage_path := NavigationServer3D.map_get_path(map,Vector3(5.88,-0.9,-32.5),Vector3(0,-1.8,-18),true)
 	check(passage_path.size()>2 and passage_path[-1].distance_to(Vector3(0,-1.8,-18))<0.5,"Bot navigation connects the left passage to the lower entrance")
 	for z in [-20.5,-19.5,-18.0,-16.0,-14.0,-12.0,-8.0]:
