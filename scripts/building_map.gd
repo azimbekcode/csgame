@@ -57,13 +57,14 @@ func _ready() -> void:
 	_make_campus()
 	_make_left_facade_lane()
 	_make_rectangular_boundary()
+	_make_rear_reference_house()
 	_make_campus_link()
 	_make_lobby_fixtures()
 	_batch_static_visuals()
 	call_deferred("_setup_navigation")
 
 func _make_floors() -> void:
-	_cylinder(Vector3(0,GROUND_FLOOR-0.15,0), OUTER_RADIUS, 0.3, marble)
+	_cylinder(Vector3(0,GROUND_FLOOR-0.15,0), ROOM_RADIUS, 0.3, marble,SEGMENTS)
 	for level in range(FLOOR_COUNT):
 		var h := floor_height(level)
 		for segment in range(SEGMENTS):
@@ -411,20 +412,68 @@ func _make_stairs() -> void:
 				_stair_railing(Vector3(edge,h+half_rise,17.4),Vector3(edge,floor_height(level+1),13.8))
 		for node in get_children().slice(first): node.reparent(assembly,false)
 
-func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2,landing_extension: float=0.0,start_extension: float=0.0,finish: Material=null) -> void:
+func _stair_flight(x: float,base: float,start_z: float,end_z: float,rise: float,width: float=2.2,landing_extension: float=0.0,start_extension: float=0.0,finish: Material=null,foundation: float=NAN,facade_side: float=0.0) -> void:
 	var tread_finish: Material = marble if finish==null else finish
 	var steps := int(ceil(absf(rise)/0.16))
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# One watertight stepped skin replaces overlapping tread boxes and slab sides.
 	for step in range(steps):
-		var top := rise*(step+1)/steps
-		var tread_height := absf(rise)/steps+0.24
-		var z := lerpf(start_z,end_z,(step+0.5)/steps)
-		_box(Vector3(x,base+top-tread_height/2,z),Vector3(width,tread_height,absf(end_z-start_z)/steps+0.01),tread_finish,0,false)
-		var front_z := lerpf(start_z,end_z,float(step)/steps)+signf(end_z-start_z)*0.03
-		_box(Vector3(x,base+top+0.007,front_z),Vector3(width-0.08,0.014,0.055),dark,0,false).name = "TreadNosing"
-	_stair_slab(x,width,base,start_z,end_z,rise)
-	_ramp(x,width,base,start_z,end_z,rise,landing_extension,start_extension)
+		var a := lerpf(start_z,end_z,float(step)/steps)
+		var b := lerpf(start_z,end_z,float(step+1)/steps)
+		var lo := minf(a,b)
+		var hi := maxf(a,b)
+		var top := base+rise*(step+1)/steps
+		var low_bottom := base+rise*(lo-start_z)/(end_z-start_z)-0.28 if is_nan(foundation) else foundation
+		var high_bottom := base+rise*(hi-start_z)/(end_z-start_z)-0.28 if is_nan(foundation) else foundation
+		var left_lo := x-width/2
+		var left_hi := x-width/2
+		var right_lo := x+width/2
+		var right_hi := x+width/2
+		if facade_side>0:
+			left_lo = -21.4+sqrt(OUTER_RADIUS*OUTER_RADIUS-pow(2.1+lo,2))-0.02
+			left_hi = -21.4+sqrt(OUTER_RADIUS*OUTER_RADIUS-pow(2.1+hi,2))-0.02
+		elif facade_side<0:
+			right_lo = 21.4-sqrt(OUTER_RADIUS*OUTER_RADIUS-pow(2.1+lo,2))+0.02
+			right_hi = 21.4-sqrt(OUTER_RADIUS*OUTER_RADIUS-pow(2.1+hi,2))+0.02
+		var tl := Vector3(left_lo,top,lo)
+		var tr := Vector3(right_lo,top,lo)
+		var bl := Vector3(left_hi,top,hi)
+		var br := Vector3(right_hi,top,hi)
+		var tlb := Vector3(left_lo,low_bottom,lo)
+		var trb := Vector3(right_lo,low_bottom,lo)
+		var blb := Vector3(left_hi,high_bottom,hi)
+		var brb := Vector3(right_hi,high_bottom,hi)
+		_quad(surface,tl,bl,br,tr)
+		_quad(surface,tr,br,brb,trb)
+		_quad(surface,bl,tl,tlb,blb)
+		_quad(surface,tlb,trb,brb,blb)
+		# The start/end faces and risers meet edge-to-edge, with no coincident faces.
+		if step==0:
+			if a==lo: _quad(surface,tl,tr,trb,tlb)
+			else: _quad(surface,br,bl,blb,brb)
+		if step==steps-1:
+			if b==hi: _quad(surface,br,bl,blb,brb)
+			else: _quad(surface,tl,tr,trb,tlb)
+		else:
+			var next_top := base+rise*(step+2)/steps
+			var edge_l := bl if b==hi else tl
+			var edge_r := br if b==hi else tr
+			var next_l := Vector3(edge_l.x,next_top,b)
+			var next_r := Vector3(edge_r.x,next_top,b)
+			if (rise>0)==(b==hi): _quad(surface,edge_r,edge_l,next_l,next_r)
+			else: _quad(surface,edge_l,edge_r,next_r,next_l)
+		var front_z := a+signf(end_z-start_z)*0.03
+		_box(Vector3(x,top+0.007,front_z),Vector3(width-0.08,0.014,0.055),dark,0,false).name = "TreadNosing"
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = surface.commit()
+	mesh.material_override = tread_finish
+	add_child(mesh)
+	var ramp_x := x if facade_side==0 else -facade_side*0.4
+	var ramp_width := width if facade_side==0 else width+0.8
+	_ramp(ramp_x,ramp_width,base,start_z,end_z,rise,landing_extension,start_extension,foundation)
 	var support := get_child(get_child_count()-1) as Node3D
-	support.set_meta("treads",{"x":x,"width":width,"base":base,"start":start_z,"end":end_z,"rise":rise,"steps":steps})
+	support.set_meta("treads",{"x":ramp_x,"width":ramp_width,"base":base,"start":start_z,"end":end_z,"rise":rise,"steps":steps})
 	stair_surfaces.append(support)
 
 func stair_surface_at(point: Vector3) -> Dictionary:
@@ -488,27 +537,12 @@ func _glass_guard(a: Vector3,b: Vector3) -> void:
 	_beam(a+Vector3.UP*1.06,b+Vector3.UP*1.06,0.035,metal)
 	for node in get_children().slice(first): node.reparent(root,false)
 
-func _stair_slab(x: float,width: float,base: float,start_z: float,end_z: float,rise: float) -> void:
-	var points := PackedVector3Array([
-		Vector3(x-width/2,base-0.06,start_z),Vector3(x+width/2,base-0.06,start_z),
-		Vector3(x+width/2,base+rise-0.06,end_z),Vector3(x-width/2,base+rise-0.06,end_z)])
-	for i in range(4): points.append(points[i]-Vector3.UP*0.20)
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_quad(st,points[0],points[3],points[2],points[1])
-	_quad(st,points[4],points[5],points[6],points[7])
-	for i in range(4): _quad(st,points[i],points[(i+1)%4],points[(i+1)%4+4],points[i+4])
-	var instance := MeshInstance3D.new()
-	instance.mesh = st.commit()
-	instance.material_override = paving
-	add_child(instance)
-
-func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: float,landing_extension: float=0.0,start_extension: float=0.0) -> void:
+func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: float,landing_extension: float=0.0,start_extension: float=0.0,foundation: float=NAN) -> void:
 	var points := PackedVector3Array()
 	for side in [-1.0,1.0]:
-		points.append(Vector3(x+side*width/2,base-0.15,start_z))
+		points.append(Vector3(x+side*width/2,base-0.15 if is_nan(foundation) else foundation,start_z))
 		points.append(Vector3(x+side*width/2,base,start_z))
-		points.append(Vector3(x+side*width/2,base+rise-0.15,end_z))
+		points.append(Vector3(x+side*width/2,base+rise-0.15 if is_nan(foundation) else foundation,end_z))
 		points.append(Vector3(x+side*width/2,base+rise,end_z))
 	if start_extension>0:
 		var landing_start := start_z-signf(end_z-start_z)*start_extension
@@ -527,6 +561,73 @@ func _ramp(x: float,width: float,base: float,start_z: float,end_z: float,rise: f
 	body.add_child(collision)
 	add_child(body)
 
+func _flat_polygon_prism(polygon: PackedVector2Array,top: float,bottom: float,finish: Material) -> Node3D:
+	var indices := Geometry2D.triangulate_polygon(polygon)
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var body := StaticBody3D.new()
+	for i in range(0,indices.size(),3):
+		var points := PackedVector3Array()
+		for corner in range(3):
+			var point := polygon[indices[i+corner]]
+			points.append(Vector3(point.x,top,point.y))
+		for corner in range(3): points.append(Vector3(points[corner].x,bottom,points[corner].z))
+		_quad(surface,points[0],points[2],points[1],points[0])
+		_quad(surface,points[3],points[4],points[5],points[3])
+		var shape := ConvexPolygonShape3D.new()
+		shape.points = points
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		body.add_child(collision)
+	for i in range(polygon.size()):
+		var a := polygon[i]
+		var b := polygon[(i+1)%polygon.size()]
+		_quad(surface,Vector3(a.x,top,a.y),Vector3(b.x,top,b.y),Vector3(b.x,bottom,b.y),Vector3(a.x,bottom,a.y))
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = surface.commit()
+	mesh.material_override = finish
+	body.add_child(mesh)
+	add_child(body)
+	return body
+
+func _make_front_forecourt_foundation() -> void:
+	var assembly := Node3D.new()
+	assembly.name = "FrontSealedFoundation"
+	add_child(assembly)
+	var first := get_child_count()
+	var circle := PackedVector2Array()
+	for i in range(SEGMENTS): circle.append(Vector2(cos(TAU*i/SEGMENTS),sin(TAU*i/SEGMENTS))*OUTER_RADIUS)
+	# Continuous buried footing also seals precision seams between adjacent colliders.
+	var footing := PackedVector2Array([Vector2(-7.72,-33),Vector2(7.55,-33),Vector2(7.55,-19),Vector2(-7.72,-19)])
+	for piece in Geometry2D.clip_polygons(footing,circle):
+		_flat_polygon_prism(piece,GROUND_FLOOR-0.04,-2.20,marble).name = "ContinuousBuriedFooting"
+	# Disjoint floor panels meet the circular ground floor and exclude all steps.
+	# This removes both holes and the coplanar floor/last-tread flicker.
+	var xs := [-7.72,-7.24,-4.6,-4.4,-2.1,0.0,2.1,4.4,4.6,7.16,7.55]
+	var zs := [-33.0,-32.0,-28.0,-24.4,-22.6,-19.0]
+	for ix in range(xs.size()-1):
+		for iz in range(zs.size()-1):
+			var x: float = (xs[ix]+xs[ix+1])/2
+			var z: float = (zs[iz]+zs[iz+1])/2
+			if x>4.6 and x<7.16 and z>-32 and z<-28: continue
+			if x< -4.6 and x> -7.24 and z< -24.4: continue
+			if absf(x)>2.1 and z> -22.6: continue
+			var panel := PackedVector2Array([Vector2(xs[ix],zs[iz]),Vector2(xs[ix+1],zs[iz]),Vector2(xs[ix+1],zs[iz+1]),Vector2(xs[ix],zs[iz+1])])
+			for piece in Geometry2D.clip_polygons(panel,circle):
+				_flat_polygon_prism(piece,GROUND_FLOOR,-2.15,marble).name = "SealedLowerFloor"
+	# Solid outer landings follow the facade instead of stopping short of it.
+	for side in [-1.0,1.0]:
+		var outer := 7.72 if side<0 else 7.55
+		for segment in range(12):
+			var a: float = side*lerpf(4.4,outer,segment/12.0)
+			var b: float = side*lerpf(4.4,outer,(segment+1)/12.0)
+			var lo := minf(a,b)
+			var hi := maxf(a,b)
+			var za := -sqrt(OUTER_RADIUS*OUTER_RADIUS-lo*lo)+0.02
+			var zb := -sqrt(OUTER_RADIUS*OUTER_RADIUS-hi*hi)+0.02
+			_flat_polygon_prism(PackedVector2Array([Vector2(lo,-22.6),Vector2(hi,-22.6),Vector2(hi,zb),Vector2(lo,za)]),-0.9,-2.15,marble).name = "CurvedSideLanding"
+	for node in get_children().slice(first): node.reparent(assembly,false)
+
 func _make_front_stair_supports(side: float,tag: String,granite: Material,cap: Material) -> void:
 	# Deep stringers have stepped upper edges and an open underside.
 	for flight in [Vector4(-33,-28,-0.9,2.45),Vector4(-26.7,-23,1.55,2.45)]:
@@ -540,6 +641,7 @@ func _make_front_stair_supports(side: float,tag: String,granite: Material,cap: M
 	_box(Vector3(side*4.23,1.15,-27.35),Vector3(0.34,0.80,1.3),granite)
 	_box(Vector3(side*4.23,1.564,-27.35),Vector3(0.40,0.028,1.3),cap,0,false)
 	_box(Vector3(side*4.23,3.60,-21.4),Vector3(0.34,0.80,3.2),granite)
+	_box(Vector3(side*4.23,4.014,-21.4),Vector3(0.40,0.028,3.2),cap,0,false)
 	# Three fluted piers in approach order. The doorway turn is between 2 and 3;
 	# the restored lateral steps sit behind pier 3, nearest the facade.
 	var pier_index := 0
@@ -567,22 +669,18 @@ func _make_front_left_stair_side() -> void:
 	var cap := _textured_material("stone",Color("a9adab"),0.52)
 	_make_front_stair_supports(1.0,"Left",granite,cap)
 	# Like the main stair: a short flight, level landing, then another flight.
-	_stair_flight(5.88,-0.9,-32,-30.5,-0.45,2.56,0,0,cap)
-	_box(Vector3(5.88,-1.49,-30),Vector3(2.56,0.28,1.0),cap).name = "LeftPassageIntermediateLanding"
-	_stair_flight(5.88,-1.35,-29.5,-28,-0.45,2.56,0,0,cap)
-	_box(Vector3(5.88,-1.94,-24.5),Vector3(2.56,0.28,7.0),cap).name = "LeftLowerPassageFloor"
-	_box(Vector3(3.6,-1.94,-21.4),Vector3(3.0,0.28,2.4),cap)
-	_box(Vector3(3.4,-1.94,-27.1),Vector3(2.6,0.28,10.2),_textured_material("stone",Color("4f5553"),1.0)).name = "UnderStairGravelBed"
+	_stair_flight(5.88,-0.9,-32,-30.5,-0.45,2.56,0,0,cap,-2.15)
+	_box(Vector3(5.88,-1.75,-30),Vector3(2.56,0.80,1.0),cap).name = "LeftPassageIntermediateLanding"
+	_stair_flight(5.88,-1.35,-29.5,-28,-0.45,2.56,0,0,cap,-2.15)
 	# Retaining wall with wide coping separates the route from the paving.
 	_box(Vector3(7.35,-1.29,-24.5),Vector3(0.38,1.58,7.0),granite).name = "LeftPassageRetainingWall"
 	_box(Vector3(7.35,-0.486,-24.5),Vector3(0.52,0.05,7.0),cap)
 	_terrain_patch(PackedVector3Array([Vector3(7.16,-0.9,-32),Vector3(7.54,-0.9,-32),Vector3(7.54,-0.5,-28),Vector3(7.16,-0.5,-28)]),1.18,granite)
 	_terrain_patch(PackedVector3Array([Vector3(7.09,-0.88,-32),Vector3(7.61,-0.88,-32),Vector3(7.61,-0.475,-28),Vector3(7.09,-0.475,-28)]),0.05,cap)
 	# Courtyard-height arrival for the restored lateral doorway steps.
-	_box(Vector3(5.8,-1.04,-21.4),Vector3(2.4,0.28,2.4),cap).name = "LeftSideStepsArrival"
 	# Stop the inner curb before the turn so the lower doorway stays accessible.
 	_box(Vector3(4.55,-1.53,-26.4),Vector3(0.30,0.54,3.2),granite)
-	_box(Vector3(4.62,-1.795,-24.5),Vector3(0.46,0.01,6.8),_textured_material("stone",Color("4f5553"),1.0),0,false)
+	_box(Vector3(4.45,-1.775,-28.6),Vector3(0.28,0.01,7.0),_textured_material("stone",Color("4f5553"),1.0),0,false)
 	# Stone paving and planting continue outside the retaining wall.
 	_box(Vector3(8.65,-0.91,-25.6),Vector3(2.1,0.10,8.4),campus_stone)
 	for z in [-28.3,-25.7,-23.1]:
@@ -601,13 +699,10 @@ func _make_front_right_stair_side() -> void:
 	var granite := _textured_material("stone",Color("878c8c"),0.82)
 	var cap := _textured_material("stone",Color("8f9694"),0.62)
 	_make_front_stair_supports(-1.0,"Right",granite,cap)
-	_box(Vector3(-5.92,-1.04,-30.35),Vector3(2.64,0.28,5.3),cap).name = "RightUpperStonePassage"
-	_stair_flight(-5.92,-0.9,-27.7,-26.5,-0.45,2.64,0,0,cap)
-	_box(Vector3(-5.92,-1.49,-26.05),Vector3(2.64,0.28,0.9),cap).name = "RightPassageIntermediateLanding"
-	_stair_flight(-5.92,-1.35,-25.6,-24.4,-0.45,2.64,0,0,cap)
-	_box(Vector3(-5.92,-1.94,-23.4),Vector3(2.64,0.28,2.0),cap).name = "RightLowerStonePassage"
-	_box(Vector3(-3.4,-1.94,-27.1),Vector3(2.6,0.28,10.2),_textured_material("stone",Color("555954"),1.0))
-	_box(Vector3(-5.8,-1.04,-21.4),Vector3(2.4,0.28,2.4),cap).name = "RightSideStepsArrival"
+	_box(Vector3(-5.92,-1.525,-30.35),Vector3(2.64,1.25,5.3),cap).name = "RightUpperStonePassage"
+	_stair_flight(-5.92,-0.9,-27.7,-26.5,-0.45,2.64,0,0,cap,-2.15)
+	_box(Vector3(-5.92,-1.75,-26.05),Vector3(2.64,0.80,0.9),cap).name = "RightPassageIntermediateLanding"
+	_stair_flight(-5.92,-1.35,-25.6,-24.4,-0.45,2.64,0,0,cap,-2.15)
 	# Broad polished coping remains at garden level beside the sunken floor.
 	_box(Vector3(-7.48,-1.25,-27.6),Vector3(0.42,1.5,10.8),granite).name = "RightPassageRetainingWall"
 	_box(Vector3(-7.48,-0.48,-27.6),Vector3(0.64,0.08,10.8),cap)
@@ -740,11 +835,9 @@ func _make_entrances() -> void:
 	for node in get_children().slice(front_first): node.reparent(frontage,false)
 	_make_front_left_stair_side()
 	_make_front_right_stair_side()
+	_make_front_forecourt_foundation()
 	# Sunken front forecourt: descend from courtyard -0.9 to the doorway at -1.8.
-	_box(Vector3(0,-1.94,-21.4),Vector3(4.2,0.28,2.4),marble)
-	_box(Vector3(0,-1.94,-19.5),Vector3(4.2,0.28,1.8),marble)
 	# Door, vestibule and the entire ground floor share one level; no indoor steps.
-	_box(Vector3(0,GROUND_FLOOR-0.14,-16.6),Vector3(4.2,0.28,6.0),marble)
 	for side in [-1.0,1.0]:
 		_box(Vector3(side*1.5,-0.4,-20.25),Vector3(0.12,2.8,0.25),door_wood)
 		_box(Vector3(side*1.28,-0.45,-20.6),Vector3(0.08,2.7,0.8),bronze)
@@ -759,15 +852,12 @@ func _make_entrances() -> void:
 		approach.rotation.y = side*PI/2
 		add_child(approach)
 		var first := get_child_count()
-		_stair_flight(0,-1.8,0,2.3,0.9,2.4,0.8,0.0)
+		_stair_flight(0,-1.8,0,2.3,0.9,2.4,0.0,0.0,marble,-2.15,side)
 		for node in get_children().slice(first): node.reparent(approach,false)
-		_box(Vector3(side*4.8,-1.04,-21.4),Vector3(0.8,0.28,2.4),marble,0,false)
 	# The longitudinal passage turns beneath the flight and enters between jambs.
 	# Keep a central opening so it coexists with both original lateral stairs.
 	for x in [-3.05,3.05]:
 		_box(Vector3(x,-1.35,-22.75),Vector3(3.7,0.9,0.2),limestone)
-	_box(Vector3(0,-1.94,-24.1),Vector3(9.2,0.28,1.5),marble).name = "UnderStairPassageTurn"
-	_box(Vector3(0,-1.94,-22.75),Vector3(2.4,0.28,2.7),marble).name = "UnderStairDoorwayPassage"
 	# Rear door is flush with the round wall; the long projecting porch is removed.
 	_box(Vector3(0,GROUND_FLOOR-0.14,20.7),Vector3(4.2,0.28,2.4),marble)
 	_stair_flight(0,GROUND_FLOOR,21.9,24.0,0.9,4.2,0.8)
@@ -1133,6 +1223,76 @@ func _terrain_patch(corners: PackedVector3Array,depth: float,mat: Material) -> N
 	add_child(body)
 	return body
 
+func _make_rear_reference_house() -> void:
+	# A low cream service house faces the rear ground-floor exit. Its rear wall
+	# is the existing perimeter wall at Z=50, extended upward to meet the roof.
+	var house := Node3D.new()
+	house.name = "RearReferenceHouse"
+	add_child(house)
+	var first := get_child_count()
+	var wall := _textured_material("stone",Color("c9c0a4"),0.94)
+	var plinth := _textured_material("stone",Color("737773"),0.94)
+	var roof := _material(Color("4c655d"),0.68)
+	var frame := _material(Color("39443e"),0.55)
+	var pane := _material(Color("788581"),0.35)
+	var recess := _material(Color("77796a"),0.94)
+	# The apron and interior sit slightly above the courtyard, with no threshold lip.
+	_box(Vector3(0,-0.98,41.0),Vector3(23.0,0.20,3.0),campus_stone).name = "HouseApron"
+	_box(Vector3(0,-0.98,46.15),Vector3(21.5,0.20,7.3),paving).name = "HouseFloor"
+	for side in [-1.0,1.0]:
+		_box(Vector3(side*6.6,1.04,42.5),Vector3(8.8,3.88,0.30),wall)
+		_box(Vector3(side*6.6,-0.70,42.32),Vector3(8.8,0.34,0.12),plinth,0,false)
+		_box(Vector3(side*10.87,1.10,46.34),Vector3(0.26,4.0,7.67),wall)
+		_box(Vector3(side*2.16,0.50,43.20),Vector3(0.20,2.76,1.4),wall)
+		_box(Vector3(side*10.9,1.13,42.22),Vector3(0.38,4.02,0.32),wall)
+		# Rainwater pipes and eave trim match the dark green roof edge in the photo.
+		_beam(Vector3(side*10.48,-0.77,42.20),Vector3(side*10.48,3.11,42.20),0.048,roof)
+	_box(Vector3(0,2.48,42.50),Vector3(4.4,1.0,0.3),wall).name = "RecessedEntranceLintel"
+	_box(Vector3(0,2.12,43.18),Vector3(4.25,0.16,1.4),wall)
+	_box(Vector3(0,2.60,50),Vector3(21.5,1.60,0.35),wall).name = "SharedRearWallExtension"
+	# Open dark double leaves reveal the shaded entrance instead of a flat black panel.
+	for side in [-1.0,1.0]:
+		_box(Vector3(side*1.35,0.47,43.76),Vector3(0.10,2.65,1.02),frame,side*0.20)
+		_box(Vector3(side*1.295,0.65,43.72),Vector3(0.015,1.20,0.60),pane,side*0.20,false)
+	_box(Vector3(0,1.95,43.88),Vector3(2.8,0.12,0.16),frame)
+	_box(Vector3(0,1.0,49.78),Vector3(4.0,3.7,0.025),recess,0,false)
+	# One broad window to the left and two narrow windows to the right.
+	for spec in [Vector2(6.75,1.85),Vector2(-4.75,1.05),Vector2(-8.25,1.05)]:
+		var x: float = spec.x
+		var width: float = spec.y
+		_box(Vector3(x,0.80,42.30),Vector3(width,2.20,0.035),pane,0,false)
+		for edge in [-1.0,1.0]:
+			_box(Vector3(x+edge*(width/2+0.045),0.80,42.24),Vector3(0.075,2.34,0.10),frame,0,false)
+		for y in [-0.34,1.38,1.94]:
+			_box(Vector3(x,y,42.24),Vector3(width+0.16,0.075,0.10),frame,0,false)
+		_box(Vector3(x,0.50,42.23),Vector3(0.07,1.65,0.10),frame,0,false)
+		_box(Vector3(x,-0.40,42.17),Vector3(width+0.28,0.09,0.28),limestone,0,false)
+	# Horizontal plaster joints, a shallow green roof and a continuous gutter.
+	for y in [-0.10,0.45,1.00,1.55,2.10,2.65]:
+		for side in [-1.0,1.0]:
+			_box(Vector3(side*6.6,y,42.344),Vector3(8.8,0.012,0.007),_material(Color("aaa48e")),0,false)
+	_terrain_patch(PackedVector3Array([Vector3(-11.25,3.12,42.22),Vector3(11.25,3.12,42.22),Vector3(11.25,3.42,50.18),Vector3(-11.25,3.42,50.18)]),0.12,roof).name = "LowGreenRoof"
+	_beam(Vector3(-11.24,3.05,42.18),Vector3(11.24,3.05,42.18),0.075,roof)
+	for x in range(-11,12):
+		_beam(Vector3(x,3.135,42.23),Vector3(x,3.435,50.17),0.013,roof)
+	# Red fire cabinet stands on legs to the left of the recessed doorway.
+	var red := _material(Color("9e2930"),0.7)
+	_box(Vector3(3.9,-0.10,41.92),Vector3(1.65,1.28,0.46),red).name = "RedFireCabinet"
+	for x in [4.61,3.19]:
+		_box(Vector3(x,-0.74,41.92),Vector3(0.10,0.27,0.40),red)
+	for x in [4.28,3.52]:
+		_box(Vector3(x,-0.02,41.676),Vector3(0.66,0.92,0.025),_material(Color("442e2e")),0,false)
+		for bar in range(7):
+			_box(Vector3(x-0.28+bar*0.093,-0.02,41.653),Vector3(0.025,0.92,0.018),red,0,false)
+		for y in [-0.45,-0.22,0.01,0.24,0.45]:
+			_box(Vector3(x,y,41.649),Vector3(0.66,0.025,0.02),red,0,false)
+	for x in [10.8,-5.4]:
+		var foot := Vector3(x,-0.87,40.55)
+		_beam(foot,foot+Vector3.UP*3.3,0.042,dark)
+		_beam(foot+Vector3.UP*3.3,foot+Vector3(0.40,3.92,0),0.045,dark)
+		_beam(foot+Vector3(0.40,3.92,0),foot+Vector3(0.18,4.30,0),0.09,dark)
+	for node in get_children().slice(first): node.reparent(house,false)
+
 func _make_rectangular_boundary() -> void:
 	var boundary := Node3D.new()
 	boundary.name = "RectangularBoundary"
@@ -1490,12 +1650,12 @@ func _beam(a: Vector3, b: Vector3, radius: float, material: Material) -> void:
 	add_child(instance)
 
 
-func _cylinder(position_value: Vector3, radius: float, height: float, material: Material) -> void:
+func _cylinder(position_value: Vector3, radius: float, height: float, material: Material,segments: int=48) -> void:
 	var mesh := CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
-	mesh.radial_segments = 48
+	mesh.radial_segments = segments
 	var instance := MeshInstance3D.new()
 	instance.mesh = mesh
 	instance.material_override = material

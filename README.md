@@ -169,3 +169,9 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 
 ![Asosiy zinaning o‘ng tarafi](docs/screenshots/front_right_reference.png)
 ![O‘ng tomondagi gulzor va tosh yo‘lak](docs/screenshots/front_right_garden.png)
+
+0.2.23: Old zina atrofidagi ochiq joylar yaxlit poydevor bilan yopildi. Pastki kichik zinalar va yon maydonchalar dumaloq fasadga tutashtirildi; bir tekislikda ustma-ust turgan pol yuzalari olib tashlandi. Orqa 0-qavat chiqishi qarshisida rasmga mos past yashil tomli, qaymoqrang bir qavatli bino, ichkariga kirgan eshik, derazalar va qizil yong‘in shkafi qo‘shildi. Binoning orqa devori hovli chegara devori bilan birlashgan.
+
+![Old zinadagi yopilgan bo‘shliqlar](docs/screenshots/front_gap_repair.png)
+![Dumaloq fasadga tutash kichik zina](docs/screenshots/front_facade_joint.png)
+![Orqa chiqish qarshisidagi bino](docs/screenshots/rear_reference_house.png)

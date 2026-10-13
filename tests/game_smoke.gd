@@ -129,6 +129,25 @@ func run() -> void:
 	check(await walk_to(p,Vector3(0,-1.8,-21.4)),"Front side stairs descend into the lower doorway landing")
 	await settle(p)
 	check(absf(p.position.y+1.8)<0.15,"Front doorway landing is below the courtyard")
+	var forecourt_closed := true
+	for ix in range(60):
+		for iz in range(50):
+			var sample := Vector3(-7.60+ix*0.25,6.0,-32.85+iz*0.27)
+			var floor_hit := p.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(sample,Vector3(sample.x,-2.2,sample.z),1))
+			if floor_hit.is_empty():
+				forecourt_closed = false
+				print("UNCOVERED ",sample)
+	check(forecourt_closed,"Front forecourt has no uncovered ground holes across 3000 sampled points")
+	for side in [-1.0,1.0]:
+		p.reset_to(Vector3(side*5.8,-0.85,-sqrt(400.0-5.8*5.8)-0.6),0)
+		await settle(p)
+		var facade_route := true
+		for x in [5.2,4.6,4.0,3.4,2.8,2.4]:
+			facade_route = await walk_to(p,Vector3(side*x,-1.8,-sqrt(400.0-x*x)-0.6)) and facade_route
+		check(facade_route,"Small side stair follows the round facade without a gap on side %d" % int(side))
+		check(absf(p.position.y-(-1.8+0.3/2.3*0.9))<0.18,"Curved stair infill remains smoothly walkable on side %d" % int(side))
+	p.reset_to(Vector3(0,-1.75,-21.4),0)
+	await settle(p)
 	check(game.building.has_node("FrontRightStonePassage"),"Front-right side has the reference stone passage and garden")
 	check(await walk_to(p,Vector3(0,-1.8,-24.1)) and await walk_to(p,Vector3(-5.92,-1.8,-24.1)),"Right sunken passage connects beneath the main stair to the lower doorway")
 	await settle(p)
@@ -261,6 +280,12 @@ func run() -> void:
 	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(27,-0.5+1.2,0),Vector3(43,-0.5+1.2,0),1)).is_empty(),"Moved straight wall bounds the ladder-side courtyard")
 	check(space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(27,0.7,0),Vector3(33,0.7,0),1)).is_empty(),"Previous curved wall leaves ten metres of extra clearance")
 	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,0.7,48),Vector3(0,0.7,52),1)).is_empty(),"Straight rear wall encloses the team approach")
+	check(game.building.has_node("RearReferenceHouse/SharedRearWallExtension"),"Reference house shares the existing rear perimeter wall")
+	p.reset_to(Vector3(0,-1.75,20.7),0)
+	await settle(p)
+	check(await walk_to(p,Vector3(0,-0.9,25.0)) and await walk_to(p,Vector3(0,-0.88,41.0)),"Rear ground-floor exit reaches the reference house apron")
+	check(await walk_to(p,Vector3(0,-0.88,46.5)),"Reference house recessed entrance is walkable")
+	check(not await walk_to(p,Vector3(0,-0.88,51.0),100) and p.position.z<49.7,"The house back and existing boundary form a continuous closed wall")
 	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-48,0.7,-43),Vector3(-48,0.7,-45),1)).is_empty(),"Front grille connects to the side wall")
 	check(space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,0.7,-43),Vector3(0,0.7,-45),1)).is_empty(),"Front grille leaves the central pedestrian entrance open")
 	check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(0,0,-52),Vector3(0,-2,-52),1)).is_empty(),"Two-way asphalt road beyond the front fence has a physical surface")
