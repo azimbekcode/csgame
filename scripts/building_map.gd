@@ -1081,11 +1081,16 @@ func _make_campus_link() -> void:
 	_box(Vector3(-15.5,2.24,44.9),Vector3(5.8,0.32,0.8),tiles,0,false)
 	for node in get_children().slice(stair_first): node.reparent(stair,false)
 	stair.position.x = 1.5
-	_box(Vector3(-19.25,0.6,46.75),Vector3(16.3,3.0,2.9),limestone)
-	_box(Vector3(-19.25,2.25,46.75),Vector3(16.3,0.30,2.9),tiles)
-	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-16.75,2.4,45.3))
+	_box(Vector3(-27.25,0.6,46.75),Vector3(32.3,3.0,2.9),limestone)
+	_box(Vector3(-27.25,2.25,46.75),Vector3(32.3,0.30,2.9),tiles)
+	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-16.75,2.4,45.3))
 	_stair_railing(Vector3(-11.2,2.4,44.5),Vector3(-11.2,2.4,48.3))
-	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-27.3,2.4,48.3))
+	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-43.3,2.4,48.3))
+	var neighbour := Node3D.new()
+	neighbour.name = "NeighbourBuilding"
+	neighbour.set_meta("near_side_x",-36.2)
+	add_child(neighbour)
+	var neighbour_first := get_child_count()
 	# Reference block: three floors, a long pale facade and a roof below the rotunda.
 	var base_height := 2.4
 	var roof_height := ROOF_HEIGHT-1.6
@@ -1173,7 +1178,7 @@ func _make_campus_link() -> void:
 	for node in get_children().slice(side_first): node.reparent(side_stair,false)
 	side_stair.position = Vector3(-18,0,43.5)
 	side_stair.rotation.y = PI/2.0
-	_box(Vector3(-18,0.75,44.35),Vector3(1.4,3.3,3.3),limestone)
+	_box(Vector3(-18,0.75,44.0),Vector3(1.4,3.3,2.6),limestone)
 	_box(Vector3(-13,upper_entry-0.12,46.29),Vector3(1.9,0.24,4.42),cream)
 	_stair_railing(Vector3(-12.02,upper_entry,43.5),Vector3(-12.02,upper_entry,48.2))
 	_stair_railing(Vector3(-13.98,upper_entry,44.2),Vector3(-13.98,upper_entry,48.2))
@@ -1183,6 +1188,9 @@ func _make_campus_link() -> void:
 	for strip in range(8):
 		var x := -14.12+(strip+0.5)*2.24/8.0
 		_box(Vector3(x,upper_entry+2.96+0.17*(1.0-pow((x+13)/1.12,2)),48.0),Vector3(0.28,0.08,1.05),canopy,0,false)
+	for node in get_children().slice(neighbour_first): node.reparent(neighbour,false)
+	# Seven metres toward the first tree beside the near end of the reference block.
+	neighbour.position.x = -7.0
 	_make_link_garden()
 	for node in get_children().slice(first): node.reparent(link,false)
 
