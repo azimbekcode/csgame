@@ -244,10 +244,10 @@ func run() -> void:
 	var link := game.building.get_node("RearCampusLink") as Node3D
 	check(absf(link.rotation.y+PI/2)<0.001,"Neighbouring stair and building turn right together")
 	check(await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30.0))),"Right rear stair exit connects to the neighbouring building approach")
-	check(await walk_to(p,link.to_global(Vector3(-14.0,2.4,46.0))),"Broad stone connecting stair reaches its raised walkway")
+	check(await walk_to(p,link.to_global(Vector3(-14.0,2.4,47.85))),"Broad stone connecting stair reaches its raised walkway")
 	check(absf(p.position.y-2.4)<0.15,"Connecting stair landing has the correct elevation")
-	check(await walk_to(p,link.to_global(Vector3(-31,2.4,46.0))) and await walk_to(p,link.to_global(Vector3(-31,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
-	check(await walk_to(p,link.to_global(Vector3(-31,2.4,46))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,46))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
+	check(await walk_to(p,link.to_global(Vector3(-31,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-31,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
+	check(await walk_to(p,link.to_global(Vector3(-31,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
 	check(is_equal_approx(link.get_node("ConnectingStoneStair").position.x,1.5),"Connecting stair keeps its approach position")
 	p.reset_to(link.to_global(Vector3(-25,2.4,45.0)),0)
 	await settle(p)

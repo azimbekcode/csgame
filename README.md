@@ -183,3 +183,7 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 0.2.25: Qo‘shni bino o‘ngga 7 metr surildi; yaqin yon cheti foydalanuvchi ko‘rsatgan birinchi daraxt qatorigacha keldi. Asosiy tosh zinaning joyi saqlanib, yuqori yo‘lak yangi kirish joyigacha uzaytirildi. Tashqi kichik zina bino bilan birga surildi.
 
 ![Surilgan binoning daraxt yonidagi cheti](docs/screenshots/neighbour_shifted_side.png)
+
+0.2.26: Keng tosh zina yangi rasmga mos ravishda qo‘shni binoning chap yonidan, uning old burchagigacha chiqadi. Tepada qisqa tekis maydoncha orqali o‘ngga burilib bino oldidagi yo‘lakka o‘tiladi. Binoning uch qavatli fasadi va kichik tashqi zinasi keng zinaning o‘ng tomonida turadi.
+
+![Bino va keng zinaning yangi joylashuvi](docs/screenshots/neighbour_stair_reference.png)

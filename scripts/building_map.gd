@@ -1039,9 +1039,9 @@ func _link_foundation() -> void:
 	# A filled stone base, rather than an exposed flight floating over ground.
 	var points := PackedVector3Array([
 		Vector3(-18.2,-0.96,30.5),Vector3(-12.8,-0.96,30.5),
-		Vector3(-12.8,2.34,44.5),Vector3(-18.2,2.34,44.5),
+		Vector3(-12.8,2.34,47.5),Vector3(-18.2,2.34,47.5),
 		Vector3(-18.2,-1.05,30.5),Vector3(-12.8,-1.05,30.5),
-		Vector3(-12.8,-1.05,44.5),Vector3(-18.2,-1.05,44.5)])
+		Vector3(-12.8,-1.05,47.5),Vector3(-18.2,-1.05,47.5)])
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_quad(surface,points[0],points[3],points[2],points[1])
@@ -1074,18 +1074,21 @@ func _make_campus_link() -> void:
 	add_child(stair)
 	var stair_first := get_child_count()
 	_box(Vector3(-12.7,-0.93,30.0),Vector3(11.0,0.10,2.0),tiles,0,false)
-	_stair_flight(-15.5,-0.9,30.5,44.5,3.3,5.4,0.8,0.0,tiles)
+	_stair_flight(-15.5,-0.9,30.5,47.5,3.3,5.4,0.8,0.0,tiles)
 	_link_foundation()
-	_link_guard(Vector3(-18.25,-0.9,30.5),Vector3(-18.25,2.4,44.5))
-	_link_guard(Vector3(-12.75,-0.9,30.5),Vector3(-12.75,2.4,44.5))
-	_box(Vector3(-15.5,2.24,44.9),Vector3(5.8,0.32,0.8),tiles,0,false)
+	_link_guard(Vector3(-18.25,-0.9,30.5),Vector3(-18.25,2.4,47.5))
+	_link_guard(Vector3(-12.75,-0.9,30.5),Vector3(-12.75,2.4,47.5))
+	_box(Vector3(-15.5,2.24,47.85),Vector3(5.4,0.32,0.7),tiles,0,false)
 	for node in get_children().slice(stair_first): node.reparent(stair,false)
 	stair.position.x = 1.5
-	_box(Vector3(-27.25,0.6,46.75),Vector3(32.3,3.0,2.9),limestone)
-	_box(Vector3(-27.25,2.25,46.75),Vector3(32.3,0.30,2.9),tiles)
-	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-16.75,2.4,45.3))
-	_stair_railing(Vector3(-11.2,2.4,44.5),Vector3(-11.2,2.4,48.3))
+	_box(Vector3(-31.1,0.75,46.75),Vector3(24.6,3.3,2.9),limestone)
+	_box(Vector3(-31.1,2.415,46.75),Vector3(24.6,0.03,2.9),tiles)
+	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-18.85,2.4,45.3))
+	_stair_railing(Vector3(-11.2,2.4,47.5),Vector3(-11.2,2.4,48.2))
 	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-43.3,2.4,48.3))
+	# The stair ends beside the facade corner; turn right across this short link.
+	_box(Vector3(-17.75,0.75,47.85),Vector3(2.1,3.3,0.7),limestone).name = "StairToFacadeLanding"
+	_box(Vector3(-17.75,2.415,47.85),Vector3(2.1,0.03,0.7),tiles,0,false)
 	var neighbour := Node3D.new()
 	neighbour.name = "NeighbourBuilding"
 	neighbour.set_meta("near_side_x",-36.2)
