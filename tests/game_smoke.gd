@@ -249,6 +249,10 @@ func run() -> void:
 	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46.0))) and await walk_to(p,link.to_global(Vector3(-24,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
 	check(await walk_to(p,link.to_global(Vector3(-24,2.4,46))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,46))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
 	check(is_equal_approx(link.get_node("ConnectingStoneStair").position.x,1.5),"Connecting stair shifts left while its neighbouring building stays in place")
+	p.reset_to(link.to_global(Vector3(-18,2.4,45.0)),0)
+	await settle(p)
+	check(await walk_to(p,link.to_global(Vector3(-18,2.4,43.5))) and await walk_to(p,link.to_global(Vector3(-12.7,6.4,43.5))),"Reference exterior stair reaches the upper storey")
+	check(await walk_to(p,link.to_global(Vector3(-12.7,6.4,47.5))) and await walk_to(p,link.to_global(Vector3(-13,6.4,50))),"Upper exterior landing enters the neighbouring building")
 	var units := 0
 	for node in game.building.get_children():
 		if str(node.name).begins_with("GalleryAirConditioner_"): units += 1
@@ -263,7 +267,7 @@ func run() -> void:
 		p.move_and_slide()
 	check(p.is_on_floor() and absf(p.position.y+1.8)<0.15,"Soldier drops through the dome opening to the atrium ground floor")
 	check(link.has_node("LinkSideGarden/LawnBed") and link.has_node("LinkSideGarden/GardenRetainingWall"),"Connecting stair has a planted side courtyard with a retaining wall")
-	check(absf(link.get_node("NeighbourRoof").position.y+0.15-game.building.ROOF_HEIGHT)<0.001,"Three-storey neighbouring building matches the main roof height")
+	check(absf(link.get_node("NeighbourRoof").position.y+0.15-(game.building.ROOF_HEIGHT-1.6))<0.001,"Three-storey neighbouring roof is slightly below the round building")
 	for level in range(4):
 		var button := game.building.lift.get_node("CallButton_%d" % level) as Node3D
 		var approach: Vector3 = game.building.lift.to_global(Vector3(-2.4,floor_y(level)+1.23,button.position.z))

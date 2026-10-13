@@ -26,6 +26,7 @@ func run() -> void:
 		"lift_retracted": [Vector3(-2.2,-0.15,12),Vector3(-4.4,-0.45,16.2)],
 		"lift_button_right": [Vector3(-2.2,5.65,12),Vector3(-4.4,5.35,16.2)],
 		"campus_link": [Vector3(-9,2,29.5),Vector3(-18,3,43)],
+		"neighbour_reference": [Vector3(-24,17,25),Vector3(-24,7.5,49)],
 		"campus_link_front": [Vector3(-15.5,0.75,28),Vector3(-15.5,3,44)],
 		"lift_rear_filled": [Vector3(0.5,0,19.1),Vector3(-4.4,-0.2,18.4)],
 		"rear": [Vector3(23,7,39),Vector3(2,4,20)],
@@ -87,7 +88,7 @@ func run() -> void:
 			game.player.global_position = Vector3(0,0.05,5)
 			if name=="lift_closed":
 				for frame in range(230): await physics_frame
-		if name in ["campus_link","campus_link_front","campus_link_garden"]:
+		if name in ["campus_link","campus_link_front","campus_link_garden","neighbour_reference"]:
 			shots[name] = [game.building.get_node("RearCampusLink").to_global(shots[name][0]),game.building.get_node("RearCampusLink").to_global(shots[name][1])]
 		camera.global_position = shots[name][0]
 		camera.look_at(shots[name][1])

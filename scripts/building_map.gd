@@ -1086,36 +1086,103 @@ func _make_campus_link() -> void:
 	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-16.75,2.4,45.3))
 	_stair_railing(Vector3(-11.2,2.4,44.5),Vector3(-11.2,2.4,48.3))
 	_stair_railing(Vector3(-27.3,2.4,45.3),Vector3(-27.3,2.4,48.3))
-	# Three taller storeys share the round building's main roof elevation.
+	# Reference block: three floors, a long pale facade and a roof below the rotunda.
 	var base_height := 2.4
-	var roof_height := ROOF_HEIGHT
-	var wall_height := roof_height-0.30-base_height
-	var wall_mid := base_height+wall_height/2
-	var storey_height := (roof_height-base_height)/3
-	_box(Vector3(-24,0.6,52.5),Vector3(13,3.0,8.6),limestone)
-	_box(Vector3(-24,2.25,52.5),Vector3(13,0.30,8.6),tiles)
-	_box(Vector3(-24,roof_height-0.15,52.5),Vector3(13.4,0.30,8.6),cream).name = "NeighbourRoof"
-	for x in [-30.4,-17.6]:
-		_box(Vector3(x,wall_mid,52.5),Vector3(0.24,wall_height,8.2),limestone)
-	_box(Vector3(-24,wall_mid,56.55),Vector3(13,wall_height,0.24),limestone)
-	for x in [-27.9,-20.1]:
-		_box(Vector3(x,wall_mid,48.45),Vector3(5.3,wall_height,0.25),limestone)
-	_box(Vector3(-24,(5.0+roof_height-0.30)/2,48.45),Vector3(2.5,roof_height-0.30-5.0,0.25),limestone)
+	var roof_height := ROOF_HEIGHT-1.6
+	var storey_height := (roof_height-base_height)/3.0
+	var facade := _textured_material("stone",Color("e8dfc5"),0.92)
+	var trim := _material(Color("d9ceb2"),0.92)
+	var frame := _material(Color("242c2b"),0.65)
+	var pane := _material(Color("253c3e"),0.25)
+	var roof_green := _material(Color("50776d"),0.72)
+	var wall_height := roof_height-base_height-0.3
+	var wall_mid := base_height+wall_height/2.0
+	_box(Vector3(-24,0.6,52.5),Vector3(24.4,3.0,8.6),limestone)
+	_box(Vector3(-24,2.25,52.5),Vector3(24.4,0.30,8.6),tiles)
+	_box(Vector3(-24,roof_height-0.15,52.5),Vector3(24.8,0.30,8.8),roof_green).name = "NeighbourRoof"
+	for x in [-36.08,-11.92]:
+		_box(Vector3(x,wall_mid,52.5),Vector3(0.24,wall_height,8.2),facade)
+	_box(Vector3(-24,wall_mid,56.55),Vector3(24.4,wall_height,0.24),facade)
+	# Keep the central doorway open for the connecting raised path.
+	_box(Vector3(-30.77,wall_mid,48.45),Vector3(10.94,wall_height,0.25),facade)
+	_box(Vector3(-18.35,wall_mid,48.45),Vector3(8.7,wall_height,0.25),facade)
+	_box(Vector3(-11.88,wall_mid,48.45),Vector3(0.24,wall_height,0.25),facade)
+	var upper_entry := base_height+storey_height
+	_box(Vector3(-13,(base_height+upper_entry)/2.0,48.45),Vector3(2.0,upper_entry-base_height,0.25),facade)
+	_box(Vector3(-13,(upper_entry+2.8+roof_height-0.3)/2.0,48.45),Vector3(2.0,roof_height-0.3-upper_entry-2.8,0.25),facade)
+	_box(Vector3(-24,(5.15+roof_height-0.3)/2.0,48.45),Vector3(2.6,roof_height-0.3-5.15,0.25),facade)
 	for level in range(3):
 		var base := base_height+level*storey_height
-		for x in [-29.0,-26.5,-24.0,-21.5,-19.0]:
-			if level==0 and x==-24.0: continue
-			_box(Vector3(x,base+2.45,48.28),Vector3(1.4,2.6,0.05),glass,0,false)
-			for edge in [-0.74,0.74]:
-				_box(Vector3(x+edge,base+2.45,48.20),Vector3(0.07,2.8,0.08),door_wood,0,false)
-			for y in [-1.35,0.0,1.35]:
-				_box(Vector3(x,base+2.45+y,48.20),Vector3(1.55,0.06,0.08),door_wood,0,false)
-		_box(Vector3(-24,base+storey_height-0.15,48.25),Vector3(13.3,0.18,0.35),cream,0,false)
-	for x in [-30.5,-28.0,-25.2,-22.8,-20.0,-17.5]:
-		_box(Vector3(x,wall_mid,48.13),Vector3(0.18,wall_height-0.10,0.24),cream,0,false)
-	for x in [-25.25,-22.75]:
-		_box(Vector3(x,3.7,48.26),Vector3(0.12,2.6,0.35),door_wood)
-	_box(Vector3(-24,5.1,48.05),Vector3(3.0,0.16,1.2),bronze,0,false)
+		for bay in range(11):
+			var x := -35.0+bay*2.2
+			if (level==0 and bay==5) or (level==1 and bay==10): continue
+			var window_height := 2.10 if level==2 else 1.65
+			var centre := base+1.50
+			_box(Vector3(x,centre,48.285),Vector3(1.36,window_height,0.045),pane,0,false).name = "NeighbourWindow_%d_%d" % [level,bay]
+			for edge in [-0.70,0.70]:
+				_box(Vector3(x+edge,centre,48.205),Vector3(0.075,window_height+0.16,0.10),frame,0,false)
+			for edge in [-window_height/2.0,window_height/2.0]:
+				_box(Vector3(x,centre+edge,48.205),Vector3(1.47,0.075,0.10),frame,0,false)
+			for mullion in [-0.24,0.24]:
+				_box(Vector3(x+mullion,centre,48.18),Vector3(0.04,window_height,0.06),frame,0,false)
+			_box(Vector3(x,centre+0.42,48.18),Vector3(1.36,0.04,0.06),frame,0,false)
+			# Recess outline continues above and below the windows, like the photograph.
+			for edge in [-0.88,0.88]:
+				_box(Vector3(x+edge,base+storey_height/2.0,48.13),Vector3(0.055,storey_height-0.12,0.14),trim,0,false)
+			_box(Vector3(x,base+storey_height-0.12,48.13),Vector3(1.81,0.065,0.14),trim,0,false)
+			_box(Vector3(x,centre-window_height/2.0-0.12,48.11),Vector3(1.62,0.12,0.20),cream,0,false)
+		for course in range(1,8):
+			var y := base+course*storey_height/8.0
+			for bay in range(12):
+				var x := -36.1+bay*2.2
+				_box(Vector3(x,y,48.295),Vector3(0.32,0.018,0.025),trim,0,false)
+		if level<2:
+			_box(Vector3(-24,base+storey_height,52.5),Vector3(23.9,0.18,7.9),cream).name = "NeighbourFloor_%d" % (level+1)
+	for bay in range(12):
+		var x := -36.1+bay*2.2
+		_box(Vector3(x,wall_mid,48.10),Vector3(0.14,wall_height,0.28),cream,0,false)
+	for x in [-36.18,-31.7,-25.1,-18.5,-11.82]:
+		_box(Vector3(x,wall_mid,48.03),Vector3(0.26,wall_height,0.37),trim,0,false)
+		_box(Vector3(x,roof_height-1.05,47.93),Vector3(0.38,0.22,0.15),cream,0,false)
+		_beam(Vector3(x,-0.8,47.84),Vector3(x,roof_height-0.8,47.84),0.035,roof_green)
+	# Broad cornice and shallow metal roof with vents.
+	_box(Vector3(-24,roof_height-0.06,48.03),Vector3(24.9,0.12,0.24),roof_green,0,false)
+	_box(Vector3(-24,roof_height-0.64,48.12),Vector3(24.9,0.74,0.44),facade,0,false)
+	_box(Vector3(-24,roof_height-1.05,48.02),Vector3(25.0,0.13,0.56),trim,0,false)
+	for x in [-33,-28,-20,-15]:
+		_box(Vector3(x,roof_height+0.35,53),Vector3(0.38,0.7,0.38),trim)
+		_box(Vector3(x,roof_height+0.72,53),Vector3(0.52,0.07,0.52),roof_green,0,false)
+	for x in [-25.3,-22.7]:
+		_box(Vector3(x,3.77,48.25),Vector3(0.10,2.75,0.30),frame)
+	# Shallow curved brown canopy above the central open entry.
+	var canopy := _material(Color("71503c"),0.78)
+	for strip in range(12):
+		var x := -25.45+(strip+0.5)*2.9/12.0
+		var arch := 0.22*(1.0-pow((x+24)/1.45,2))
+		_box(Vector3(x,5.30+arch,47.98),Vector3(2.9/12.0,0.10,1.15),canopy,0,false)
+	for side in [-1.0,1.0]:
+		_box(Vector3(-24+side*0.97,3.77,48.72),Vector3(0.09,2.68,0.95),frame,side*0.18)
+	# Narrow exterior stair to the left upper doorway, as in the reference.
+	var side_stair := Node3D.new()
+	side_stair.name = "NeighbourExteriorStair"
+	add_child(side_stair)
+	var side_first := get_child_count()
+	_stair_flight(0,base_height,0,5.0,storey_height,1.2,0.8,0,cream)
+	_stair_railing(Vector3(-0.66,base_height,0),Vector3(-0.66,upper_entry,5))
+	_stair_railing(Vector3(0.66,base_height,0),Vector3(0.66,upper_entry,5))
+	for node in get_children().slice(side_first): node.reparent(side_stair,false)
+	side_stair.position = Vector3(-18,0,43.5)
+	side_stair.rotation.y = PI/2.0
+	_box(Vector3(-18,0.75,44.35),Vector3(1.4,3.3,3.3),limestone)
+	_box(Vector3(-13,upper_entry-0.12,46.29),Vector3(1.9,0.24,4.42),cream)
+	_stair_railing(Vector3(-12.02,upper_entry,43.5),Vector3(-12.02,upper_entry,48.2))
+	_stair_railing(Vector3(-13.98,upper_entry,44.2),Vector3(-13.98,upper_entry,48.2))
+	for x in [-13.95,-12.05]:
+		_box(Vector3(x,upper_entry+1.4,48.20),Vector3(0.09,2.8,0.22),frame)
+	_box(Vector3(-13.75,upper_entry+1.35,48.95),Vector3(0.09,2.7,0.95),frame,0.18)
+	for strip in range(8):
+		var x := -14.12+(strip+0.5)*2.24/8.0
+		_box(Vector3(x,upper_entry+2.96+0.17*(1.0-pow((x+13)/1.12,2)),48.0),Vector3(0.28,0.08,1.05),canopy,0,false)
 	_make_link_garden()
 	for node in get_children().slice(first): node.reparent(link,false)
 
@@ -1136,7 +1203,7 @@ func _make_link_garden() -> void:
 	_box(Vector3(-28.2,-0.81,37.7),Vector3(0.50,0.16,14.8),paving)
 	_box(Vector3(-17.65,-0.81,37.7),Vector3(1.80,0.16,14.0),campus_stone)
 	_box(Vector3(-23.25,0.61,45.0),Vector3(9.5,2.82,0.28),paving).name = "GardenRetainingWall"
-	_tree(Vector3(-23.5,-0.77,38.4),1515)
+	_tree(Vector3(-27.0,-0.77,34.0),1515)
 	for point in [Vector3(-27,-0.77,43.5),Vector3(-20,-0.77,43.7),Vector3(-27,-0.77,32.5)]:
 		_shrub(point+Vector3(0,0.4,0))
 	for x in [-26.0,-21.0]:
@@ -1184,7 +1251,7 @@ func _make_campus() -> void:
 		else:
 			_box(Vector3(-13,-0.88,-39),Vector3(13,0.08,12),grass)
 			_box(Vector3(-14.85,-0.88,-32),Vector3(9.3,0.08,2),grass)
-		for z in ([-46.0,-31.0,-14.0,3.0,20.0] if side<0 else []):
+		for z in ([-46.0,-31.0,-14.0,3.0,42.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in ([-37.0,-12.0,13.0,38.0] if side<0 else []):
 			_beam(Vector3(side*25,-0.9,z),Vector3(side*25,4.7,z),0.065,dark)

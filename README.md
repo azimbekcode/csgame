@@ -175,3 +175,7 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 ![Old zinadagi yopilgan bo‘shliqlar](docs/screenshots/front_gap_repair.png)
 ![Dumaloq fasadga tutash kichik zina](docs/screenshots/front_facade_joint.png)
 ![Orqa chiqish qarshisidagi bino](docs/screenshots/rear_reference_house.png)
+
+0.2.24: Qo‘shni korpus yangi rasmga mos uch qavatli uzun fasad bilan qayta qurildi. Qaymoqrang devor, uch qator qora romli deraza, tik bezak ustunlari, keng karniz, yashil tom va jigarrang kirish soyabonlari qo‘shildi. Chapdagi tashqi zina ikkinchi qavat eshigiga olib boradi. Tom balandligi dumaloq binoning asosiy tomidan 1,6 metr past.
+
+![Uch qavatli qo‘shni bino](docs/screenshots/neighbour_reference.png)
