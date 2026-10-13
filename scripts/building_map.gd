@@ -1081,11 +1081,11 @@ func _make_campus_link() -> void:
 	_box(Vector3(-15.5,2.24,47.85),Vector3(5.4,0.32,0.7),tiles,0,false)
 	for node in get_children().slice(stair_first): node.reparent(stair,false)
 	stair.position.x = 1.5
-	_box(Vector3(-31.1,0.75,46.75),Vector3(24.6,3.3,2.9),limestone)
-	_box(Vector3(-31.1,2.415,46.75),Vector3(24.6,0.03,2.9),tiles)
-	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-18.85,2.4,45.3))
+	_box(Vector3(-34.6,0.75,44.5),Vector3(31.6,3.3,7.4),limestone)
+	_box(Vector3(-34.6,2.415,44.5),Vector3(31.6,0.03,7.4),tiles)
+	_stair_railing(Vector3(-50.3,2.4,40.8),Vector3(-18.85,2.4,40.8))
 	_stair_railing(Vector3(-11.2,2.4,47.5),Vector3(-11.2,2.4,48.2))
-	_stair_railing(Vector3(-43.3,2.4,45.3),Vector3(-43.3,2.4,48.3))
+	_stair_railing(Vector3(-50.3,2.4,40.8),Vector3(-50.3,2.4,48.3))
 	# The stair ends beside the facade corner; turn right across this short link.
 	_box(Vector3(-17.75,0.75,47.85),Vector3(2.1,3.3,0.7),limestone).name = "StairToFacadeLanding"
 	_box(Vector3(-17.75,2.415,47.85),Vector3(2.1,0.03,0.7),tiles,0,false)
@@ -1193,7 +1193,9 @@ func _make_campus_link() -> void:
 		_box(Vector3(x,upper_entry+2.96+0.17*(1.0-pow((x+13)/1.12,2)),48.0),Vector3(0.28,0.08,1.05),canopy,0,false)
 	for node in get_children().slice(neighbour_first): node.reparent(neighbour,false)
 	# Seven metres toward the first tree beside the near end of the reference block.
-	neighbour.position.x = -7.0
+	neighbour.scale.x = 31.4/24.4
+	# Widen away from the broad stair, keeping its adjacent building corner fixed.
+	neighbour.position.x = -7.0-11.8*(1.0-neighbour.scale.x)
 	_make_link_garden()
 	for node in get_children().slice(first): node.reparent(link,false)
 

@@ -246,13 +246,17 @@ func run() -> void:
 	check(await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30.0))),"Right rear stair exit connects to the neighbouring building approach")
 	check(await walk_to(p,link.to_global(Vector3(-14.0,2.4,47.85))),"Broad stone connecting stair reaches its raised walkway")
 	check(absf(p.position.y-2.4)<0.15,"Connecting stair landing has the correct elevation")
-	check(await walk_to(p,link.to_global(Vector3(-31,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-31,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
-	check(await walk_to(p,link.to_global(Vector3(-31,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
+	check(await walk_to(p,link.to_global(Vector3(-34.5,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-34.5,2.4,50.0))),"Raised path reaches the neighbouring building entrance")
+	check(await walk_to(p,link.to_global(Vector3(-34.5,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,47.85))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
 	check(is_equal_approx(link.get_node("ConnectingStoneStair").position.x,1.5),"Connecting stair keeps its approach position")
-	p.reset_to(link.to_global(Vector3(-25,2.4,45.0)),0)
+	var neighbour := link.get_node("NeighbourBuilding") as Node3D
+	p.reset_to(neighbour.to_global(Vector3(-18,2.4,45.0)),0)
 	await settle(p)
-	check(await walk_to(p,link.to_global(Vector3(-25,2.4,43.5))) and await walk_to(p,link.to_global(Vector3(-19.7,6.4,43.5))),"Reference exterior stair reaches the upper storey")
-	check(await walk_to(p,link.to_global(Vector3(-19.7,6.4,47.5))) and await walk_to(p,link.to_global(Vector3(-20,6.4,50))),"Upper exterior landing enters the neighbouring building")
+	check(await walk_to(p,neighbour.to_global(Vector3(-18,2.4,43.5))) and await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,43.5))),"Reference exterior stair reaches the upper storey")
+	check(await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,47.5))) and await walk_to(p,neighbour.to_global(Vector3(-13,6.4,50))),"Upper exterior landing enters the neighbouring building")
+	p.reset_to(link.to_global(Vector3(-45,2.45,41.5)),0)
+	await settle(p)
+	check(await walk_to(p,link.to_global(Vector3(-21,2.4,41.5))) and await walk_to(p,link.to_global(Vector3(-21,2.4,46.5))),"Wide facade forecourt supports walking across its front and depth")
 	var units := 0
 	for node in game.building.get_children():
 		if str(node.name).begins_with("GalleryAirConditioner_"): units += 1
@@ -267,7 +271,8 @@ func run() -> void:
 		p.move_and_slide()
 	check(p.is_on_floor() and absf(p.position.y+1.8)<0.15,"Soldier drops through the dome opening to the atrium ground floor")
 	check(link.has_node("LinkSideGarden/LawnBed") and link.has_node("LinkSideGarden/GardenRetainingWall"),"Connecting stair has a planted side courtyard with a retaining wall")
-	check(absf(link.get_node("NeighbourBuilding").to_global(Vector3(link.get_node("NeighbourBuilding").get_meta("near_side_x"),0,52.5)).z-3.0)<0.3,"Shifted building near edge reaches the first tree beside the facade")
+	check(absf(neighbour.scale.x*24.4-31.4)<0.001,"Neighbouring facade widens by seven metres")
+	check(absf(link.to_local(neighbour.to_global(Vector3(-11.8,0,52.5))).x+18.8)<0.001,"Wider building keeps the corner beside the broad stair fixed")
 	check(absf(link.get_node("NeighbourBuilding/NeighbourRoof").position.y+0.15-(game.building.ROOF_HEIGHT-1.6))<0.001,"Three-storey neighbouring roof is slightly below the round building")
 	for level in range(4):
 		var button := game.building.lift.get_node("CallButton_%d" % level) as Node3D
