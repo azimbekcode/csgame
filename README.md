@@ -191,3 +191,5 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 0.2.27: Qo‘shni bino oldidagi maydoncha 2,9 metrdan 7,4 metr chuqurlikkacha kengaytirildi. Binoning eni 7 metrga oshirilib, 31,4 metr bo‘ldi. Keng zinaga yaqin burchak joyida saqlandi; fasad va tashqi zina yangi en bilan moslashtirildi. Maydoncha bo‘ylab va kirishlarga yurish tekshirildi.
 
 ![Bino oldidagi keng maydoncha](docs/screenshots/neighbour_forecourt.png)
+
+0.2.28: Qo‘shni bino 7 metr orqaga surildi. Eni yana 2 metrga oshirilib 33,4 metr, uzunligi 5 metrga oshirilib 13,6 metr bo‘ldi. Keng zinaning tepasidagi tekis maydoncha yangi joydagi keng old maydonchaga tutashtirildi. Kichik tashqi zina maydoncha ichiga moslandi; ikkala kirishga borish va qaytish tekshirildi.
