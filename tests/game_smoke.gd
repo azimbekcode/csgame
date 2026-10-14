@@ -250,13 +250,14 @@ func run() -> void:
 	check(await walk_to(p,link.to_global(Vector3(-35.5,2.4,52.0))) and await walk_to(p,link.to_global(Vector3(-19.3,2.4,52.0))) and await walk_to(p,link.to_global(Vector3(-19.3,2.4,49.1))) and await walk_to(p,link.to_global(Vector3(-14.0,2.4,49.1))) and await walk_to(p,link.to_global(Vector3(-14.0,-0.9,30))),"Connecting stair can be descended without jumping")
 	check(is_equal_approx(link.get_node("ConnectingStoneStair").position.x,1.5),"Connecting stair keeps its approach position")
 	var neighbour := link.get_node("NeighbourBuilding") as Node3D
-	p.reset_to(neighbour.to_global(Vector3(-18,2.4,45.0)),0)
+	p.reset_to(neighbour.to_global(Vector3(-16.8,2.4,47.35)),0)
 	await settle(p)
-	check(await walk_to(p,neighbour.to_global(Vector3(-18,2.4,44.5))) and await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,44.5))),"Reference exterior stair reaches the upper storey")
-	check(await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,47.5))) and await walk_to(p,neighbour.to_global(Vector3(-13,6.4,50))),"Upper exterior landing enters the neighbouring building")
+	check(await walk_to(p,neighbour.to_global(Vector3(-16.214,2.4,47.35))) and await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,47.35))),"Reference exterior stair reaches the upper storey")
+	check(await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,48.0))) and await walk_to(p,neighbour.to_global(Vector3(-13,6.4,50))),"Upper exterior landing enters the neighbouring building")
+	check(await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,48.0))) and await walk_to(p,neighbour.to_global(Vector3(-12.7,6.4,47.35))) and await walk_to(p,neighbour.to_global(Vector3(-16.8,2.4,47.35))),"Steeper open metal stair can be descended without jumping")
 	p.reset_to(link.to_global(Vector3(-47,2.45,48.5)),0)
 	await settle(p)
-	check(await walk_to(p,link.to_global(Vector3(-47,2.4,54.5))) and await walk_to(p,link.to_global(Vector3(-23,2.4,54.5))),"Wide facade forecourt supports walking across its front and depth")
+	check(await walk_to(p,link.to_global(Vector3(-47,2.4,54.5))) and await walk_to(p,link.to_global(Vector3(-47,2.4,51.5))) and await walk_to(p,link.to_global(Vector3(-23,2.4,51.5))),"Wide facade forecourt supports walking across its front and depth")
 	var units := 0
 	for node in game.building.get_children():
 		if str(node.name).begins_with("GalleryAirConditioner_"): units += 1

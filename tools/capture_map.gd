@@ -29,6 +29,8 @@ func run() -> void:
 		"neighbour_shifted_side": [Vector3(-21,2.0,2),Vector3(-37,5.5,13)],
 		"neighbour_stair_reference": [Vector3(-14,0.95,29),Vector3(-20,7.2,55)],
 		"neighbour_forecourt": [Vector3(-35.5,20,39),Vector3(-35.5,2.4,51.5)],
+		"neighbour_metal_stair": [Vector3(-35,3.4,53),Vector3(-21.7,4.3,54.0)],
+		"neighbour_clear_forecourt": [Vector3(-30,4.0,52),Vector3(-46,3.2,51)],
 		"neighbour_reference": [Vector3(-35.5,28,38),Vector3(-35.5,7,57)],
 		"campus_link_front": [Vector3(-15.5,0.75,28),Vector3(-15.5,3,44)],
 		"lift_rear_filled": [Vector3(0.5,0,19.1),Vector3(-4.4,-0.2,18.4)],
@@ -91,7 +93,7 @@ func run() -> void:
 			game.player.global_position = Vector3(0,0.05,5)
 			if name=="lift_closed":
 				for frame in range(230): await physics_frame
-		if name in ["campus_link","campus_link_front","campus_link_garden","neighbour_reference","neighbour_stair_reference","neighbour_forecourt"]:
+		if name in ["campus_link","campus_link_front","campus_link_garden","neighbour_reference","neighbour_stair_reference","neighbour_forecourt","neighbour_metal_stair","neighbour_clear_forecourt"]:
 			shots[name] = [game.building.get_node("RearCampusLink").to_global(shots[name][0]),game.building.get_node("RearCampusLink").to_global(shots[name][1])]
 		camera.global_position = shots[name][0]
 		camera.look_at(shots[name][1])

@@ -193,3 +193,8 @@ Qo‘shni korpus va keng tosh zina birga o‘ngga 90° burildi. Atriumning har q
 ![Bino oldidagi keng maydoncha](docs/screenshots/neighbour_forecourt.png)
 
 0.2.28: Qo‘shni bino 7 metr orqaga surildi. Eni yana 2 metrga oshirilib 33,4 metr, uzunligi 5 metrga oshirilib 13,6 metr bo‘ldi. Keng zinaning tepasidagi tekis maydoncha yangi joydagi keng old maydonchaga tutashtirildi. Kichik tashqi zina maydoncha ichiga moslandi; ikkala kirishga borish va qaytish tekshirildi.
+
+0.2.29: Qo‘shni binoning kichik tashqi zinasi yangi rasmga mos tor, tikroq va devor yonidagi ochiq metall zina qilib qayta qurildi. Pog‘onalar orasida ochiq joy, ingichka qaymoqrang metall yon tayanchlar va panjaralar bor. Maydonchada turgan daraxt va dumaloq bino tomonga qaragan chet panjarasi olib tashlandi.
+
+![Devor yonidagi ochiq metall zina](docs/screenshots/neighbour_metal_stair.png)
+![Daraxt va panjaradan tozalangan maydoncha](docs/screenshots/neighbour_clear_forecourt.png)

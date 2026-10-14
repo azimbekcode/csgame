@@ -1083,9 +1083,7 @@ func _make_campus_link() -> void:
 	stair.position.x = 1.5
 	_box(Vector3(-35.6,0.75,51.5),Vector3(33.6,3.3,7.4),limestone)
 	_box(Vector3(-35.6,2.415,51.5),Vector3(33.6,0.03,7.4),tiles)
-	_stair_railing(Vector3(-52.3,2.4,47.8),Vector3(-20.2,2.4,47.8))
 	_stair_railing(Vector3(-11.2,2.4,47.5),Vector3(-11.2,2.4,49.5))
-	_stair_railing(Vector3(-52.3,2.4,47.8),Vector3(-52.3,2.4,55.3))
 	# The stair ends beside the facade corner; turn right across this short link.
 	_box(Vector3(-17.75,0.75,48.5),Vector3(2.1,3.3,2.0),limestone).name = "StairToFacadeLanding"
 	_box(Vector3(-17.75,2.415,48.5),Vector3(2.1,0.03,2.0),tiles,0,false)
@@ -1170,21 +1168,39 @@ func _make_campus_link() -> void:
 		_box(Vector3(x,5.30+arch,47.98),Vector3(2.9/12.0,0.10,1.15),canopy,0,false)
 	for side in [-1.0,1.0]:
 		_box(Vector3(-24+side*0.97,3.77,48.72),Vector3(0.09,2.68,0.95),frame,side*0.18)
-	# Narrow exterior stair to the left upper doorway, as in the reference.
+	# Slender pale metal stair hugs the facade, with daylight between its treads.
+	var stair_metal := _material(Color("c9bea0"),0.55)
 	var side_stair := Node3D.new()
 	side_stair.name = "NeighbourExteriorStair"
 	add_child(side_stair)
 	var side_first := get_child_count()
-	_stair_flight(0,base_height,0,5.0,storey_height,1.2,0.8,0,cream)
-	_stair_railing(Vector3(-0.66,base_height,0),Vector3(-0.66,upper_entry,5))
-	_stair_railing(Vector3(0.66,base_height,0),Vector3(0.66,upper_entry,5))
+	var run := 4.4/(33.4/24.4)
+	var width := 1.12/(13.6/8.6)
+	var steps := 24
+	for step in range(steps):
+		var top := base_height+storey_height*(step+1)/steps
+		_box(Vector3(0,top-0.025,run*(step+0.5)/steps),Vector3(width,0.05,run/steps*0.92),stair_metal,0,false).name = "OpenMetalTread_%d" % step
+	for side in [-1.0,1.0]:
+		var x: float = side*(width/2.0+0.035)
+		_beam(Vector3(x,base_height-0.09,0),Vector3(x,upper_entry-0.09,run),0.045,stair_metal)
+		for rail_height in [0.12,0.55,1.05]:
+			_beam(Vector3(x,base_height+rail_height,0),Vector3(x,upper_entry+rail_height,run),0.023,stair_metal)
+		for post in range(7):
+			var t := post/6.0
+			_beam(Vector3(x,base_height+storey_height*t,run*t),Vector3(x,base_height+storey_height*t+1.05,run*t),0.024,stair_metal)
+	_ramp(0,width,base_height,0,run,storey_height,0.5)
+	var stair_support := get_child(get_child_count()-1) as Node3D
+	stair_support.set_meta("treads",{"x":0.0,"width":width,"base":base_height,"start":0.0,"end":run,"rise":storey_height,"steps":steps})
+	stair_surfaces.append(stair_support)
+	_box(Vector3(0,upper_entry-0.025,run+0.25),Vector3(width,0.05,0.5),stair_metal,0,false)
 	for node in get_children().slice(side_first): node.reparent(side_stair,false)
-	side_stair.position = Vector3(-18,0,44.5)
+	side_stair.position = Vector3(-13-run,0,47.35)
 	side_stair.rotation.y = PI/2.0
-	_box(Vector3(-18,0.75,45.0),Vector3(1.4,3.3,2.6),limestone)
-	_box(Vector3(-13,upper_entry-0.12,46.79),Vector3(1.9,0.24,3.42),cream)
-	_stair_railing(Vector3(-12.02,upper_entry,44.5),Vector3(-12.02,upper_entry,48.2))
-	_stair_railing(Vector3(-13.98,upper_entry,45.2),Vector3(-13.98,upper_entry,48.2))
+	_box(Vector3(-12.95,upper_entry-0.035,48.11),Vector3(1.0,0.07,0.78),stair_metal)
+	for x in [-13.47,-12.43]:
+		for rail_height in [0.55,1.05]:
+			_beam(Vector3(x,upper_entry+rail_height,47.72),Vector3(x,upper_entry+rail_height,48.3),0.023,stair_metal)
+		_beam(Vector3(x,base_height,48.05),Vector3(x,upper_entry+1.05,48.05),0.03,stair_metal)
 	for x in [-13.95,-12.05]:
 		_box(Vector3(x,upper_entry+1.4,48.20),Vector3(0.09,2.8,0.22),frame)
 	_box(Vector3(-13.75,upper_entry+1.35,48.95),Vector3(0.09,2.7,0.95),frame,0.18)
@@ -1267,7 +1283,7 @@ func _make_campus() -> void:
 		else:
 			_box(Vector3(-13,-0.88,-39),Vector3(13,0.08,12),grass)
 			_box(Vector3(-14.85,-0.88,-32),Vector3(9.3,0.08,2),grass)
-		for z in ([-46.0,-31.0,-14.0,3.0,42.0] if side<0 else []):
+		for z in ([-46.0,-31.0,-14.0,42.0] if side<0 else []):
 			_tree(Vector3(side*(31.0+fmod(absf(z),6.0)),-0.83,z),int(absf(z)*31+side*7))
 		for z in ([-37.0,-12.0,13.0,38.0] if side<0 else []):
 			_beam(Vector3(side*25,-0.9,z),Vector3(side*25,4.7,z),0.065,dark)
